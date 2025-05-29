@@ -1,0 +1,64 @@
+# General
+*.log
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.cache
+*.lock
+!locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved  # Keep SPM dependency versions
+
+# IDEs and Editors
+.idea/
+*.iml
+.vscode/
+locify-ios/Locify.xcodeproj/xcuserdata/
+locify-ios/Locify.xcodeproj/project.xcworkspace/xcuserdata/
+locify-ios/*.xcuserstate
+
+# Build Outputs
+build/
+target/
+
+# iOS
+locify-ios/DerivedData/
+locify-ios/.build/
+locify-ios/.swiftpm/
+locify-ios/*.generated.swift
+locify-ios/*.xcarchive
+locify-ios/*.ipa
+locify-ios/*.dSYM
+locify-ios/*.hmap
+locify-ios/*.xcresult/
+locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/*
+
+# Android
+locify-android/.gradle/
+locify-android/build/
+locify-android/local.properties
+locify-android/gradle.properties
+locify-android/*.apk
+locify-android/*.aab
+locify-android/*.keystore
+locify-android/*.jks
+
+# Backend
+locify-backend/target/
+locify-backend/.mvn/
+locify-backend/mvnw
+locify-backend/mvnw.cmd
+locify-backend/*.jar
+locify-backend/*.war
+locify-backend/*.class
+locify-backend/application.properties
+locify-backend/application-*.properties
+locify-backend/application*.yml
+locify-backend/application*.yaml
+locify-backend/.env
+locify-backend/postgres-data/
+locify-backend/docker-compose*.yml
+locify-backend/docker-compose*.yaml
+locify-backend/.dockerignore
+locify-backend/gcloud/
+locify-backend/*-key.json
+locify-backend/service-account-key.json
