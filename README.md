@@ -6,6 +6,7 @@
 
 ## Table of Contents
 - [Project Structure](#project-structure)
+- [Documentation](#documentation)
 - [Setup Instructions](#setup-instructions)
 - [Branch Naming Rules](#branch-naming-rules)
 - [Commit Message Convention](#commit-message-convention)
@@ -17,6 +18,12 @@
 - **`/locify-ios`**: iOS app written in Swift.
 - **`/locify-android`**: Android app written in Kotlin.
 - **`/locify-backend`**: Backend service using Java/Spring Boot.
+
+---
+
+## Documentation
+
+- **Feature Specification**: [docs/Locify_Feature_Specification.md](./docs/Locify_Feature_Specification.md)
 
 ---
 
