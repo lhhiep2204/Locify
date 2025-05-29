@@ -22,7 +22,9 @@
 ---
 
 ## Documentation
-
+- **API Documentation**: [docs/Locify_API_Documentation.md](./docs/Locify_API_Documentation.md)
+- **Database Schema**: [docs/Locify_Database_Schema.md](./docs/Locify_Database_Schema.md)
+- **Data Sync Flow**: [docs/Locify_Data_Sync_Flow.md](./docs/Locify_Data_Sync_Flow.md)
 - **Feature Specification**: [docs/Locify_Feature_Specification.md](./docs/Locify_Feature_Specification.md)
 
 ---
