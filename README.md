@@ -1,6 +1,6 @@
 # Locify - Location Saving App
 
-**Locify** is a monorepo project that provides a cross-platform solution for saving, managing, and navigating to favorite locations, supporting both online and offline use. It includes mobile apps for iOS and Android, and a backend service.
+**Locify** is a monorepo project that provides a cross-platform solution for saving and managing locations, supporting both online and offline use for users to plan visits or keep memorable places.
 
 ---
 

@@ -1,338 +1,115 @@
 # Locify API Documentation
 
-This document outlines the RESTful API endpoints for the Locify backend, built with Java/Spring Boot and integrated with Firebase Authentication for user management. The API supports user-based location and category management and synchronization for offline use. All endpoints use JSON for requests and responses and are secured with Firebase Authentication tokens.
+This document outlines the RESTful API endpoints for the Locify backend, built with Java/Spring Boot and integrated with Firebase Authentication for user management. The API supports user-based location and category management for saving planned or memorable locations, with synchronization for offline use.
+
+---
 
 ## Table of Contents
 - [Base URL](#base-url)
 - [Authentication](#authentication)
-- [Error Responses and Validation](#error-responses-and-validation)
 - [Endpoints](#endpoints)
   - [Users](#users)
-    - [Get User Profile](#get-user-profile)
-    - [Update User Profile](#update-user-profile)
   - [Categories](#categories)
-    - [Get All Categories](#get-all-categories)
-    - [Create Category](#create-category)
-    - [Update Category](#update-category)
-    - [Delete Category](#delete-category)
   - [Locations](#locations)
-    - [Get All Locations](#get-all-locations)
-    - [Get Locations by Category](#get-locations-by-category)
-    - [Create Location](#create-location)
-    - [Update Location](#update-location)
-    - [Delete Location](#delete-location)
+  - [Images](#images)
 - [Synchronization](#synchronization)
+- [Error Handling](#error-handling)
+  - [Error Response Format](#error-response-format)
+  - [Error Codes](#error-codes)
+  - [Notes](#notes)
 
 ---
 
 ## Base URL
-```
-https://api.locify.com/v1
-```
+`https://api.locify.com/v1`
 
 ---
 
 ## Authentication
-All endpoints require a valid Firebase Authentication token passed in the `Authorization` header as a Bearer token. The token is validated against Firebase to authenticate the user and retrieve the `user_id` (Firebase UID).
-
-**Header Example**:
-```
-Authorization: Bearer <firebase_id_token>
-```
-
----
-
-## Error Responses and Validation
-Errors are returned with appropriate HTTP status codes and a JSON body containing error details. Validation rules for API request inputs are defined below. Basic database constraints (e.g., `NOT NULL`, maximum length, foreign keys) are enforced at the database level and documented in the [Database Schema](../docs/Locify_Database_Schema.md).
-
-### Error Response Format
-```json
-{
-  "error": {
-    "code": 400,
-    "message": "Invalid request: Missing required field 'name'"
-  }
-}
-```
-
-**Example Error Responses**:
-```json
-// Invalid email format
-{
-  "error": {
-    "code": 400,
-    "message": "Invalid request: Email must be a valid format (e.g., user@example.com)"
-  }
-}
-// Special characters in name
-{
-  "error": {
-    "code": 400,
-    "message": "Invalid request: Name cannot contain special characters (allowed: letters, numbers, spaces, hyphens, underscores)"
-  }
-}
-// Resource not found
-{
-  "error": {
-    "code": 404,
-    "message": "Category with ID uuid not found"
-  }
-}
-// Rate limit exceeded
-{
-  "error": {
-    "code": 429,
-    "message": "Too many requests: Rate limit of 100 requests per minute exceeded"
-  }
-}
-```
-
-### Validation Rules
-- **Email** (e.g., `users.email`):
-  - Must be a valid email format (e.g., `user@example.com`).
-  - Example invalid cases:
-    - Missing `@` symbol: `user.example.com` → 400 Bad Request.
-    - Already exists: `user@example.com` (already registered) → 409 Conflict.
-- **Name** (e.g., `users.name`, `categories.name`, `locations.name`):
-  - No special characters (allowed: letters, numbers, spaces, hyphens, underscores; regex: `^[a-zA-Z0-9 _-]+$`).
-  - Cannot be empty or whitespace-only.
-  - Example invalid cases:
-    - Contains special characters: `Cafe@123` → 400 Bad Request.
-    - Empty: `""` → 400 Bad Request.
-    - Whitespace-only: `"   "` → 400 Bad Request.
-- **Description** (e.g., `locations.description`):
-  - Optional, can be empty or null.
-  - Example invalid case:
-    - Exceeds database limit: `[1000+ characters]` → 400 Bad Request.
-- **Latitude** (e.g., `locations.latitude`):
-  - Must be a valid number between -90 and 90.
-  - Example invalid cases:
-    - Out of range: `91` → 400 Bad Request.
-    - Non-numeric: `abc` → 400 Bad Request.
-- **Longitude** (e.g., `locations.longitude`):
-  - Must be a valid number between -180 and 180.
-  - Example invalid cases:
-    - Out of range: `181` → 400 Bad Request.
-    - Non-numeric: `abc` → 400 Bad Request.
-- **Category ID** (e.g., `locations.category_id`, `reassign_category_id`):
-  - Must be a valid UUID.
-  - Must exist in the `categories` table and belong to the authenticated user.
-  - Example invalid cases:
-    - Invalid UUID: `invalid-uuid` → 400 Bad Request.
-    - Non-existent or unauthorized: `uuid` (not found or belongs to another user) → 404 Not Found or 403 Forbidden.
-- **Sync Status** (e.g., `categories.sync_status`, `locations.sync_status`):
-  - Must be one of: `synced`, `pendingCreate`, `pendingUpdate`, `pendingDelete`.
-  - Example invalid case:
-    - Invalid value: `invalidStatus` → 400 Bad Request.
-
-### Common Status Codes
-- **4xx Client Errors**:
-  - `400 Bad Request`: Invalid request data, such as:
-    - Missing required fields (e.g., `name`, `email`, `latitude`, `longitude`, `category_id`).
-    - Invalid field formats (e.g., email, UUID, latitude/longitude out of range, special characters in `name` or `subject`).
-    - Invalid or unsupported `sync_status` values.
-  - `401 Unauthorized`: Missing or invalid Firebase Authentication token.
-  - `403 Forbidden`: User lacks permission to access the resource (e.g., attempting to access another user's category or location).
-  - `404 Not Found`: Resource not found (e.g., category or location ID does not exist).
-  - `409 Conflict`: Resource already exists (e.g., email already registered, duplicate category name for a user).
-  - `429 Too Many Requests`: Rate limit exceeded for the user or endpoint (e.g., exceeding 100 requests per minute per user).
-- **5xx Server Errors**:
-  - `500 Internal Server Error`: Unexpected server error (e.g., database failure, unhandled exception).
-  - `502 Bad Gateway`: Issue with upstream services (e.g., Firebase Authentication service unavailable).
-  - `503 Service Unavailable`: Server temporarily down (e.g., during maintenance).
-  - `504 Gateway Timeout`: Upstream service (e.g., Firebase) timed out.
-
-### Rate Limiting
-To ensure fair usage, the API enforces a rate limit of 100 requests per minute per user for all endpoints. Exceeding this limit returns a `429 Too Many Requests` error. Clients should implement exponential backoff for retries.
+- All endpoints require a Firebase ID token in the `Authorization` header:
+  ```
+  Authorization: Bearer <firebase_id_token>
+  ```
+- Tokens are validated server-side using Firebase Authentication.
 
 ---
 
 ## Endpoints
 
 ### Users
-
-#### Get User Profile
-Retrieve the authenticated user's profile information.
-
-- **Method**: GET
-- **Endpoint**: `/users/me`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**: None
-- **Response**:
-  - **Status**: 200 OK
-  - **Body**:
+- **GET /users/me**
+  - Description: Retrieve the authenticated user's profile.
+  - Response: 
     ```json
     {
       "id": "firebase_uid",
       "email": "user@example.com",
       "name": "John Doe",
-      "created_at": "2025-05-29T14:30:00Z",
-      "updated_at": "2025-05-29T15:00:00Z"
+      "created_at": "2025-05-31T23:15:00Z",
+      "updated_at": "2025-05-31T23:15:00Z"
     }
     ```
-
-#### Update User Profile
-Update the authenticated user's profile information (e.g., name).
-
-- **Method**: PUT
-- **Endpoint**: `/users/me`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**:
-  ```json
-  {
-    "name": "John Doe"
-  }
-  ```
-- **Response**:
-  - **Status**: 200 OK
-  - **Body**:
+- **PUT /users/me**
+  - Description: Update the authenticated user's profile.
+  - Request Body:
     ```json
     {
-      "id": "firebase_uid",
-      "email": "user@example.com",
-      "name": "John Doe",
-      "created_at": "2025-05-29T14:30:00Z",
-      "updated_at": "2025-05-29T15:00:00Z"
+      "name": "John Doe"
     }
     ```
+  - Response: Updated user object.
 
 ### Categories
-
-#### Get All Categories
-Retrieve all categories for the authenticated user.
-
-- **Method**: GET
-- **Endpoint**: `/categories`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**: None
-- **Response**:
-  - **Status**: 200 OK
-  - **Body**:
+- **GET /categories**
+  - Description: List all categories for the authenticated user.
+  - Query Parameters: None
+  - Response:
     ```json
     [
       {
         "id": "uuid",
         "user_id": "firebase_uid",
         "name": "Restaurant",
+        "icon": "https://example.com/icons/restaurant.png",
         "sync_status": "synced",
-        "created_at": "2025-05-29T14:30:00Z",
-        "updated_at": "2025-05-29T14:30:00Z"
-      },
-      {
-        "id": "uuid",
-        "user_id": "firebase_uid",
-        "name": "Favorites",
-        "sync_status": "pendingUpdate",
-        "created_at": "2025-05-29T14:35:00Z",
-        "updated_at": "2025-05-29T15:00:00Z"
+        "created_at": "2025-05-31T23:15:00Z",
+        "updated_at": "2025-05-31T23:15:00Z"
       }
     ]
     ```
-
-#### Create Category
-Create a new category for the authenticated user.
-
-- **Method**: POST
-- **Endpoint**: `/categories`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**:
-  ```json
-  {
-    "id": "client-generated-uuid",
-    "name": "Cafe",
-    "sync_status": "pendingCreate"
-  }
-  ```
-- **Response**:
-  - **Status**: 201 Created
-  - **Body**:
+- **POST /categories**
+  - Description: Create a new category.
+  - Request Body:
     ```json
     {
-      "id": "uuid",
-      "user_id": "firebase_uid",
+      "id": "client-generated-uuid",
       "name": "Cafe",
-      "sync_status": "synced",
-      "created_at": "2025-05-29T14:30:00Z",
-      "updated_at": "2025-05-29T14:30:00Z"
+      "icon": "https://example.com/icons/cafe.png",
+      "sync_status": "pendingCreate"
     }
     ```
-
-#### Update Category
-Update an existing category's name.
-
-- **Method**: PUT
-- **Endpoint**: `/categories/{category_id}`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**:
-  ```json
-  {
-    "name": "Updated Cafe",
-    "sync_status": "pendingUpdate"
-  }
-  ```
-- **Response**:
-  - **Status**: 200 OK
-  - **Body**:
+  - Response: Created category object.
+- **PUT /categories**
+  - Description: Update an existing category.
+  - Request Body:
     ```json
     {
       "id": "uuid",
-      "user_id": "firebase_uid",
-      "name": "Updated Cafe",
-      "sync_status": "synced",
-      "created_at": "2025-05-29T14:30:00Z",
-      "updated_at": "2025-05-29T15:00:00Z"
+      "name": "Coffee Shop",
+      "icon": "https://example.com/icons/coffee.png",
+      "sync_status": "pendingUpdate"
     }
     ```
-
-#### Delete Category
-Delete a category. If the category contains locations, the client must reassign them to another category.
-
-- **Method**: DELETE
-- **Endpoint**: `/categories/{category_id}`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**:
-  ```json
-  {
-    "reassign_category_id": "uuid"
-  }
-  ```
-- **Response**:
-  - **Status**: 204 No Content
-  - **Body**: None
+  - Response: Updated category object.
+- **DELETE /categories/{category_id}**
+  - Description: Delete a category by ID.
+  - Response: 204 No Content.
 
 ### Locations
-
-#### Get All Locations
-Retrieve all locations for the authenticated user.
-
-- **Method**: GET
-- **Endpoint**: `/locations`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**: None
-- **Response**:
-  - **Status**: 200 OK
-  - **Body**:
+- **GET /locations**
+  - Description: List all locations for the authenticated user, optionally filtered by category.
+  - Query Parameters: `category_id` (optional)
+  - Response:
     ```json
     [
       {
@@ -341,147 +118,140 @@ Retrieve all locations for the authenticated user.
         "category_id": "uuid",
         "name": "Coffee Shop",
         "address": "123 Main St",
-        "description": "Great coffee place",
+        "description": "Great coffee",
         "latitude": 37.7749,
         "longitude": -122.4194,
         "is_favorite": true,
+        "image_urls": [
+          "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/locations%2Fuser_123%2Flocation_456%2Fimage_1.jpg",
+          "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/locations%2Fuser_123%2Flocation_456%2Fimage_2.jpg"
+        ],
         "sync_status": "synced",
-        "created_at": "2025-05-29T14:30:00Z",
-        "updated_at": "2025-05-29T14:30:00Z"
+        "created_at": "2025-05-31T23:15:00Z",
+        "updated_at": "2025-05-31T23:15:00Z"
       }
     ]
     ```
-
-#### Get Locations by Category
-Retrieve all locations for a specific category.
-
-- **Method**: GET
-- **Endpoint**: `/locations?category_id={category_id}`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**: None
-- **Response**:
-  - **Status**: 200 OK
-  - **Body**:
-    ```json
-    [
-      {
-        "id": "uuid",
-        "user_id": "firebase_uid",
-        "category_id": "uuid",
-        "name": "Coffee Shop",
-        "address": "123 Main St",
-        "description": "Great coffee place",
-        "latitude": 37.7749,
-        "longitude": -122.4194,
-        "is_favorite": true,
-        "sync_status": "synced",
-        "created_at": "2025-05-29T14:30:00Z",
-        "updated_at": "2025-05-29T14:30:00Z"
-      }
-    ]
-    ```
-
-#### Create Location
-Create a new location for the authenticated user.
-
-- **Method**: POST
-- **Endpoint**: `/locations`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**:
-  ```json
-  {
-    "id": "client-generated-uuid",
-    "category_id": "uuid",
-    "name": "Coffee Shop",
-    "address": "123 Main St",
-    "description": "Great coffee place",
-    "latitude": 37.7749,
-    "longitude": -122.4194,
-    "is_favorite": true,
-    "sync_status": "pendingCreate"
-  }
-  ```
-- **Response**:
-  - **Status**: 201 Created
-  - **Body**:
+- **POST /locations**
+  - Description: Create a new location.
+  - Request Body:
     ```json
     {
-      "id": "uuid",
-      "user_id": "firebase_uid",
+      "id": "client-generated-uuid",
       "category_id": "uuid",
       "name": "Coffee Shop",
       "address": "123 Main St",
-      "description": "Great coffee place",
+      "description": "Great coffee",
       "latitude": 37.7749,
       "longitude": -122.4194,
       "is_favorite": true,
-      "sync_status": "synced",
-      "created_at": "2025-05-29T14:30:00Z",
-      "updated_at": "2025-05-29T14:30:00Z"
+      "image_urls": [
+        "https://example.com/images/coffee-shop-1.jpg",
+        "https://example.com/images/coffee-shop-2.jpg"
+      ],
+      "sync_status": "pendingCreate"
     }
     ```
-
-#### Update Location
-Update an existing location's details.
-
-- **Method**: PUT
-- **Endpoint**: `/locations/{location_id}`
-- **Request Headers**:
-  ```
-  Authorization: Bearer <firebase_id_token>
-  ```
-- **Request Body**:
-  ```json
-  {
-    "category_id": "uuid",
-    "name": "Updated Coffee Shop",
-    "address": "123 Main St",
-    "description": "Updated description",
-    "latitude": 37.7749,
-    "longitude": -122.4194,
-    "is_favorite": false,
-    "sync_status": "pendingUpdate"
-  }
-  ```
-- **Response**:
-  - **Status**: 200 OK
-  - **Body**:
+  - Response: Created location object.
+- **PUT /locations**
+  - Description: Update an existing location.
+  - Request Body:
     ```json
     {
       "id": "uuid",
-      "user_id": "firebase_uid",
       "category_id": "uuid",
-      "name": "Updated Coffee Shop",
+      "name": "Coffee Shop",
       "address": "123 Main St",
-      "description": "Updated description",
+      "description": "Great coffee",
       "latitude": 37.7749,
       "longitude": -122.4194,
-      "is_favorite": false,
-      "sync_status": "synced",
-      "created_at": "2025-05-29T14:30:00Z",
-      "updated_at": "2025-05-29T15:00:00Z"
+      "is_favorite": true,
+      "image_urls": [
+        "https://example.com/images/coffee-shop-1.jpg",
+        "https://example.com/images/coffee-shop-2.jpg"
+      ],
+      "sync_status": "pendingUpdate"
     }
     ```
+  - Response: Updated location object.
+- **DELETE /locations/{location_id}**
+  - Description: Delete a location by ID.
+  - Response: 204 No Content.
 
-#### Delete Location
-Delete a location.
+### Images
+- **Firebase Storage Integration**:
+  - Use Firebase Storage SDK directly for image operations
+  - Storage path structure: `/locations/{user_id}/{location_id}/{image_name}`
+  - Security rules ensure users can only access their own images
 
-- **Method**: DELETE
-- **Endpoint**: `/locations/{location_id}`
-- **Request Headers**:
+  **iOS (SwiftUI)**:
+  ```swift
+  // Upload image
+  let storageRef = Storage.storage().reference()
+  let imageRef = storageRef.child("locations/\(userId)/\(locationId)/\(imageName)")
+  
+  // Upload from UIImage
+  if let imageData = image.jpegData(compressionQuality: 0.8) {
+      let metadata = StorageMetadata()
+      metadata.contentType = "image/jpeg"
+      
+      imageRef.putData(imageData, metadata: metadata) { metadata, error in
+          if let error = error {
+              print("Upload failed: \(error)")
+              return
+          }
+          // Get download URL
+          imageRef.downloadURL { url, error in
+              if let downloadURL = url {
+                  // Use downloadURL in your location data
+              }
+          }
+      }
+  }
+  
+  // Delete image
+  imageRef.delete { error in
+      if let error = error {
+          print("Delete failed: \(error)")
+      }
+  }
   ```
-  Authorization: Bearer <firebase_id_token>
+
+  **Android (Kotlin)**:
+  ```kotlin
+  // Upload image
+  val storageRef = FirebaseStorage.getInstance().reference
+  val imageRef = storageRef.child("locations/$userId/$locationId/$imageName")
+  
+  // Upload from File
+  val uploadTask = imageRef.putFile(imageUri)
+      .addOnSuccessListener {
+          // Get download URL
+          imageRef.downloadUrl.addOnSuccessListener { uri ->
+              // Use uri in your location data
+          }
+      }
+      .addOnFailureListener { e ->
+          // Handle failure
+      }
+  
+  // Delete image
+  imageRef.delete()
+      .addOnSuccessListener {
+          // Deletion successful
+      }
+      .addOnFailureListener { e ->
+          // Handle failure
+      }
   ```
-- **Request Body**: None
-- **Response**:
-  - **Status**: 204 No Content
-  - **Body**: None
+
+  **Notes**:
+  - Firebase Storage SDK handles authentication automatically.
+  - Supports offline persistence.
+  - Provides upload/download progress monitoring.
+  - Handles retries and error cases.
+  - Manages security rules and access control.
+  - Generates download URLs automatically.
 
 ---
 
@@ -498,6 +268,41 @@ The API supports offline synchronization using the `sync_status` field (`synced`
   - Processes pending changes and updates `sync_status` to `synced`.
   - Uses `updated_at` to resolve conflicts (e.g., the record with the latest `updated_at` timestamp takes precedence).
   - Returns the updated resource with server-generated timestamps.
+
+---
+
+## Error Handling
+The Locify API returns error responses with a custom `error` object containing a `code` and `message`. Clients (iOS/Android) should map the `code` to user-friendly messages for display, while the `message` is designed for debugging.
+
+### Error Response Format
+```json
+{
+  "error": {
+    "code": "E001",
+    "message": "Field 'name' is empty or null"
+  }
+}
+```
+- **code**: Custom error code (e.g., `E001`, `S001`). Prefix `E` for client-side errors (input, auth, not found), `S` for server-side errors (rate limit, server error).
+- **message**: Technical message for debugging (not for user display).
+
+### Error Codes
+| Error Code | HTTP Status | Description | Example Error Message |
+|------------|-------------|-------------|-----------------------|
+| E001       | 400         | Invalid input data | Field 'name' is empty or null |
+| E002       | 400         | Invalid UUID format | 'category_id' is not a valid UUID |
+| E003       | 400         | Invalid coordinates | 'latitude' must be between -90 and 90 |
+| E004       | 400         | Missing required field | 'user_id' is required |
+| E005       | 401         | Invalid or missing Firebase token | Authentication token is invalid |
+| E006       | 403         | Unauthorized access | User not authorized for this resource |
+| E007       | 404         | Resource not found | Location with ID 'uuid' not found |
+| S001       | 429         | Rate limit exceeded | Too many requests, try again later |
+| S002       | 500         | Server error | Unexpected server error, check logs |
+
+### Notes
+- Clients should map `error.code` (HTTP status) to user-friendly messages using the `Error Code` (e.g., `E001` -> "Please enter a location name").
+- `error.message` is for debugging only and should not be shown to users.
+- All responses include HTTP status codes for compatibility with standard REST practices.
 
 ---
 

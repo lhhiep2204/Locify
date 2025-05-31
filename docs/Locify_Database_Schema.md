@@ -1,6 +1,6 @@
 # Locify Database Schema
 
-This document defines the relational database schema used in the Locify backend, built with PostgreSQL. It supports user-based location management, category grouping, offline synchronization, and cross-device consistency using `sync_status` and `updated_at` for offline access. User authentication is handled by Firebase Authentication, with user IDs synchronized with Firebase UIDs.
+This document defines the relational database schema used in the Locify backend, built with PostgreSQL. It supports user-based location management and category grouping for saving planned or memorable locations, with offline synchronization and cross-device consistency using `sync_status` and `updated_at`.
 
 ## Table of Contents
 - [Validation Notes](#validation-notes)
@@ -21,13 +21,13 @@ This schema defines basic database constraints such as data types, `NOT NULL`, `
 ## Users Table
 Stores information about registered users, synchronized with Firebase Authentication.
 
-| Column Name  | Data Type           | Constraints                       | Description                       |
-|--------------|---------------------|-----------------------------------|-----------------------------------|
-| `id`         | VARCHAR(128)        | PRIMARY KEY                       | Unique user ID (Firebase UID)     |
-| `email`      | VARCHAR(255)        | UNIQUE, NOT NULL                  | Unique email address              |
-| `name`       | VARCHAR(255)        | NOT NULL                          | Full name of the user             |
-| `created_at` | TIMESTAMP           |                                   | Time of account creation          |
-| `updated_at` | TIMESTAMP           |                                   | Time of last update               |
+| Column Name  | Data Type           | Constraints                       | Description                         |
+|--------------|---------------------|-----------------------------------|-------------------------------------|
+| `id`         | VARCHAR(128)        | PRIMARY KEY                       | Unique user ID (Firebase UID)       |
+| `email`      | VARCHAR(255)        | UNIQUE, NOT NULL                  | Unique email address                |
+| `name`       | VARCHAR(255)        | NOT NULL                          | Full name of the user               |
+| `created_at` | TIMESTAMP           |                                   | Time of account creation            |
+| `updated_at` | TIMESTAMP           |                                   | Last time the user info was updated |
 
 ---
 
@@ -39,6 +39,7 @@ Stores user-defined or default categories for organizing locations.
 | `id`          | UUID                | PRIMARY KEY                                     | Unique category ID                              |
 | `user_id`     | VARCHAR(128)        | FOREIGN KEY (users.id), NOT NULL                | References `users(id)`                          |
 | `name`        | VARCHAR(255)        | NOT NULL                                        | Name of the category                            |
+| `icon`        | VARCHAR(255)        |                                                 | URL of the category icon          |
 | `sync_status` | ENUM('synced', 'pendingCreate', 'pendingUpdate', 'pendingDelete') | NOT NULL                    | Synchronization status                           |
 | `created_at`  | TIMESTAMP           |                                                 | Time of category creation                       |
 | `updated_at`  | TIMESTAMP           |                                                 | Last time the category was updated              |
@@ -66,9 +67,10 @@ Stores all location information saved by the user.
 | `latitude`    | DOUBLE PRECISION    | NOT NULL                                        | Latitude coordinate (between -90 and 90)         |
 | `longitude`   | DOUBLE PRECISION    | NOT NULL                                        | Longitude coordinate (between -180 and 180)      |
 | `is_favorite` | BOOLEAN             | DEFAULT FALSE                                   | Whether the location is marked as a favorite      |
+| `image_urls`  | TEXT[]              |                                                 | Array of URLs for location images                |
 | `sync_status` | ENUM('synced', 'pendingCreate', 'pendingUpdate', 'pendingDelete') | NOT NULL                    | Synchronization status                           |
 | `created_at`  | TIMESTAMP           |                                                 | Time of location creation                        |
-| `updated_at`  | TIMESTAMP           |                                                 | Last update timestamp                            |
+| `updated_at`  | TIMESTAMP           |                                                 | Last time the location was updated                            |
 
 **Indexes**:
 - `idx_locations_category_id`
