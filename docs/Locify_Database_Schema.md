@@ -2,6 +2,8 @@
 
 This document defines the relational database schema used in the Locify backend, built with PostgreSQL. It supports user-based location management and category grouping for saving planned or memorable locations, with offline synchronization and cross-device consistency using `sync_status` and `updated_at`.
 
+---
+
 ## Table of Contents
 - [Validation Notes](#validation-notes)
 - [Users Table](#users-table)
@@ -14,7 +16,11 @@ This document defines the relational database schema used in the Locify backend,
 ---
 
 ## Validation Notes
-This schema defines basic database constraints such as data types, `NOT NULL`, `UNIQUE`, maximum lengths, and foreign key relationships. Additional validation rules (e.g., email format, special characters in `name`, valid `sync_status` values) are enforced at the API layer and documented in the [API Documentation](../docs/Locify_API_Documentation.md).
+This schema defines basic database constraints, including data types, `NOT NULL`, `UNIQUE`, maximum lengths, and foreign key relationships. Additional validation rules (e.g., email format, special characters in `name`, valid `sync_status` values) are enforced at the API layer and documented in the [API Documentation](../docs/Locify_API_Documentation.md).
+
+**Image Cleanup**:
+- During user deletion (via `DELETE /users/me`), the backend queries the `categories` table for `icon` URLs and the `locations` table for `image_urls` associated with the `user_id`. These images are deleted from Firebase Storage using the Firebase Admin SDK before removing database records.
+- The deletion process uses transactions in PostgreSQL to ensure data integrity, with image deletions from Firebase Storage performed first to prevent orphaned data.
 
 ---
 
@@ -39,13 +45,13 @@ Stores user-defined or default categories for organizing locations.
 | `id`          | UUID                | PRIMARY KEY                                     | Unique category ID                              |
 | `user_id`     | VARCHAR(128)        | FOREIGN KEY (users.id), NOT NULL                | References `users(id)`                          |
 | `name`        | VARCHAR(255)        | NOT NULL                                        | Name of the category                            |
-| `icon`        | VARCHAR(255)        |                                                 | URL of the category icon          |
+| `icon`        | VARCHAR(255)        |                                                 | URL of the category icon                        |
 | `sync_status` | ENUM('synced', 'pendingCreate', 'pendingUpdate', 'pendingDelete') | NOT NULL                    | Synchronization status                           |
 | `created_at`  | TIMESTAMP           |                                                 | Time of category creation                       |
 | `updated_at`  | TIMESTAMP           |                                                 | Last time the category was updated              |
 
 **Indexes**:
-- `idx_categories_user_id`
+- `idx_categories_user_id`: Optimizes queries for user-specific categories, including image cleanup during user deletion.
 
 **Relations**:
 - Belongs to one `user`
@@ -70,11 +76,11 @@ Stores all location information saved by the user.
 | `image_urls`  | TEXT[]              |                                                 | Array of URLs for location images                |
 | `sync_status` | ENUM('synced', 'pendingCreate', 'pendingUpdate', 'pendingDelete') | NOT NULL                    | Synchronization status                           |
 | `created_at`  | TIMESTAMP           |                                                 | Time of location creation                        |
-| `updated_at`  | TIMESTAMP           |                                                 | Last time the location was updated                            |
+| `updated_at`  | TIMESTAMP           |                                                 | Last time the location was updated               |
 
 **Indexes**:
-- `idx_locations_category_id`
-- `idx_locations_user_id`
+- `idx_locations_category_id`: Optimizes queries for category-specific locations.
+- `idx_locations_user_id`: Optimizes queries for user-specific locations, including image cleanup during user deletion.
 
 **Relations**:
 - Belongs to one `user`
