@@ -26,9 +26,9 @@ This document describes the data flow and synchronization mechanisms for the Loc
 ## Overview
 Locify allows users to manage locations and categories in both online and offline modes without requiring login. The client uses local storage to cache data and supports offline operations. When not logged in, even if online, the app retrieves category and location data from local storage, but other online features (e.g., search, share, feedback) function normally. Data synchronization occurs after login to ensure consistency between local storage and the backend server under the logged-in user's account. The `sync_status` field (`synced`, `pendingCreate`, `pendingUpdate`, `pendingDelete`) in the `categories` and `locations` tables tracks changes for synchronization.
 
-- **Online Mode (No Login)**: The client performs operations on local storage for adding, editing, or deleting categories/locations, retrieving data locally even when online. Other online features (e.g., search, share, feedback) operate normally without requiring login, using Google Maps SDK for search/navigation on both iOS and Android. No server interaction occurs for category/location data until login.  
-- **Online Mode (Logged In)**: The client interacts directly with the backend API to fetch, create, update, or delete category/location data. Successful API calls update local storage to maintain consistency. Other online features continue to function normally.  
-- **Offline Mode**: The client performs operations on local storage, marking changes with appropriate `sync_status` values for later synchronization. Online-only features (e.g., search, share, feedback) are unavailable.  
+- **Online Mode (No Login)**: The client performs operations on local storage for adding, editing, or deleting categories/locations, retrieving data locally even when online. Image selection for locations is disabled, and a message is displayed: "Please log in to add or remove images." Other online features (e.g., search, share, feedback) operate normally without requiring login, using Google Maps SDK for search/navigation on both iOS and Android. No server interaction occurs for category/location data until login.  
+- **Online Mode (Logged In)**: The client interacts directly with the backend API to fetch, create, update, or delete category/location data, including image selection for locations. Successful API calls update local storage to maintain consistency. Other online features continue to function normally.  
+- **Offline Mode**: The client performs operations on local storage, marking changes with appropriate `sync_status` values for later synchronization. Image selection for locations is only available when logged in; if not logged in, the option is disabled with a message: "Please log in to add or remove images." Online-only features (e.g., search, share, feedback) are unavailable.  
 - **Synchronization**: After login, the client sends all pending local changes to the server, which processes them under the logged-in user's account and updates `sync_status` to `synced`. After logout or user deletion, local data is managed as specified below.
 
 ---
@@ -56,14 +56,14 @@ Locify allows users to manage locations and categories in both online and offlin
   1. If the user is logged in:
      - Client generates a UUID for the new record and sends a POST request with `sync_status: pendingCreate`.  
      - For categories, includes basic info (name, icon) and sync status.
-     - For locations, includes all location details (name, address, coordinates, etc.).
+     - For locations, includes all location details (name, address, coordinates, etc.), and image selection is enabled, allowing users to add images.
      - Server validates the request (e.g., checks `name` length, valid `icon` URL, `latitude` range) and creates the record under the logged-in user's account.  
      - Server returns the created resource with `sync_status: synced` and server-generated timestamps.  
      - Client updates local storage with the server response.  
   2. If the user is not logged in (online or offline):
      - Client generates a UUID for the new record and stores it in local storage with `sync_status: pendingCreate`.  
      - For categories, stores name, icon (local or remote URL), and sync status locally.
-     - For locations, stores all location details, including local image URLs (e.g., `file://`) if images are added.
+     - For locations, stores all location details, but image selection is disabled, and a message is displayed: "Please log in to add images."
      - Record is immediately available for viewing/editing in the app.  
      - When the user logs in and goes online, the client synchronizes the record with the server under the logged-in user's account.  
 
@@ -73,12 +73,13 @@ Locify allows users to manage locations and categories in both online and offlin
   1. If the user is logged in:
      - Client sends a PUT request with updated fields and `sync_status: pendingUpdate`.  
      - For categories, can update name and icon (valid URL or new upload).
-     - For locations, can update any location details, including new image URLs (up to 10).
+     - For locations, can update any location details, including adding/removing images (image selection enabled).
      - Server validates the request (e.g., checks `name` length, valid `latitude`/`longitude`) and updates the record, setting `sync_status: synced` and updating `updated_at`.  
      - Server returns the updated resource.  
      - Client updates local storage with the server response.  
   2. If the user is not logged in (online or offline):
      - Client updates the record in local storage and sets `sync_status: pendingUpdate`.  
+     - For locations, image selection is disabled, and a message is displayed: "Please log in to add or remove images."  
      - Updated record is reflected in the app immediately.  
      - When the user logs in and goes online, the client synchronizes the record with the server under the logged-in user's account.  
 
@@ -111,16 +112,16 @@ Locify allows users to manage locations and categories in both online and offlin
 - **Process**:
   1. Client generates a UUID for the new record and stores it in local storage with `sync_status: pendingCreate`.  
   2. For categories, stores name and icon (local URL if uploaded offline, e.g., `file://category_icon.jpg`).  
-  3. For locations, stores all location details, including local image URLs (e.g., `file://image1.jpg`) for images selected offline. Images are stored in the device's temporary storage (e.g., app sandbox).  
-  4. Record is immediately available for viewing/editing in the app, with local images displayed if available.  
+  3. For locations, stores all location details, but image selection is disabled if not logged in, with a message: "Please log in to add images." If logged in, images selected offline are stored in the device's temporary storage with local URLs (e.g., `file://image1.jpg`).  
+  4. Record is immediately available for viewing/editing in the app, with local images displayed if available and logged in.  
   5. When the user logs in and goes online, the client synchronizes the record with the server under the logged-in user's account.  
 
 ### Update Data (Offline)
 - **Description**: Update an existing category or location while offline or not logged in.  
 - **Process**:
   1. Client updates the record in local storage and sets `sync_status: pendingUpdate`.  
-  2. For locations, new images selected offline are stored in the device's temporary storage with local URLs (e.g., `file://new_image.jpg`) and added to `image_urls`.  
-  3. Updated record is reflected in the app immediately, with local images displayed if available.  
+  2. For locations, if not logged in, image selection is disabled, and a message is displayed: "Please log in to add or remove images." If logged in, new images selected offline are stored in the device's temporary storage with local URLs (e.g., `file://new_image.jpg`) and added to `image_urls`.  
+  3. Updated record is reflected in the app immediately, with local images displayed if available and logged in.  
   4. When the user logs in and goes online, the client synchronizes the record with the server under the logged-in user's account.  
 
 ### Delete Data (Offline)
@@ -147,11 +148,11 @@ Locify allows users to manage locations and categories in both online and offlin
      - Client fetches server data using pagination (e.g., `GET /locations?page=1&size=50`) to merge with local data.  
      - Client sends these records to the server in batches (up to 50 records per request) in sequence:  
        - **Create**: 
-         - For locations with images: First upload images to Firebase Storage, replacing local URLs (e.g., `file://`) with remote URLs, then send POST request with the logged-in user’s `user_id` and image URLs.
+         - For locations with images (only if logged in): First upload images to Firebase Storage, replacing local URLs (e.g., `file://`) with remote URLs, then send POST request with the logged-in user’s `user_id` and image URLs.
          - For categories with icons: Upload icon to Firebase Storage, then send POST request with the logged-in user’s `user_id` and icon URL.
          - For records without images/icons: Send POST request with the logged-in user’s `user_id`.
        - **Update**: 
-         - For locations with new images: Upload new images to Firebase Storage, replacing local URLs, then send PUT request with the logged-in user’s `user_id` and updated image URLs.
+         - For locations with new images (only if logged in): Upload new images to Firebase Storage, replacing local URLs, then send PUT request with the logged-in user’s `user_id` and updated image URLs.
          - For categories with new icons: Upload new icon to Firebase Storage, then send PUT request with the logged-in user’s `user_id` and updated icon URL.
          - For records without image changes: Send PUT request with the logged-in user’s `user_id`.
        - **Delete**: 
@@ -170,7 +171,7 @@ Locify allows users to manage locations and categories in both online and offlin
      - For images and icons, the server compares the URLs to avoid duplicate uploads.  
   4. **Error Handling**:
      - If a sync request fails, the client retains the record’s `sync_status` and retries during the next sync attempt using exponential backoff (initial delay: 1s, max delay: 60s).  
-     - If image upload fails:
+     - If image upload fails (only when logged in):
        - The client keeps the local image URLs in the record.
        - The record’s data remains in local storage with the original `sync_status`.
        - During the next sync attempt, the client will:

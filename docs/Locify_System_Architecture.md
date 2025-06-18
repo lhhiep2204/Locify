@@ -178,35 +178,38 @@ sequenceDiagram
     participant API
     participant DB
 
-    Note over Client: User selects image
-    Client->>LocalDB: Store image metadata (local URL if offline)
-    alt Online
-        Client->>Storage: Upload image
-        Storage-->>Client: Return download URL
-    else Offline
-        Note over Client,LocalDB: Store in temporary storage
-        Client->>LocalDB: Store image in temporary storage (file://)
+    Note over Client: User selects image (only when logged in)
+    alt Not logged in
+        Client->>Client: Display message: "Please log in to add or remove images"
+    else Logged in
+        Client->>LocalDB: Store image metadata (local URL if offline)
+        alt Online
+            Client->>Storage: Upload image
+            Storage-->>Client: Return download URL
+        else Offline
+            Note over Client,LocalDB: Store in temporary storage
+            Client->>LocalDB: Store image in temporary storage (file://)
+        end
+        Note over Client,LocalDB: Update location with URL
+        Client->>LocalDB: Update location with image URL
+        Note over Client,API: Sync with server
+        Client->>API: Update location with image URL
+        API->>DB: Update location data
+        DB-->>API: Confirm update
+        API-->>Client: Return updated location
+        Note over Client: User deletes individual image
+        Client->>LocalDB: Remove image URL from location/category
+        alt Online
+            Client->>Storage: Delete image
+            Storage-->>Client: Confirm deletion
+        else Offline
+            Client->>LocalDB: Delete local image file (file://)
+        end
+        Client->>API: Update location/category with new URLs
+        API->>DB: Update location/category data
+        DB-->>API: Confirm update
+        API-->>Client: Return updated record
     end
-    Note over Client,LocalDB: Update location with URL
-    Client->>LocalDB: Update location with image URL
-    Note over Client,API: Sync with server
-    Client->>API: Update location with image URL
-    API->>DB: Update location data
-    DB-->>API: Confirm update
-    API-->>Client: Return updated location
-    Client->>LocalDB: Update with server data
-    Note over Client: User deletes individual image
-    Client->>LocalDB: Remove image URL from location/category
-    alt Online
-        Client->>Storage: Delete image
-        Storage-->>Client: Confirm deletion
-    else Offline
-        Client->>LocalDB: Delete local image file (file://)
-    end
-    Client->>API: Update location/category with new URLs
-    API->>DB: Update location/category data
-    DB-->>API: Confirm update
-    API-->>Client: Return updated record
     Note over Client: User deletes location
     Client->>LocalDB: Mark location as pendingDelete
     alt Online
@@ -239,7 +242,8 @@ sequenceDiagram
 ```
 
 **Key Points**:
-- Images are uploaded to Firebase Storage by the client when online or stored locally (e.g., `file://`) when offline.
+- Image selection is only available when the user is logged in; otherwise, a message is displayed: "Please log in to add or remove images."
+- When logged in, images are uploaded to Firebase Storage by the client when online or stored locally (e.g., `file://`) when offline.
 - Image URLs are updated in local storage and synced with the server.
 - Offline images are marked as pending upload and processed when online.
 - For individual image deletions (e.g., editing location/category) or location deletions, the client deletes images from Firebase Storage using the Firebase SDK. Offline, local image files (e.g., `file://`) are deleted immediately to free device storage.
@@ -287,7 +291,7 @@ graph LR
 - **Client Interaction**:
   - iOS and Android clients send HTTP requests to the **API Server** for CRUD operations on categories and locations.
   - Clients authenticate using **Firebase Authentication**, obtaining tokens for secure API requests.
-  - Clients upload and delete images/icons directly to/from **Firebase Storage** using the Firebase Storage SDK for individual location updates, location deletions, or category icon updates (excluding category deletions).
+  - Clients upload and delete images/icons directly to/from **Firebase Storage** using the Firebase Storage SDK for individual location updates, location deletions, or category icon updates (excluding category deletions), but only when logged in.
   - Offline data is cached in **Local Storage** (SwiftData for iOS, Room for Android), with local image/icon files (e.g., `file://`) deleted immediately upon marking `pendingDelete` or `pendingUpdate` to free device storage.
 - **Backend Interaction**:
   - The **API Server** processes requests, queries the **PostgreSQL** database, and verifies tokens via **Firebase Authentication**.

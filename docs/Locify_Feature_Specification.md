@@ -54,7 +54,7 @@
   - Shows location images if available locally; otherwise, displays a placeholder ("Image unavailable offline").
   - Shows markers for other locations in the same category on the map (Google Maps SDK on both iOS and Android).  
   - In offline mode, displays a message: "Map unavailable offline" and shows only the location details.  
-- **Edit location details** (Online/Offline): Edit name, description, category (select from default or user-created categories), or add/remove location images, stored locally for offline support and synced with the server after login if not logged in. Offline images are stored in temporary storage (e.g., `file://image1.jpg`).  
+- **Edit location details** (Online/Offline): Edit name, description, category (select from default or user-created categories), or add/remove location images (image selection only available when logged in). Changes are stored locally for offline support and synced with the server after login if not logged in. When not logged in, the image selection option is disabled, and a message is displayed: "Please log in to add or remove images." Offline images, when logged in, are stored in temporary storage (e.g., `file://image1.jpg`).  
 - **Mark/Unmark as Favorite** (Online/Offline): Mark or unmark a location as a favorite, stored locally. Favorite locations appear in the "Favorites" category and are synced after login if not logged in.  
 - **Delete location** (Online/Offline): Delete a location from the list, updated locally and synced with the server after login if not logged in.  
 - **Share location** (Online): Users share location details (name, address, coordinates) and images (if available) via the system sharing mechanism (iOS or Android), available whether logged in or not. Not available offline.  
@@ -64,7 +64,7 @@
 **Purpose**: Add a new saved location.  
 **Features**:
 - **Location Search** (Online): Functionality to search for a location, available whether logged in or not. Uses Google Maps SDK on both iOS and Android. Not available offline.  
-- **Location Details** (Online/Offline): Input fields for the location name, category, notes, and option to add images. Offline images are stored in temporary storage with local URLs (e.g., `file://image1.jpg`).  
+- **Location Details** (Online/Offline): Input fields for the location name, category, notes, and option to add images (image selection only available when logged in). When not logged in, the image selection option is disabled, and a message is displayed: "Please log in to add images." Offline images, when logged in, are stored in temporary storage with local URLs (e.g., `file://image1.jpg`).  
 - **Category Selection** (Online/Offline): Ability to select a category for a location (with the option to create a new one).  
 - **Map Preview** (Online): Displays a non-interactive map view with a marker indicating the selected location, available whether logged in or not, using Google Maps SDK on both iOS and Android. In offline mode, displays a placeholder: "Map preview unavailable offline."  
 
@@ -108,14 +108,15 @@
 - Users access the Add Location Screen.  
 - Users search for a location (online only; Google Maps SDK on both iOS and Android), available whether logged in or not.  
 - Users enter location details (name, category, notes) and select a category (default, user-created, or create a new one; online/offline).  
+- If logged in, users can add images, stored locally for offline support (e.g., `file://image1.jpg`) and synced with the server. When not logged in, the image selection option is disabled, and a message is displayed: "Please log in to add images."  
 - A non-interactive map preview displays the selected location (online only; available whether logged in or not, using Google Maps SDK). In offline mode, displays a placeholder: "Map preview unavailable offline."  
-- The location is saved, stored locally for offline access and synced with the server after login if not logged in. Offline images are stored in temporary storage.  
+- The location is saved, stored locally for offline access and synced with the server after login if not logged in.  
 
 ### 4. Manage Categories and Locations
 - Users view the category list with the number of locations per category, retrieved from local storage (online/offline when not logged in; online synced data when logged in).  
 - Users create, edit, or delete categories (online/offline). When deleting a category with locations, the app prompts to select a replacement category. Changes are stored locally and synced with the server after login if not logged in. Offline icons are stored in temporary storage.  
 - Select a category to view its location list, retrieved from local storage (online/offline when not logged in; online synced data when logged in).  
-- In the location list, users view, edit (including changing category), delete, mark/unmark as favorite, or share locations via the system sharing mechanism (iOS or Android; sharing online only, available whether logged in or not). Changes to categories or locations are stored locally and synced after login if not logged in. Offline images are stored in temporary storage.  
+- In the location list, users view, edit (including changing category; image selection only available when logged in), delete, mark/unmark as favorite, or share locations via the system sharing mechanism (iOS or Android; sharing online only, available whether logged in or not). When not logged in, the image selection option is disabled, and a message is displayed: "Please log in to add or remove images." Changes to categories or locations are stored locally and synced after login if not logged in. Offline images, when logged in, are stored in temporary storage.  
 - Select a location to view on the map (online: dynamic map, available whether logged in or not; offline: displays a message "Map unavailable offline" and shows only location details; Google Maps SDK on both iOS and Android). Images are displayed if available locally; otherwise, a placeholder is shown.  
 
 ### 5. Navigation
