@@ -6,7 +6,6 @@
 .env.*.local
 *.cache
 *.lock
-!locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved  # Keep SPM dependency versions
 
 # IDEs and Editors
 .idea/
@@ -30,7 +29,11 @@ locify-ios/*.ipa
 locify-ios/*.dSYM
 locify-ios/*.hmap
 locify-ios/*.xcresult/
-locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/*
+
+# Ignore everything in xcshareddata except swiftpm/Package.resolved
+locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/**
+!locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+!locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Android
 locify-android/.gradle/
