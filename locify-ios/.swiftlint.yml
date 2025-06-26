@@ -1,0 +1,67 @@
+# Disable specific rules that are enabled by default
+disabled_rules:
+  - control_statement
+  - implicit_getter
+
+# Enable additional opt-in rules for better code quality
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - unused_parameter
+  - force_unwrapping
+  - fatal_error_message
+
+# Rules that apply when using swiftlint analyze
+analyzer_rules:
+  - unused_import
+  - unused_declaration
+
+included: # paths to include during linting
+  - Locify
+
+# Allow SwiftLint to run even if no lintable files are found
+allow_zero_lintable_files: false
+
+# If true, all warnings will be treated as errors
+strict: false
+
+# If true, all errors will be downgraded to warnings
+lenient: false
+
+# Disable update checks to improve build performance
+check_for_updates: false
+
+# Custom rule configurations
+line_length: 120  # Maximum allowed line length
+
+type_body_length:
+  - 300  # Warning at 300 lines
+  - 400  # Error at 400 lines
+
+file_length:
+  warning: 500
+  error: 1200
+
+# Identifier name rules
+identifier_name:
+  min_length:
+    error: 3
+  excluded:
+    - id
+    - _body
+
+# Type name rules
+type_name:
+  min_length: 3
+  max_length:
+    warning: 40
+    error: 50
+  excluded: ["iPhone"]
+
+# Force casting and force try should be warnings
+force_cast: warning
+force_try:
+  severity: warning
+
+# Set output format to match Xcode's style
+reporter: "xcode"
