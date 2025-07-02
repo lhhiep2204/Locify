@@ -27,6 +27,7 @@
 		72DEB75B2E0D97DC00ADDB36 /* Locify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Locify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72DEB76A2E0D97DE00ADDB36 /* LocifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		72DEB7742E0D97DE00ADDB36 /* LocifyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocifyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		72DEB9B12E1584D900ADDB36 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		72DEB7522E0D97DC00ADDB36 = {
 			isa = PBXGroup;
 			children = (
+				72DEB9B12E1584D900ADDB36 /* README.md */,
 				72DEB75D2E0D97DC00ADDB36 /* Locify */,
 				72DEB76D2E0D97DE00ADDB36 /* LocifyTests */,
 				72DEB7772E0D97DE00ADDB36 /* LocifyUITests */,
