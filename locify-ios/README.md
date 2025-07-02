@@ -1,6 +1,6 @@
 # Locify iOS App
 
-Locify is a location-based application designed for iOS, iPadOS, macOS, and visionOS, enabling users to manage and share favorite places, organize them into categories, and synchronize data seamlessly between offline and online modes. Built with **Clean Architecture**, Locify ensures a modular, testable, and maintainable codebase, leveraging **SwiftUI**, **Firebase**, **Apple Maps (MapKit)**, and **SwiftData** for a robust user experience across all supported platforms.
+Locify is a location-based application designed for iOS, iPadOS, macOS, and visionOS, enabling users to manage and share favorite places, organize them into categories, and synchronize data seamlessly between offline and online modes without requiring login. Built with **Clean Architecture**, Locify ensures a modular, testable, and maintainable codebase, leveraging **SwiftUI**, **Firebase**, **Google Maps SDK**, **MapKit**, and **SwiftData** for a robust user experience across all supported platforms.
 
 ---
 
@@ -12,13 +12,13 @@ Locify is a location-based application designed for iOS, iPadOS, macOS, and visi
 ---
 
 ## Features
-- **Location Management**: Create, edit, and delete favorite locations with details like name, address, coordinates, and images.
-- **Category Management**: Organize locations into custom categories for easy access.
-- **Main Map**: Interactive map powered by Apple Maps (MapKit) for searching, navigating, and visualizing locations.
+- **Location Management**: Create, edit, and delete favorite locations with details like name, address, coordinates, and images (image management requires login).
+- **Category Management**: Organize locations into custom or default categories (e.g., Restaurant, Cafe, Favorites) for easy access.
+- **Main Map**: Interactive map supporting Google Maps and Apple Maps, with runtime switching via Settings. Features include searching, navigating, and visualizing locations (online only; offline shows last known location).
 - **Authentication**: Secure user authentication via Firebase Authentication, supporting email/password login and registration.
-- **Offline/Online Sync**: Store and manage locations and categories offline using SwiftData, with automatic synchronization when online.
-- **Settings**: Manage user account, preferences (language, theme), and previews.
-- **Multi-platform Support**: Optimized for iOS, iPadOS, macOS, and visionOS with a consistent UI.
+- **Offline/Online Sync**: Store and manage locations and categories offline using SwiftData, with automatic synchronization to the server after login when online.
+- **Settings**: Manage user account, preferences (language, theme, map provider), and send feedback (online only).
+- **Multi-platform Support**: Optimized for iOS, iPadOS, macOS, and visionOS with a consistent SwiftUI-based UI.
 
 ---
 
@@ -33,121 +33,172 @@ Locify is a location-based application designed for iOS, iPadOS, macOS, and visi
   - Swift 6
 - **Dependencies**:
   - Firebase (Authentication, Storage) via Swift Package Manager (SPM)
+  - Google Maps SDK via SPM
+  - MapKit
 
 ---
 
 ## Project Structure
-Locify follows **Clean Architecture**, dividing the codebase into **Presentation**, **Domain**, **Data**, and **Shared** layers for separation of concerns. Below is the directory structure, followed by a diagram illustrating the relationships between layers.
+Locify follows **Clean Architecture**, dividing the codebase into **Presentation**, **Domain**, **Data**, and **Shared** layers for separation of concerns, with dependencies flowing inward to the Domain layer. The structure is designed for testability, modularity, and framework independence, incorporating best practices from top-tier iOS development, such as protocol-based abstractions, fine-grained UseCases, and a robust dependency injection system.
 
 ### Directory Structure
 
 ```
-Locify
-├── App
-├── Data
-│   ├── Mappers
-│   │   ├── Local
-│   │   └── Remote
-│   ├── Network
-│   │   ├── Base
-│   │   ├── Models
-│   │   ├── Requests
-│   │   └── Services
-│   ├── Repositories
-│   ├── Storage
-│   │   ├── Keychain
-│   │   ├── LocalData
-│   │   │   ├── SwiftData
-│   │   │   └── SyncManager
-│   │   ├── Models
-│   │   └── UserDefaults
-│   └── ThirdParty
-│       └── Firebase
-│           ├── Authentication
-│           └── Storage
-├── Domain
-│   ├── Entities
-│   ├── Repositories
-│   └── UseCases
-│       ├── Authentication
-│       ├── Category
-│       ├── Location
-│       └── Sync
-├── Presentation
-│   ├── DesignSystem
-│   │   ├── Components
-│   │   │   ├── Button
-│   │   │   ├── Dialog
-│   │   │   ├── Drawer
-│   │   │   ├── Image
-│   │   │   ├── Map
-│   │   │   ├── Text
-│   │   │   └── TextField
-│   │   └── Styles
-│   ├── Features
-│   │   ├── Authentication
-│   │   │   ├── Views
-│   │   │   └── ViewModels
-│   │   ├── CategoryManagement
-│   │   │   ├── Views
-│   │   │   └── ViewModels
-│   │   ├── LocationManagement
-│   │   │   ├── Views
-│   │   │   └── ViewModels
-│   │   ├── MainMap
-│   │   │   ├── Views
-│   │   │   └── ViewModels
-│   │   ├── Settings
-│   │   │   ├── Views
-│   │   │   └── ViewModels
-│   │   └── Shared
-│   │       ├── Views
-│   │       └── ViewModels
-│   └── Routing
-├── Resources
-│   ├── Assets
-│   │   ├── Colors
-│   │   ├── Icons
-│   │   └── Images
-│   ├── Fonts
-│   ├── Localization
-│   │   └── Localized
-│   │       └── Keys
-│   ├── MockData
-│   │   ├── Categories
-│   │   ├── Locations
-│   │   └── Users
-│   └── PreviewContent
-├── Shared
-│   ├── Configuration
-│   ├── DI
-│   │   ├── Assemblies
-│   │   └── Protocols
-│   ├── Errors
-│   │   ├── NetworkErrors
-│   │   ├── StorageErrors
-│   │   └── SyncErrors
-│   ├── Extensions
-│   │   ├── Foundation
-│   │   └── SwiftUI
-│   └── Utilities
+locify-ios
+├── Locify
+│   ├── App
+│   ├── Data
+│   │   ├── Mappers
+│   │   │   ├── Local
+│   │   │   └── Remote
+│   │   ├── MapKit
+│   │   ├── Network
+│   │   │   ├── Base
+│   │   │   ├── Models
+│   │   │   ├── Requests
+│   │   │   └── Services
+│   │   │       ├── AuthService
+│   │   │       ├── CategoryService
+│   │   │       ├── LocationService
+│   │   │       ├── MapService
+│   │   │       ├── StorageService
+│   │   │       └── SyncService
+│   │   ├── Repositories
+│   │   │   ├── Authentication
+│   │   │   ├── Category
+│   │   │   ├── Location
+│   │   │   └── Sync
+│   │   ├── Storage
+│   │   │   ├── Keychain
+│   │   │   ├── LocalData
+│   │   │   │   ├── SwiftData
+│   │   │   │   └── SyncManager
+│   │   │   ├── Models
+│   │   │   └── UserDefaults
+│   │   └── ThirdParty
+│   │       ├── Firebase
+│   │       │   ├── Authentication
+│   │       │   └── Storage
+│   │       └── GoogleMaps
+│   ├── Domain
+│   │   ├── Entities
+│   │   ├── Repositories
+│   │   └── UseCases
+│   │       ├── Authentication
+│   │       │   ├── DeleteAccountUseCase
+│   │       │   ├── LoginUseCase
+│   │       │   ├── LogoutUseCase
+│   │       │   └── RegisterUseCase
+│   │       ├── Category
+│   │       │   ├── CreateCategoryUseCase
+│   │       │   ├── DeleteCategoryUseCase
+│   │       │   ├── FetchCategoriesUseCase
+│   │       │   └── UpdateCategoryUseCase
+│   │       ├── Location
+│   │       │   ├── CreateLocationUseCase
+│   │       │   ├── DeleteLocationUseCase
+│   │       │   ├── FetchLocationsUseCase
+│   │       │   └── UpdateLocationUseCase
+│   │       └── Sync
+│   │           ├── ResolveConflictsUseCase
+│   │           ├── SyncCategoriesUseCase
+│   │           └── SyncLocationsUseCase
+│   ├── Presentation
+│   │   ├── DesignSystem
+│   │   │   ├── Components
+│   │   │   │   ├── Button
+│   │   │   │   ├── Custom
+│   │   │   │   ├── Dialog
+│   │   │   │   ├── Image
+│   │   │   │   ├── Text
+│   │   │   │   └── TextField
+│   │   │   └── Styles
+│   │   ├── Features
+│   │   │   ├── Authentication
+│   │   │   │   ├── ViewModels
+│   │   │   │   └── Views
+│   │   │   ├── CategoryManagement
+│   │   │   │   ├── ViewModels
+│   │   │   │   └── Views
+│   │   │   ├── LocationManagement
+│   │   │   │   ├── ViewModels
+│   │   │   │   └── Views
+│   │   │   ├── MainMap
+│   │   │   │   ├── ViewModels
+│   │   │   │   └── Views
+│   │   │   ├── Settings
+│   │   │   │   ├── ViewModels
+│   │   │   │   └── Views
+│   │   │   └── Shared
+│   │   │       ├── ViewModels
+│   │   │       └── Views
+│   │   └── Routing
+│   ├── Resources
+│   │   ├── Assets
+│   │   │   ├── Colors
+│   │   │   ├── Icons
+│   │   │   └── Images
+│   │   ├── Fonts
+│   │   ├── Localization
+│   │   │   └── Localized
+│   │   │       └── Keys
+│   │   ├── MockData
+│   │   │   ├── Categories
+│   │   │   ├── Locations
+│   │   │   └── Users
+│   │   └── PreviewContent
+│   └── Shared
+│       ├── Configuration
+│       │   ├── AppConfig
+│       │   └── MapProvider
+│       ├── DI
+│       │   ├── Assemblies
+│       │   └── Protocols
+│       ├── Errors
+│       │   ├── NetworkErrors
+│       │   ├── StorageErrors
+│       │   └── SyncErrors
+│       ├── Extensions
+│       │   ├── Foundation
+│       │   └── SwiftUI
+│       └── Utilities
 └── Tests
-    ├── UnitTests
-    │   ├── Data
-    │   ├── Domain
-    │   └── Presentation
+    ├── Mocks
+    │   ├── Repositories
+    │   ├── Services
+    │   │   ├── MapService
+    │   │   └── OtherServices
+    │   └── ViewModels
     ├── UITests
-    └── Mocks
+    └── UnitTests
+        ├── Data
+        │   ├── MapKit
+        │   ├── Network
+        │   ├── Repositories
+        │   └── Storage
+        ├── Domain
+        │   ├── Entities
+        │   └── UseCases
+        └── Presentation
+            ├── Routing
+            └── ViewModels
 ```
 
 ### Key Components
-- **Dependency Injection**: Uses **Assemblies** in `Shared/DI/Assemblies` to register dependencies (UseCases, ViewModels, Repositories) into a custom `DependencyContainer`.
-- **Navigation**: Managed directly in SwiftUI Views and ViewModels using `NavigationStack` and `NavigationPath`, with centralized routing in `RouterManager`.
-- **Offline Support**: SwiftData handles local storage, with `SyncManager` managing offline/online synchronization (sync_status: synced, pendingCreate, pendingUpdate, pendingDelete).
-- **Design System**: Reusable UI components (Button, Map, TextField) in `Presentation/DesignSystem` ensure consistent styling.
+- **Dependency Injection**: A custom `DependencyContainer` in `Shared/DI/Assemblies` registers dependencies (UseCases, ViewModels, Repositories, Services) via protocols, ensuring loose coupling and testability. Dependencies are injected into ViewModels and Repositories using Swift’s property wrapper pattern, optimized for SwiftUI compatibility. The container resolves services (e.g., `LocationService`, `MapService`) and supports dynamic map provider selection.
+- **Navigation**: Managed in `Presentation/Routing` using `NavigationStack` and `NavigationPath`, with a centralized `RouterManager` for consistent navigation across features.
+- **Offline Support**: SwiftData in `Data/Storage/LocalData/SwiftData` handles local storage, with `SyncManager` managing offline/online synchronization using `sync_status` (synced, pendingCreate, pendingUpdate, pendingDelete), as detailed in the [Locify_Data_Sync_Flow.md](./../docs/Locify_Data_Sync_Flow.md). Offline mode displays the last known location on the selected map provider.
+- **Design System**: Reusable UI components (e.g., `Button`, `Map`, `TextField`) in `Presentation/DesignSystem/Components` ensure consistent styling across SwiftUI views, with styles defined in `Styles`. Custom components are stored in `Presentation/DesignSystem/Components/Custom` to organize complex or domain-specific UI elements (e.g., `LocationCardView`, `MapPreviewView`, `CategoryTagView`) separately from core components (e.g., `Button`, `Dialog`).
+- **Custom Components**: Stored in `Presentation/DesignSystem/Components/Custom` for reusable, cross-feature UI elements, ensuring they are nested below the top-level components to maintain organization and avoid clutter.
+- **Repository Protocols**: `Domain/Repositories` defines protocols (e.g., `LocationRepositoryProtocol`) for all repository interactions, implemented in `Data/Repositories`, ensuring decoupling and testability.
+- **Service Protocols**: `Data/Network/Services` includes protocols (e.g., `MapServiceProtocol`, `StorageServiceProtocol`) to abstract API requests and map/storage operations. `MapService` supports runtime switching between Google Maps (`Data/ThirdParty/GoogleMaps`) and Apple Maps (`Data/MapKit`) via a factory pattern.
+- **API Request Handling**: Services like `LocationService`, `CategoryService`, and `SyncService` handle API requests for their respective domains, as defined in [Locify_API_Documentation.md](./../docs/Locify_API_Documentation.md), while repositories orchestrate network and local storage operations.
+- **Map Provider Switching**: Users can switch between Google Maps and Apple Maps in the Settings feature, with the selected provider stored in `Shared/Configuration/MapProvider` using `UserDefaults`. The `MapService` dynamically selects the appropriate implementation (`GoogleMaps` or `MapKit`).
+- **Storage Abstraction**: `Data/Network/Services/StorageService` abstracts file storage operations (e.g., image uploads/deletions) via `StorageServiceProtocol`, with the concrete implementation in `Data/ThirdParty/Firebase/Storage` using the Firebase Storage SDK.
+- **Testing**: Comprehensive test suites in `Tests/UnitTests` cover `Data` (Repositories, Network, Storage, MapKit), `Domain` (Entities, UseCases), and `Presentation` (ViewModels, Routing), with `Mocks` for repositories, services (including `MapService` for both Google Maps and Apple Maps), and ViewModels in `Tests/Mocks`. `Tests/UITests` validate UI flows, including map provider switching, offline sync, and error handling scenarios.
 
 ### Architecture Diagram
-The following diagram illustrates the relationships between directories in Locify's Clean Architecture, highlighting the level-2 directories and how dependencies flow through the `DependencyContainer`.
+The following diagram illustrates the relationships between directories in Locify’s Clean Architecture, highlighting dependency flow through the `DependencyContainer`.
 
 ```mermaid
 graph LR
@@ -155,47 +206,60 @@ graph LR
     B -->|DependencyContainer| C[Domain]
     B -->|DependencyContainer| D[Data]
     B -->|DependencyContainer| E[Presentation]
-    D -->|Implements Repositories| C
+    D -->|Implements Protocols| C
     E -->|Calls UseCases| C
     E -->|Uses| F[Resources]
     G[Tests] -->|Tests| C
     G -->|Tests| D
     G -->|Tests| E
-    subgraph Shared
-        B1[Configuration]
-        B2[DI]
-        B3[Errors]
-        B4[Extensions]
-        B5[Utilities]
-    end
-    subgraph Data
-        D1[Mappers]
-        D2[Network]
-        D3[Repositories]
-        D4[Storage]
-        D5[ThirdParty]
-    end
-    subgraph Domain
-        C1[Entities]
-        C2[Repositories]
-        C3[UseCases]
-    end
-    subgraph Presentation
-        E1[DesignSystem]
-        E2[Features]
-        E3[Routing]
-    end
-    subgraph Resources
-        F1[Assets]
-        F2[Fonts]
-        F3[Localization]
-        F4[MockData]
-        F5[PreviewContent]
-    end
-    subgraph Tests
-        G1[UnitTests]
-        G2[UITests]
-        G3[Mocks]
+    subgraph locify-ios
+        H[Locify]
+        G[Tests]
+        subgraph Locify
+            A
+            B
+            C
+            D
+            E
+            F
+        end
+        subgraph Tests
+            G1[Mocks]
+            G2[UITests]
+            G3[UnitTests]
+        end
+        subgraph Shared
+            B1[Configuration]
+            B2[DI]
+            B3[Errors]
+            B4[Extensions]
+            B5[Utilities]
+        end
+        subgraph Data
+            D1[Mappers]
+            D2[MapKit]
+            D3[Network]
+            D4[Repositories]
+            D5[Storage]
+            D6[ThirdParty]
+        end
+        subgraph Domain
+            C1[Entities]
+            C2[Repositories]
+            C3[UseCases]
+        end
+        subgraph Presentation
+            E1[DesignSystem]
+            E2[Features]
+            E3[Routing]
+        end
+        subgraph Resources
+            F1[Assets]
+            F2[Fonts]
+            F3[Localization]
+            F4[MockData]
+            F5[PreviewContent]
+        end
     end
 ```
 
