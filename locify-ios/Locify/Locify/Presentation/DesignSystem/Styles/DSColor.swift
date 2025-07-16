@@ -11,7 +11,7 @@ import SwiftUI
 /// These values should match the color names defined in the asset catalog.
 enum DSColor: String {
     /// Accent Colors
-    case blueMirage = "blue.mirage"
+    case accent = "AccentColor"
 
     /// Background Colors
     case backgroundPrimary = "background.primary"
