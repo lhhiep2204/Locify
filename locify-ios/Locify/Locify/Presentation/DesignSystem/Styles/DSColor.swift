@@ -24,6 +24,13 @@ enum DSColor: String {
     case textSecondary = "text.secondary"
     case textPrimaryInverted = "text.primary.inverted"
     case textSecondaryInverted = "text.secondary.inverted"
+
+    /// Shade
+    case gray20 = "gray.20"
+    case gray40 = "gray.40"
+    case gray60 = "gray.60"
+    case gray80 = "gray.80"
+    case gray100 = "gray.100"
 }
 
 extension Color {

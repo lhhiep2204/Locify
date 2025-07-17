@@ -48,7 +48,6 @@ identifier_name:
     error: 3
   excluded:
     - id
-    - _body
 
 # Type name rules
 type_name:

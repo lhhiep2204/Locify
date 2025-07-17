@@ -11,8 +11,8 @@
 .idea/
 *.iml
 .vscode/
-locify-ios/Locify.xcodeproj/xcuserdata/
-locify-ios/Locify.xcodeproj/project.xcworkspace/xcuserdata/
+locify-ios/Locify/Locify.xcodeproj/xcuserdata/
+locify-ios/Locify/Locify.xcodeproj/project.xcworkspace/xcuserdata/
 locify-ios/*.xcuserstate
 
 # Build Outputs
@@ -31,9 +31,9 @@ locify-ios/*.hmap
 locify-ios/*.xcresult/
 
 # Ignore everything in xcshareddata except swiftpm/Package.resolved
-locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/**
-!locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
-!locify-ios/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+locify-ios/Locify/Locify.xcodeproj/project.xcworkspace/xcshareddata/**
+!locify-ios/Locify/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+!locify-ios/Locify/Locify.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Android
 locify-android/.gradle/
