@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct LocifyApp: App {
+    private var router: Router<Route> = .init(root: .home)
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self
@@ -25,7 +27,7 @@ struct LocifyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RouterView(router)
         }
         .modelContainer(sharedModelContainer)
     }

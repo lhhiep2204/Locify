@@ -17,7 +17,7 @@ extension Route: @MainActor AppRoute {
     var body: some View {
         switch self {
         case .home:
-            Text("Hello, World!")
+            HomeView(ViewModelFactory.shared.makeHomeViewModel())
         }
     }
 }
