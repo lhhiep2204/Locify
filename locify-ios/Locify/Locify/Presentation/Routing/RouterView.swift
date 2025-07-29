@@ -13,21 +13,21 @@ import SwiftUI
 /// that handles navigation via a shared `Router` instance.
 struct RouterView<Route: AppRoute>: View {
     /// The router managing the navigation stack.
-    @Bindable private var manager: Router<Route>
+    @Bindable private var router: Router<Route>
 
     /// Creates a `RouterView` that observes and manages navigation paths using the provided router.
     ///
-    /// - Parameter manager: The router responsible for handling navigation paths.
-    init(_ manager: Router<Route>) {
-        self.manager = manager
+    /// - Parameter router: The router responsible for handling navigation paths.
+    init(_ router: Router<Route>) {
+        self.router = router
     }
 
     var body: some View {
-        NavigationStack(path: $manager.paths) {
-            manager.root
+        NavigationStack(path: $router.paths) {
+            router.root
                 .navigationDestination(for: Route.self) { $0 }
         }
-        .environment(manager)
+        .environment(router)
     }
 }
 
@@ -41,7 +41,7 @@ struct RouterModifier<Route: AppRoute>: ViewModifier {
 
     /// Creates a `RouterModifier` that manages navigation paths using the provided router.
     ///
-    /// - Parameter manager: The router responsible for handling navigation paths.
+    /// - Parameter router: The router responsible for handling navigation paths.
     init(_ manager: Router<Route>) {
         self.manager = manager
     }
@@ -58,7 +58,7 @@ struct RouterModifier<Route: AppRoute>: ViewModifier {
 extension View {
     /// Applies the `RouterModifier` to the view, enabling navigation support using the given router.
     ///
-    /// - Parameter manager: The router managing the navigation paths.
+    /// - Parameter router: The router managing the navigation paths.
     /// - Returns: A view with navigation behavior powered by the provided router.
     func applyRouter<Route: AppRoute>(_ manager: Router<Route>) -> some View {
         modifier(RouterModifier(manager))

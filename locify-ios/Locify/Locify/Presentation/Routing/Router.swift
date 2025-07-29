@@ -5,7 +5,6 @@
 //  Created by Hoàng Hiệp Lê on 8/7/25.
 //
 
-import Combine
 import SwiftUI
 
 /// A protocol that represents a route in the navigation stack.
@@ -15,7 +14,7 @@ import SwiftUI
 typealias RouterHandler = View & Hashable
 protocol AppRoute: RouterHandler {}
 
-/// A navigation manager for SwiftUI views, handling a stack-based navigation model.
+/// A navigation router for SwiftUI views, handling a stack-based navigation model.
 ///
 /// `Router` maintains the current path stack and root view, and provides methods
 /// for navigation actions such as push, pop, and resetting the stack.
