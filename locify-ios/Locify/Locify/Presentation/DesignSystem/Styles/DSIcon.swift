@@ -9,15 +9,26 @@ import SwiftUI
 
 /// A design system enum that defines custom icons used in the app.
 enum DSIcon: String {
+    // MARK: - M
     case marker = "ic.marker"
 }
 
 /// A design system enum that defines system-provided SF Symbols used in the app.
 enum DSSystemIcon: String {
+    // MARK: - C
     case clearText = "multiply.circle.fill"
+
+    // MARK: - L
+    case list = "list.bullet"
     case location = "location"
+
+    // MARK: - P
     case passwordShown = "eye"
     case passwordHidden = "eye.slash"
+
+    // MARK: - S
+    case search = "magnifyingglass"
+    case settings = "gear"
 }
 
 extension Image {

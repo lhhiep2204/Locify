@@ -5,18 +5,13 @@
 //  Created by Hoàng Hiệp Lê on 22/7/25.
 //
 
-import SwiftUI
+import Foundation
 
 @Observable
 class HomeViewModel {
-    var categories: [Category] = []
+    var locations: [Location] = []
     var selectedCategory: Category?
     var selectedLocation: Location?
-    var showCategorySheet: Bool = false
-    var showSearchSheet: Bool = false
-    var showSettingsSheet: Bool = false
-    var showAlert: Bool = false
-    var searchText: String = ""
 
     private let fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol
     private let fetchLocationsUseCase: FetchLocationsUseCaseProtocol
@@ -25,20 +20,20 @@ class HomeViewModel {
         fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol,
         fetchLocationsUseCase: FetchLocationsUseCaseProtocol
     ) {
+        self.selectedCategory = Category.mockList.first
+
         self.fetchCategoriesUseCase = fetchCategoriesUseCase
         self.fetchLocationsUseCase = fetchLocationsUseCase
     }
 
-    func loadCategories() async {
+    func fetchLocations() async {
+        guard let selectedCategory else { return }
+
         do {
-            let categories = try await fetchCategoriesUseCase.execute()
-            await MainActor.run {
-                self.categories = categories
-            }
+            locations = try await fetchLocationsUseCase.execute(for: selectedCategory)
+            selectedLocation = locations.first
         } catch {
-            await MainActor.run {
-                self.showAlert = true
-            }
+            Logger.error(error.localizedDescription)
         }
     }
 }
