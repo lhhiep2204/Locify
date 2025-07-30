@@ -37,21 +37,21 @@ struct RouterView<Route: AppRoute>: View {
 /// rather than using a dedicated `RouterView`.
 struct RouterModifier<Route: AppRoute>: ViewModifier {
     /// The router managing the navigation stack.
-    @Bindable private var manager: Router<Route>
+    @Bindable private var router: Router<Route>
 
     /// Creates a `RouterModifier` that manages navigation paths using the provided router.
     ///
     /// - Parameter router: The router responsible for handling navigation paths.
-    init(_ manager: Router<Route>) {
-        self.manager = manager
+    init(_ router: Router<Route>) {
+        self.router = router
     }
 
     func body(content: Content) -> some View {
-        NavigationStack(path: $manager.paths) {
+        NavigationStack(path: $router.paths) {
             content
                 .navigationDestination(for: Route.self) { $0 }
         }
-        .environment(manager)
+        .environment(router)
     }
 }
 
@@ -60,7 +60,7 @@ extension View {
     ///
     /// - Parameter router: The router managing the navigation paths.
     /// - Returns: A view with navigation behavior powered by the provided router.
-    func applyRouter<Route: AppRoute>(_ manager: Router<Route>) -> some View {
-        modifier(RouterModifier(manager))
+    func applyRouter<Route: AppRoute>(_ router: Router<Route>) -> some View {
+        modifier(RouterModifier(router))
     }
 }
