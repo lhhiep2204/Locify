@@ -13,6 +13,11 @@ class HomeViewModel {
     var selectedCategory: Category?
     var selectedLocation: Location?
 
+    var relatedLocations: [Location] {
+        guard let selectedLocation else { return [] }
+        return locations.filter { $0.id != selectedLocation.id }
+    }
+
     private let fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol
     private let fetchLocationsUseCase: FetchLocationsUseCaseProtocol
 
@@ -25,7 +30,9 @@ class HomeViewModel {
         self.fetchCategoriesUseCase = fetchCategoriesUseCase
         self.fetchLocationsUseCase = fetchLocationsUseCase
     }
+}
 
+extension HomeViewModel {
     func fetchLocations() async {
         guard let selectedCategory else { return }
 
