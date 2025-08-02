@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dismissSheet) private var dismissSheet
 
     @State var viewModel: HomeViewModel
 
@@ -36,6 +37,9 @@ struct HomeView: View {
         .task {
             await viewModel.fetchCategories()
             await viewModel.fetchLocations()
+        }
+        .environment(\.dismissSheet) {
+            showCategoryListView = false
         }
     }
 }

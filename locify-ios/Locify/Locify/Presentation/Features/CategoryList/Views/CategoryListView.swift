@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CategoryListView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismissSheet) private var dismissSheet
 
     private var router: Router<Route>
     var categories: [Category]
@@ -23,7 +23,7 @@ struct CategoryListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        dismiss()
+                        dismissSheet()
                     } label: {
                         Image.appSystemIcon(.close)
                     }
@@ -38,11 +38,11 @@ struct CategoryListView: View {
 extension CategoryListView {
     private var listView: some View {
         List {
-            ForEach(categories) { category in
+            ForEach(categories) { item in
                 NavigationLink {
-                    Text(category.name)
+                    LocationListView(locations: Location.mockList)
                 } label: {
-                    categoryItemView(category)
+                    categoryItemView(item)
                 }
             }
         }
