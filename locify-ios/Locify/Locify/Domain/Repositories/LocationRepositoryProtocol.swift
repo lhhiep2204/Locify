@@ -8,5 +8,5 @@
 import Foundation
 
 protocol LocationRepositoryProtocol: Sendable {
-    func fetchLocations(for categoryId: UUID) async throws -> [Location]
+    func fetchLocations() async throws -> [Location]
 }

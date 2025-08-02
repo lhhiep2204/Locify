@@ -8,7 +8,7 @@
 import Foundation
 
 /// A domain entity representing a user-saved location, associated with a user and category.
-struct Location: Identifiable, Equatable {
+struct Location: Identifiable, Equatable, Hashable {
     /// Unique identifier for the location.
     let id: UUID
     /// Identifier of the user who owns this location.

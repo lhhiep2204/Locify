@@ -17,6 +17,7 @@ enum DSIcon: String {
 enum DSSystemIcon: String {
     // MARK: - C
     case clearText = "multiply.circle.fill"
+    case close = "xmark"
 
     // MARK: - L
     case list = "list.bullet"

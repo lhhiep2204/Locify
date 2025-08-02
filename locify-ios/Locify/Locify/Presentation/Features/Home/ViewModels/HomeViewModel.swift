@@ -9,6 +9,7 @@ import Foundation
 
 @Observable
 class HomeViewModel {
+    var categories: [Category] = []
     var locations: [Location] = []
     var selectedCategory: Category?
     var selectedLocation: Location?
@@ -33,11 +34,17 @@ class HomeViewModel {
 }
 
 extension HomeViewModel {
-    func fetchLocations() async {
-        guard let selectedCategory else { return }
-
+    func fetchCategories() async {
         do {
-            locations = try await fetchLocationsUseCase.execute(for: selectedCategory)
+            categories = try await fetchCategoriesUseCase.execute()
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
+    }
+
+    func fetchLocations() async {
+        do {
+            locations = try await fetchLocationsUseCase.execute()
             selectedLocation = locations.first
         } catch {
             Logger.error(error.localizedDescription)

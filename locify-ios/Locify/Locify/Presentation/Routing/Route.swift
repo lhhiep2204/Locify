@@ -10,6 +10,7 @@ import SwiftUI
 /// An enum representing all possible navigation routes in the app.
 enum Route {
     case home
+    case categoryList(categories: [Category])
 }
 
 /// Makes `Route` conform to `AppRoute` by implementing a `View` body for each case.
@@ -29,6 +30,8 @@ private struct RouteContentView: View {
         switch route {
         case .home:
             HomeView(factory.makeHomeViewModel())
+        case .categoryList(let categories):
+            CategoryListView(categories: categories)
         }
     }
 }

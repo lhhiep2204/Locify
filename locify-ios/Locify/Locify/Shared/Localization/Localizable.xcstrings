@@ -1,7 +1,12 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Categories" : {
 
+    },
+    "Please select a location" : {
+
+    }
   },
   "version" : "1.1"
 }

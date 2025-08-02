@@ -117,10 +117,10 @@ locify-ios
 │   │   │   ├── Authentication
 │   │   │   │   ├── ViewModels
 │   │   │   │   └── Views
-│   │   │   ├── CategoryManagement
+│   │   │   ├── CategoryList
 │   │   │   │   ├── ViewModels
 │   │   │   │   └── Views
-│   │   │   ├── LocationManagement
+│   │   │   ├── LocationList
 │   │   │   │   ├── ViewModels
 │   │   │   │   └── Views
 │   │   │   ├── Home

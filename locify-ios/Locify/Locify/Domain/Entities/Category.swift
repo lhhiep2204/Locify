@@ -8,7 +8,7 @@
 import Foundation
 
 /// A domain entity representing a category for grouping locations, owned by a user.
-struct Category: Identifiable, Equatable {
+struct Category: Identifiable, Equatable, Hashable {
     /// Unique identifier for the category.
     let id: UUID
     /// Identifier of the user who owns this category.

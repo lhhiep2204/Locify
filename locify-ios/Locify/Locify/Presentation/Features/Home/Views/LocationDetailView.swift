@@ -23,7 +23,7 @@ struct LocationDetailView: View {
                 .scrollContentBackground(.hidden)
             }
         } else {
-            DSText("Please select a location")
+            DSText(.localized(HomeKeys.locationEmpty))
         }
     }
 }

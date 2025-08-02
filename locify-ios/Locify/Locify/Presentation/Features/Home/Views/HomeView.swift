@@ -15,6 +15,8 @@ struct HomeView: View {
     @State private var showLocationDetail: Bool = true
     @State private var locationDetailDetent: PresentationDetent = .fraction(0.25)
 
+    @State private var showCategoryListView: Bool = false
+
     init(_ viewModel: HomeViewModel) {
         self.viewModel = viewModel
     }
@@ -32,6 +34,7 @@ struct HomeView: View {
             }
         }
         .task {
+            await viewModel.fetchCategories()
             await viewModel.fetchLocations()
         }
     }
@@ -100,7 +103,7 @@ extension HomeView {
         .toolbar {
             ToolbarItemGroup(placement: .topBarLeading) {
                 Button {
-
+                    showCategoryListView = true
                 } label: {
                     Image.appSystemIcon(.list)
                 }
@@ -119,6 +122,9 @@ extension HomeView {
                     Image.appSystemIcon(.settings)
                 }
             }
+        }
+        .sheet(isPresented: $showCategoryListView) {
+            CategoryListView(categories: viewModel.categories)
         }
     }
 }
