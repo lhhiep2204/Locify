@@ -9,14 +9,24 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.dismissSheet) private var dismissSheet
 
-    @State var viewModel: HomeViewModel
+    @State private var viewModel: HomeViewModel
 
     @State private var showLocationDetail: Bool = true
     @State private var locationDetailDetent: PresentationDetent = .fraction(0.25)
 
     @State private var showCategoryListView: Bool = false
+
+    private var router: Router<Route> = .init(root: .categoryList)
+
+    private var selectedLocation: Binding<Location?> {
+        Binding<Location?>(
+            get: { viewModel.selectedLocation },
+            set: { newValue in
+                viewModel.selectedLocationId = newValue?.id
+            }
+        )
+    }
 
     init(_ viewModel: HomeViewModel) {
         self.viewModel = viewModel
@@ -34,12 +44,14 @@ struct HomeView: View {
                 EmptyView()
             }
         }
-        .task {
-            await viewModel.fetchCategories()
-            await viewModel.fetchLocations()
-        }
         .environment(\.dismissSheet) {
             showCategoryListView = false
+        }
+        .environment(\.selectLocation) { (selectedId, locations) in
+            showCategoryListView = false
+
+            viewModel.selectedLocationId = selectedId
+            viewModel.locations = locations
         }
     }
 }
@@ -78,7 +90,7 @@ extension HomeView {
 
     private var mapView: some View {
         MapView(
-            selectedLocation: $viewModel.selectedLocation,
+            selectedLocation: selectedLocation,
             locations: viewModel.locations
         )
     }
@@ -101,9 +113,11 @@ extension HomeView {
 
     private var locationDetailView: some View {
         LocationDetailView(
-            location: $viewModel.selectedLocation,
+            location: selectedLocation,
             relatedLocations: viewModel.relatedLocations
-        )
+        ) { locationId in
+            viewModel.selectedLocationId = locationId
+        }
         .toolbar {
             ToolbarItemGroup(placement: .topBarLeading) {
                 Button {
@@ -128,7 +142,7 @@ extension HomeView {
             }
         }
         .sheet(isPresented: $showCategoryListView) {
-            CategoryListView(categories: viewModel.categories)
+            RouterView(router)
         }
     }
 }

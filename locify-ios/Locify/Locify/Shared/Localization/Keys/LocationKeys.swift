@@ -8,6 +8,6 @@
 import Foundation
 
 enum LocationKeys: String, LocalizedKey {
-    // MARK: - T
-    case title = "Locations"
+    // MARK: - R
+    case relatedLocations = "Related Locations"
 }

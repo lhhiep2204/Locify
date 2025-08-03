@@ -9,45 +9,16 @@ import Foundation
 
 @Observable
 class HomeViewModel {
-    var categories: [Category] = []
+    var selectedLocationId: UUID?
     var locations: [Location] = []
-    var selectedCategory: Category?
-    var selectedLocation: Location?
+
+    var selectedLocation: Location? {
+        guard let selectedLocationId else { return nil }
+        return locations.first(where: { $0.id == selectedLocationId })
+    }
 
     var relatedLocations: [Location] {
-        guard let selectedLocation else { return [] }
-        return locations.filter { $0.id != selectedLocation.id }
-    }
-
-    private let fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol
-    private let fetchLocationsUseCase: FetchLocationsUseCaseProtocol
-
-    init(
-        fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol,
-        fetchLocationsUseCase: FetchLocationsUseCaseProtocol
-    ) {
-        self.selectedCategory = Category.mockList.first
-
-        self.fetchCategoriesUseCase = fetchCategoriesUseCase
-        self.fetchLocationsUseCase = fetchLocationsUseCase
-    }
-}
-
-extension HomeViewModel {
-    func fetchCategories() async {
-        do {
-            categories = try await fetchCategoriesUseCase.execute()
-        } catch {
-            Logger.error(error.localizedDescription)
-        }
-    }
-
-    func fetchLocations() async {
-        do {
-            locations = try await fetchLocationsUseCase.execute()
-            selectedLocation = locations.first
-        } catch {
-            Logger.error(error.localizedDescription)
-        }
+        guard let selectedLocationId else { return [] }
+        return locations.filter { $0.id != selectedLocationId }
     }
 }

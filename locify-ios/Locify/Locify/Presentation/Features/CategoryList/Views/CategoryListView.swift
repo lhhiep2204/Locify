@@ -9,13 +9,12 @@ import SwiftUI
 
 struct CategoryListView: View {
     @Environment(\.dismissSheet) private var dismissSheet
+    @Environment(\.viewModelFactory) private var factory
 
-    private var router: Router<Route>
-    var categories: [Category]
+    @State private var viewModel: CategoryListViewModel
 
-    init(categories: [Category]) {
-        self.categories = categories
-        self.router = .init(root: .categoryList(categories: categories))
+    init(_ viewModel: CategoryListViewModel) {
+        self.viewModel = viewModel
     }
 
     var body: some View {
@@ -31,17 +30,22 @@ struct CategoryListView: View {
             }
             .navigationTitle(Text(CategoryKeys.title))
             .interactiveDismissDisabled()
-            .applyRouter(router)
+            .task {
+                await viewModel.fetchCategories()
+            }
     }
 }
 
 extension CategoryListView {
     private var listView: some View {
         List {
-            ForEach(categories) { item in
-                NavigationLink {
-                    LocationListView(locations: Location.mockList)
-                } label: {
+            ForEach(viewModel.categories) { item in
+                NavigationLink(
+                    .locationList(
+                        categoryId: item.id,
+                        categoryName: item.name
+                    )
+                ) {
                     categoryItemView(item)
                 }
             }
@@ -55,5 +59,5 @@ extension CategoryListView {
 }
 
 #Preview {
-    CategoryListView(categories: Category.mockList)
+    CategoryListView(ViewModelFactory.shared.makeCategoryListViewModel())
 }

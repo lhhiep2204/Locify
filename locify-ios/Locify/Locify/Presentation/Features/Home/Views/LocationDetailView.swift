@@ -9,7 +9,9 @@ import SwiftUI
 
 struct LocationDetailView: View {
     @Binding var location: Location?
+
     let relatedLocations: [Location]
+    let onSelectLocation: (UUID) -> Void
 
     var body: some View {
         if let location {
@@ -48,7 +50,7 @@ extension LocationDetailView {
     private var relatedLocationSection: some View {
         Section(
             header: DSText(
-                "Related Locations",
+                .localized(LocationKeys.relatedLocations),
                 font: .regular(.small),
                 color: .appColor(.textSecondary)
             )
@@ -70,7 +72,7 @@ extension LocationDetailView {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    location = item
+                    onSelectLocation(item.id)
                 }
             }
         }
@@ -81,5 +83,5 @@ extension LocationDetailView {
     LocationDetailView(
         location: .constant(.mockList.first),
         relatedLocations: Location.mockList
-    )
+    ) { _ in }
 }

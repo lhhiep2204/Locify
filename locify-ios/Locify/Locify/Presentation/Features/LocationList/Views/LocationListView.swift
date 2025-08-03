@@ -9,8 +9,18 @@ import SwiftUI
 
 struct LocationListView: View {
     @Environment(\.dismissSheet) private var dismissSheet
+    @Environment(\.selectLocation) private var selectLocation
 
-    var locations: [Location]
+    @State private var viewModel: LocationListViewModel
+    private let categoryName: String
+
+    init(
+        _ viewModel: LocationListViewModel,
+        categoryName: String
+    ) {
+        self.viewModel = viewModel
+        self.categoryName = categoryName
+    }
 
     var body: some View {
         listView
@@ -23,15 +33,18 @@ struct LocationListView: View {
                     }
                 }
             }
-            .navigationTitle(Text(LocationKeys.title))
+            .navigationTitle(Text(categoryName))
             .interactiveDismissDisabled()
+            .task {
+                await viewModel.fetchLocations()
+            }
     }
 }
 
 extension LocationListView {
     private var listView: some View {
         List {
-            ForEach(locations) { item in
+            ForEach(viewModel.locations) { item in
                 locationItemView(item)
             }
         }
@@ -54,11 +67,14 @@ extension LocationListView {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .onTapGesture {
-            dismissSheet()
+            selectLocation(location.id, viewModel.locations)
         }
     }
 }
 
 #Preview {
-    LocationListView(locations: Location.mockList)
+    LocationListView(
+        ViewModelFactory.shared.makeLocationListViewModel(categoryId: UUID()),
+        categoryName: "Category Name"
+    )
 }

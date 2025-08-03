@@ -41,12 +41,19 @@ final class ViewModelFactory {
 
 // MARK: - Factory Methods
 extension ViewModelFactory {
-    /// Creates a fully configured `HomeViewModel` for the Home screen.
-    ///
-    /// - Returns: A new `HomeViewModel` instance ready to be used in SwiftUI views.
     func makeHomeViewModel() -> HomeViewModel {
-        HomeViewModel(
-            fetchCategoriesUseCase: categoryUseCases.fetch,
+        .init()
+    }
+
+    func makeCategoryListViewModel() -> CategoryListViewModel {
+        .init(
+            fetchCategoriesUseCase: categoryUseCases.fetch
+        )
+    }
+
+    func makeLocationListViewModel(categoryId: UUID) -> LocationListViewModel {
+        .init(
+            categoryId: categoryId,
             fetchLocationsUseCase: locationUseCases.fetch
         )
     }
