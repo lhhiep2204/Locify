@@ -20,9 +20,12 @@ struct LocationDetailView: View {
                     .padding(.horizontal)
 
                 List {
-                    relatedLocationSection
+                    if !relatedLocations.isEmpty {
+                        relatedLocationSection
+                    }
                 }
                 .scrollContentBackground(.hidden)
+                .id(location.id)
             }
         } else {
             DSText(.localized(HomeKeys.locationEmpty))
@@ -80,8 +83,10 @@ extension LocationDetailView {
 }
 
 #Preview {
-    LocationDetailView(
-        location: .constant(.mockList.first),
-        relatedLocations: Location.mockList
-    ) { _ in }
+    if let location = Location.mockList.first {
+        LocationDetailView(
+            location: .constant(location),
+            relatedLocations: Location.mockList
+        ) { _ in }
+    }
 }

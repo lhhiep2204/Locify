@@ -8,13 +8,13 @@
 import MapKit
 
 extension MKCoordinateRegion {
-    /// Calculate a dynamic map region for a single location
-    /// based on its address depth (number of components)
+    /// Calculate a dynamic map region for a single location based on its address depth (number of components)
     static func region(for location: Location) -> MKCoordinateRegion {
-        let coordinate = CLLocationCoordinate2D(
-            latitude: location.latitude,
-            longitude: location.longitude
-        )
+        // Clamp latitude to [-90, 90] and longitude to [-180, 180], ignoring NaN/infinite
+        let lat = location.latitude.isFinite ? min(max(location.latitude, -90), 90) : 0
+        let lon = location.longitude.isFinite ? min(max(location.longitude, -180), 180) : 0
+
+        let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
         let span = calculateMapRegionSpan(for: location)
 
         return .init(center: coordinate, span: span)
@@ -28,16 +28,14 @@ extension MKCoordinateRegion {
             .map { $0.trimmingCharacters(in: .whitespaces) }
 
         let count = addressParts.count
-        let spanValue: Double
 
-        switch count {
-        case 0...2:   // Country or large area → zoom out
-            spanValue = 0.1
-        case 3...4:   // City or neighborhood → medium zoom
-            spanValue = 0.01
-        default:      // Street / building → zoom in
-            spanValue = 0.005
-        }
+        let spanValue: Double = {
+            switch count {
+            case 0...2: 0.1 // Country or large area → zoom out
+            case 3...4: 0.01 // City or neighborhood → medium zoom
+            default: 0.005 // Street / building → zoom in
+            }
+        }()
 
         return .init(latitudeDelta: spanValue, longitudeDelta: spanValue)
     }

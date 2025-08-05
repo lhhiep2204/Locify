@@ -17,17 +17,33 @@ struct MapView: View {
     var body: some View {
         Map(position: $position) {
             ForEach(locations) { item in
-                Marker(
+                Annotation(
                     item.name,
                     coordinate: .init(
                         latitude: item.latitude,
                         longitude: item.longitude
-                    )
-                )
+                    ),
+                    anchor: .bottom
+                ) {
+                    Image.appIcon(.marker)
+                        .onTapGesture {
+                            if selectedLocation == item {
+                                updateCamera()
+                            } else {
+                                selectedLocation = item
+                            }
+                        }
+                }
             }
         }
+        .mapControls {
+            MapUserLocationButton()
+            MapPitchToggle()
+            MapCompass()
+            MapScaleView()
+        }
         .onAppear { updateCamera() }
-        .onChange(of: selectedLocation) { (_, _) in
+        .onChange(of: selectedLocation) {
             updateCamera()
         }
     }
@@ -46,8 +62,10 @@ private extension MapView {
 }
 
 #Preview {
-    MapView(
-        selectedLocation: .constant(Location.mockList.first!),
-        locations: Location.mockList
-    )
+    if let location = Location.mockList.first {
+        MapView(
+            selectedLocation: .constant(location),
+            locations: Location.mockList
+        )
+    }
 }

@@ -61,12 +61,12 @@ extension HomeView {
         NavigationSplitView {
             locationDetailView
         } detail: {
-            mapContentView
+            mapView
         }
     }
 
     private var compactContentView: some View {
-        mapContentView
+        mapView
             .sheet(isPresented: $showLocationDetail) {
                 NavigationStack {
                     locationDetailView
@@ -78,14 +78,9 @@ extension HomeView {
                 .interactiveDismissDisabled()
                 .presentationBackgroundInteraction(.enabled)
             }
-    }
-
-    private var mapContentView: some View {
-        ZStack {
-            mapView
-            topView
-                .padding([.horizontal, .top], DSSpacing.small)
-        }
+            .onChange(of: viewModel.selectedLocationId) {
+                locationDetailDetent = .fraction(0.25)
+            }
     }
 
     private var mapView: some View {
@@ -93,22 +88,6 @@ extension HomeView {
             selectedLocation: selectedLocation,
             locations: viewModel.locations
         )
-    }
-
-    private var topView: some View {
-        VStack {
-            HStack {
-                Spacer()
-
-                Button {
-
-                } label: {
-                    Image.appSystemIcon(.location)
-                }
-                .buttonStyle(.glass)
-            }
-            Spacer()
-        }
     }
 
     private var locationDetailView: some View {
