@@ -43,6 +43,7 @@ Key features:
 ---
 
 ## Data Flow
+
 ### 1. Authentication Flow
 ```mermaid
 sequenceDiagram
@@ -89,142 +90,93 @@ sequenceDiagram
 **Key Points**:
 - Firebase ID Token is stored locally for offline use and refreshed automatically when online.
 - Offline logout sets `isLoggedOut: true` and defers `FirebaseAuth.signOut()` until network is available.
-- API responses are cached locally for offline access.
-
-**Additional Details**:
-- See [Locify_Data_Sync_Flow.md](./Locify_Data_Sync_Flow.md) for token refresh failure handling and offline session management.
+- API requests include the Firebase token, verified by the backend using Firebase Authentication.
 
 ### 2. Data Synchronization Flow
 ```mermaid
 sequenceDiagram
     participant Client
     participant LocalDB
-    participant Storage
     participant API
     participant DB
 
-    Note over Client: User adds/updates location
-    Client->>LocalDB: Store location data
-    Note over Client,LocalDB: Store data locally before sync
-    Client->>Storage: Upload images directly
-    Storage-->>Client: Return download URLs
-    Note over Client,LocalDB: Update with image URLs
-    Client->>LocalDB: Update with image URLs
-    Note over Client,API: Sync in batches when online
-    Client->>API: Send batch of location data (up to 50 records)
-    API->>DB: Store location data
-    DB-->>API: Confirm storage
-    API-->>Client: Return updated locations
-    Note over Client,LocalDB: Update with server data
-    Client->>LocalDB: Update with server data
+    Note over Client: User logs in or network available
+    Client->>LocalDB: Query unsynced records
+    LocalDB-->>Client: Return records with sync_status
+    Note over Client: Send batch requests
+    Client->>API: Send pendingCreate, pendingUpdate, pendingDelete
+    API->>DB: Validate and process changes
+    DB-->>API: Update records, set sync_status: synced
+    API-->>Client: Return updated records
+    Note over Client,LocalDB: Update local storage
+    Client->>LocalDB: Update records with server data
+    alt Conflict detected
+        API-->>Client: Return E008 error with server version
+        Client->>LocalDB: Update with server version
+        Client->>Client: Prompt user for manual resolution
+    end
 ```
 
 **Key Points**:
-- Data is stored locally before syncing with the server.
-- Images are uploaded directly to Firebase Storage by the client, and URLs are stored locally.
-- Synchronization uses batch requests (up to 50 records) with pagination.
-
-**Additional Details**:
-- See [Locify_Data_Sync_Flow.md](./Locify_Data_Sync_Flow.md) for batch processing and conflict resolution details.
+- Synchronization occurs after login, when network connectivity is restored, or manually triggered by the user.
+- The client sends batch requests (up to 50 records) with `sync_status: pendingCreate`, `pendingUpdate`, or `pendingDelete`.
+- The server uses `updated_at` to resolve conflicts, rejecting older changes with an `E008` error.
+- Synced records are updated in local storage with `sync_status: synced`.
 
 ### 3. Offline Support Flow
 ```mermaid
 sequenceDiagram
     participant Client
     participant LocalDB
-    participant Storage
-    participant API
-    participant DB
 
-    Note over Client: Offline operation
-    Client->>LocalDB: Store data locally
-    LocalDB-->>Client: Confirm storage
-    Note over Client,LocalDB: Store images in temporary storage
-    Client->>LocalDB: Store local image URLs (e.g., file://)
-    Note over Client: When internet connection is available
-    Client->>LocalDB: Get pending changes
-    Note over Client: Check isLoggedOut flag
-    alt isLoggedOut: true
-        Client->>Auth: Call FirebaseAuth.signOut()
-        Auth-->>Client: Confirm session cleared
-        Client->>LocalDB: Remove token, set isLoggedOut: false
-    end
-    Note over Client,Storage: Upload pending images
-    Client->>Storage: Upload pending images
-    Storage-->>Client: Return download URLs
-    Note over Client,API: Sync pending changes
-    Client->>API: Sync pending changes (up to 50 records)
-    API->>DB: Update server data
-    DB-->>API: Confirm updates
-    API-->>Client: Return synced data
-    Note over Client,LocalDB: Update with synced data
-    Client->>LocalDB: Update with synced data
+    Note over Client: Offline mode
+    Client->>LocalDB: Create, update, or delete record
+    LocalDB-->>Client: Store with sync_status: pending*
+    Note over Client: Image handling (if logged in)
+    Client->>LocalDB: Store images/icons as file:// URLs
+    Note over Client: Network restored
+    Client->>LocalDB: Query unsynced records
+    LocalDB-->>Client: Return pending records
+    Client->>API: Send pending changes and upload images
+    API-->>Client: Return updated records with Firebase Storage URLs
+    Client->>LocalDB: Update records with server data
 ```
 
 **Key Points**:
-- Offline operations are stored locally, with images saved in temporary storage (e.g., `file://`).
-- When online, the app checks `isLoggedOut: true` and completes logout.
-- Pending changes are synced in batches, with server data updating local storage.
-
-**Additional Details**:
-- See [Locify_Data_Sync_Flow.md](./Locify_Data_Sync_Flow.md) for offline image handling and sync retry logic.
+- Offline operations are stored in local storage (SwiftData for iOS, Room for Android) with appropriate `sync_status`.
+- Images/icons, when logged in, are stored locally as `file://` URLs and uploaded to Firebase Storage when online.
+- Changes are synced with the server when network connectivity is restored.
 
 ### 4. Image Handling Flow
 ```mermaid
 sequenceDiagram
     participant Client
     participant LocalDB
-    participant Storage
     participant API
     participant DB
+    participant Storage
 
-    Note over Client: User selects image (only when logged in)
-    alt Not logged in
-        Client->>Client: Display message: "Please log in to add or remove images"
-    else Logged in
-        Client->>LocalDB: Store image metadata (local URL if offline)
-        alt Online
-            Client->>Storage: Upload image
-            Storage-->>Client: Return download URL
-        else Offline
-            Note over Client,LocalDB: Store in temporary storage
-            Client->>LocalDB: Store image in temporary storage (file://)
-        end
-        Note over Client,LocalDB: Update location with URL
-        Client->>LocalDB: Update location with image URL
-        Note over Client,API: Sync with server
-        Client->>API: Update location with image URL
-        API->>DB: Update location data
-        DB-->>API: Confirm update
-        API-->>Client: Return updated location
-        Note over Client: User deletes individual image
-        Client->>LocalDB: Remove image URL from location/category
-        alt Online
-            Client->>Storage: Delete image
-            Storage-->>Client: Confirm deletion
-        else Offline
-            Client->>LocalDB: Delete local image file (file://)
-        end
-        Client->>API: Update location/category with new URLs
-        API->>DB: Update location/category data
-        DB-->>API: Confirm update
-        API-->>Client: Return updated record
-    end
-    Note over Client: User deletes location
-    Client->>LocalDB: Mark location as pendingDelete
-    alt Online
-        Client->>Storage: Delete all location images
-        Storage-->>Client: Confirm deletion
-        Client->>API: DELETE /locations/{location_id}
-        API->>DB: Delete location
-        DB-->>API: Confirm deletion
-        API-->>Client: Return 204 No Content
-    else Offline
-        Client->>LocalDB: Delete local image files (file://)
-    end
-    Note over Client,API: Category deletion
-    Client->>LocalDB: Mark category and locations as pendingDelete
-    Client->>API: DELETE /categories/{category_id}
+    Note over Client: Image upload (online, logged in)
+    Client->>Storage: Upload image/icon
+    Storage-->>Client: Return Firebase Storage URL
+    Client->>API: Send record with image URLs
+    API->>DB: Store record with URLs
+    DB-->>API: Confirm save
+    API-->>Client: Return updated record
+    Client->>LocalDB: Update record with URLs
+    Note over Client: Image upload (offline, logged in)
+    Client->>LocalDB: Store image as file:// URL
+    Note over Client: Network restored
+    Client->>LocalDB: Query pending records
+    LocalDB-->>Client: Return records with file:// URLs
+    Client->>Storage: Upload images/icons
+    Storage-->>Client: Return Firebase Storage URLs
+    Client->>API: Send updated records
+    API->>DB: Update records
+    DB-->>API: Confirm update
+    API-->>Client: Return updated records
+    Client->>LocalDB: Update records with server data
+    Note over API: Category deletion
     API->>DB: Query icon URL and location image URLs
     DB-->>API: Return icon/image URLs
     API->>Storage: Delete icon and location images
@@ -248,14 +200,21 @@ sequenceDiagram
 - Offline images are marked as pending upload and processed when online.
 - For individual image deletions (e.g., editing location/category) or location deletions, the client deletes images from Firebase Storage using the Firebase SDK. Offline, local image files (e.g., `file://`) are deleted immediately to free device storage.
 - For category deletions, the backend queries the database for the category’s icon URL and all image URLs of associated locations, then deletes them from Firebase Storage before removing database records.
-- During user deletion, the backend queries the database for all image URLs associated with the user and deletes them from Firebase Storage before removing database records.
+- During user deletion, the backend queries the database for all image URLs associated with the user (including `avatar_url` for the user profile) and deletes them from Firebase Storage before removing database records.
 
 **Additional Details**:
 - See [Locify_API_Documentation.md](./Locify_API_Documentation.md) for image constraints (e.g., 5MB max size, 10 images per location) and user deletion endpoint.
+- Image storage paths:
+  - Location images: `/locations/{user_id}/{location_id}/{image_id}`
+  - Category icons: `/categories/{user_id}/{category_id}/icon`
+  - User profile images: `/users/{user_id}/profile`
+- Firebase Storage security rules ensure user-specific access control.
+- The backend uses batch processing for image deletions during category or user deletion to optimize performance.
 
 ---
 
 ## Diagrams
+
 ### System Architecture Diagram
 ```mermaid
 %% System Architecture Diagram for Locify: Client-Backend interactions for managing categories and locations with offline support and image storage %%
@@ -298,7 +257,7 @@ graph LR
   - For category deletions (including associated locations) or user account deletions, the **API Server** deletes images/icons from **Firebase Storage** using the Firebase Admin SDK in batches, ensuring data integrity with database transactions.
 - **Data Flow**:
   - Data is synchronized between client and server when online, with offline changes marked as `pendingCreate`, `pendingUpdate`, or `pendingDelete` in **Local Storage**.
-  - Images/icons are stored in **Firebase Storage** with paths organized by `user_id` (e.g., `/locations/{user_id}/{location_id}/{image_id}`, `/categories/{user_id}/{category_id}/icon`).
+  - Images/icons are stored in **Firebase Storage** with paths organized by `user_id` (e.g., `/locations/{user_id}/{location_id}/{image_id}`, `/categories/{user_id}/{category_id}/icon`, `/users/{user_id}/profile`).
 
 ---
 
