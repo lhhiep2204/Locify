@@ -83,10 +83,8 @@ extension LocationDetailView {
 }
 
 #Preview {
-    if let location = Location.mockList.first {
-        LocationDetailView(
-            location: .constant(location),
-            relatedLocations: Location.mockList
-        ) { _ in }
-    }
+    LocationDetailView(
+        location: .constant(.mock),
+        relatedLocations: Location.mockList
+    ) { _ in }
 }

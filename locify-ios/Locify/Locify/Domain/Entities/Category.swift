@@ -64,6 +64,13 @@ struct Category: Identifiable, Equatable, Hashable {
 }
 
 extension Category {
+    /// A mock category for testing, previews, or development.
+    static let mock: Category = .init(
+        userId: "user1",
+        name: "Food",
+        icon: "fork.knife"
+    )
+
     /// A list of mock categories for testing, previews, or development.
     static let mockList: [Category] = [
         .init(

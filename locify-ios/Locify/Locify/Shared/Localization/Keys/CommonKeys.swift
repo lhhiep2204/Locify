@@ -9,24 +9,25 @@ import Foundation
 
 enum CommonKeys: String, LocalizedKey {
     // MARK: - B
-    case back = "common_back"
+    case back = "Back"
 
     // MARK: - C
-    case cancel = "common_cancel"
-    case close = "common_close"
-    case confirm = "common_confirm"
+    case cancel = "Cancel"
+    case close = "Close"
+    case confirm = "Confirm"
 
     // MARK: - D
-    case delete = "common_delete"
-    case done = "common_done"
+    case delete = "Delete"
+    case done = "Done"
 
     // MARK: - E
-    case edit = "common_edit"
-    case error = "common_error"
+    case edit = "Edit"
+    case error = "Error"
 
     // MARK: - N
-    case next = "common_next"
+    case next = "Next"
 
     // MARK: - S
-    case save = "common_save"
+    case save = "Save"
+    case share = "Share"
 }

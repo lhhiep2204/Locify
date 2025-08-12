@@ -46,6 +46,18 @@ extension LocationListView {
         List {
             ForEach(viewModel.locations) { item in
                 locationItemView(item)
+                    .swipeActions(edge: .trailing) {
+                        deleteButtonView(item)
+                        editButtonView(item)
+                    }
+                    .swipeActions(edge: .leading) {
+                        shareButtonView(item)
+                    }
+                    .contextMenu {
+                        editButtonView(item)
+                        shareButtonView(item)
+                        deleteButtonView(item)
+                    }
             }
         }
     }
@@ -70,11 +82,51 @@ extension LocationListView {
             selectLocation(location.id, viewModel.locations)
         }
     }
+
+    private func editButtonView(_ location: Location) -> some View {
+        Button {
+
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.edit))
+            } icon: {
+                Image.appSystemIcon(.edit)
+            }
+        }
+    }
+
+    private func shareButtonView(_ location: Location) -> some View {
+        ShareLink(item: "location.infoToShare()") {
+            Label {
+                DSText(.localized(CommonKeys.share))
+            } icon: {
+                Image.appSystemIcon(.share)
+            }
+        }
+        .tint(.blue)
+    }
+
+    private func deleteButtonView(_ location: Location) -> some View {
+        Button {
+
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.delete))
+            } icon: {
+                Image.appSystemIcon(.delete)
+            }
+        }
+        .tint(.red)
+    }
 }
 
 #Preview {
-    LocationListView(
-        ViewModelFactory.shared.makeLocationListViewModel(categoryId: UUID()),
-        categoryName: "Category Name"
-    )
+    if let category = Category.mockList.first {
+        NavigationStack {
+            LocationListView(
+                ViewModelFactory.shared.makeLocationListViewModel(categoryId: category.id),
+                categoryName: category.name
+            )
+        }
+    }
 }

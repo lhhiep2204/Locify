@@ -101,6 +101,20 @@ struct Location: Identifiable, Equatable, Hashable {
 
 // swiftlint:disable all
 extension Location {
+    /// A mock location with real coordinates
+    static let mock: Location = .init(
+        userId: Category.mock.userId,
+        categoryId: Category.mock.id,
+        name: "Shake Shack Madison Square Park",
+        address: "Madison Ave & E.23rd St, New York, NY 10010",
+        description: "",
+        latitude: 40.741563,
+        longitude: -73.988243,
+        isFavorite: true,
+        imageUrls: [],
+        syncStatus: .pendingCreate
+    )
+
     /// A list of mock locations with real coordinates (Apple Maps compatible), 5 per category.
     static let mockList: [Location] = {
         let realLocations: [[(name: String, address: String, lat: Double, lon: Double)]] = [

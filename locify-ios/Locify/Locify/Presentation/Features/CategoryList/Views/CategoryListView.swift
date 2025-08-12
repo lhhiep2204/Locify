@@ -47,6 +47,18 @@ extension CategoryListView {
                     )
                 ) {
                     categoryItemView(item)
+                        .swipeActions(edge: .trailing) {
+                            deleteButtonView(item)
+                            editButtonView(item)
+                        }
+                        .swipeActions(edge: .leading) {
+                            shareButtonView(item)
+                        }
+                        .contextMenu {
+                            editButtonView(item)
+                            shareButtonView(item)
+                            deleteButtonView(item)
+                        }
                 }
             }
         }
@@ -56,8 +68,46 @@ extension CategoryListView {
         DSText(category.name, font: .bold(.medium))
             .lineLimit(1)
     }
+
+    private func editButtonView(_ category: Category) -> some View {
+        Button {
+
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.edit))
+            } icon: {
+                Image.appSystemIcon(.edit)
+            }
+        }
+    }
+
+    private func shareButtonView(_ category: Category) -> some View {
+        ShareLink(item: "location.infoToShare()") {
+            Label {
+                DSText(.localized(CommonKeys.share))
+            } icon: {
+                Image.appSystemIcon(.share)
+            }
+        }
+        .tint(.blue)
+    }
+
+    private func deleteButtonView(_ category: Category) -> some View {
+        Button {
+
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.delete))
+            } icon: {
+                Image.appSystemIcon(.delete)
+            }
+        }
+        .tint(.red)
+    }
 }
 
 #Preview {
-    CategoryListView(ViewModelFactory.shared.makeCategoryListViewModel())
+    NavigationStack {
+        CategoryListView(ViewModelFactory.shared.makeCategoryListViewModel())
+    }
 }

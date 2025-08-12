@@ -19,6 +19,12 @@ enum DSSystemIcon: String {
     case clearText = "multiply.circle.fill"
     case close = "xmark"
 
+    // MARK: - D
+    case delete = "trash"
+
+    // MARK: - E
+    case edit = "square.and.pencil"
+
     // MARK: - L
     case list = "list.bullet"
     case location = "location"
@@ -30,6 +36,7 @@ enum DSSystemIcon: String {
     // MARK: - S
     case search = "magnifyingglass"
     case settings = "gear"
+    case share = "square.and.arrow.up"
 }
 
 extension Image {

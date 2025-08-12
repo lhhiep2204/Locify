@@ -62,10 +62,8 @@ private extension MapView {
 }
 
 #Preview {
-    if let location = Location.mockList.first {
-        MapView(
-            selectedLocation: .constant(location),
-            locations: Location.mockList
-        )
-    }
+    MapView(
+        selectedLocation: .constant(.mock),
+        locations: Location.mockList
+    )
 }
