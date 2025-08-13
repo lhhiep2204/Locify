@@ -29,7 +29,6 @@ struct CategoryListView: View {
                 }
             }
             .navigationTitle(Text(CategoryKeys.title))
-            .interactiveDismissDisabled()
             .task {
                 await viewModel.fetchCategories()
             }

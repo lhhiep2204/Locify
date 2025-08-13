@@ -9,54 +9,29 @@ import Foundation
 
 /// A domain entity representing a category for grouping locations, owned by a user.
 struct Category: Identifiable, Equatable, Hashable {
-    /// Unique identifier for the category.
     let id: UUID
-    /// Identifier of the user who owns this category.
-    let userId: String
-    /// Name of the category.
     let name: String
-    /// Optional URL for the category icon.
-    let icon: String?
-    /// Synchronization status with the server.
     let syncStatus: SyncStatus
-    /// Creation timestamp.
     let createdAt: Date
-    /// Last update timestamp
     let updatedAt: Date
 
-    /// Initializes a Category with default or provided values.
-    /// - Parameters:
-    ///   - id: Unique identifier (defaults to new UUID).
-    ///   - userId: User identifier (required).
-    ///   - name: Category name (required).
-    ///   - icon: Optional icon URL.
-    ///   - syncStatus: Synchronization status (defaults to `.pendingCreate`).
-    ///   - createdAt: Creation timestamp (defaults to current date).
-    ///   - updatedAt: Last update timestamp (defaults to current date).
     init(
         id: UUID = UUID(),
-        userId: String,
         name: String,
-        icon: String? = nil,
         syncStatus: SyncStatus = .pendingCreate,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
         self.id = id
-        self.userId = userId
         self.name = name
-        self.icon = icon
         self.syncStatus = syncStatus
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
 
-    /// Compares two Category instances for equality.
     static func == (lhs: Category, rhs: Category) -> Bool {
         lhs.id == rhs.id &&
-        lhs.userId == rhs.userId &&
         lhs.name == rhs.name &&
-        lhs.icon == rhs.icon &&
         lhs.syncStatus == rhs.syncStatus &&
         lhs.createdAt == rhs.createdAt &&
         lhs.updatedAt == rhs.updatedAt
@@ -66,32 +41,37 @@ struct Category: Identifiable, Equatable, Hashable {
 extension Category {
     /// A mock category for testing, previews, or development.
     static let mock: Category = .init(
-        userId: "user1",
+        id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!,
         name: "Food",
-        icon: "fork.knife"
+        createdAt: Date(timeIntervalSince1970: 1697059200),
+        updatedAt: Date(timeIntervalSince1970: 1697059200)
     )
 
     /// A list of mock categories for testing, previews, or development.
     static let mockList: [Category] = [
         .init(
-            userId: "user1",
+            id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!,
             name: "Food",
-            icon: "fork.knife"
+            createdAt: Date(timeIntervalSince1970: 1697059200),
+            updatedAt: Date(timeIntervalSince1970: 1697059200)
         ),
         .init(
-            userId: "user1",
+            id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174001")!,
             name: "Shopping",
-            icon: "cart"
+            createdAt: Date(timeIntervalSince1970: 1697145600),
+            updatedAt: Date(timeIntervalSince1970: 1697145600)
         ),
         .init(
-            userId: "user1",
+            id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174002")!,
             name: "Travel",
-            icon: "airplane"
+            createdAt: Date(timeIntervalSince1970: 1697232000),
+            updatedAt: Date(timeIntervalSince1970: 1697232000)
         ),
         .init(
-            userId: "user1",
+            id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174003")!,
             name: "Work",
-            icon: "briefcase"
+            createdAt: Date(timeIntervalSince1970: 1697318400),
+            updatedAt: Date(timeIntervalSince1970: 1697318400)
         )
     ]
 }

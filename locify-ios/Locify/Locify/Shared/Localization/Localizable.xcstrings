@@ -1,13 +1,31 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Address" : {
+
+    },
     "Categories" : {
+
+    },
+    "Coordinates" : {
 
     },
     "Delete" : {
 
     },
     "Edit" : {
+
+    },
+    "Latitude" : {
+
+    },
+    "Longitude" : {
+
+    },
+    "Name" : {
+
+    },
+    "Notes" : {
 
     },
     "Please select a location" : {

@@ -39,6 +39,8 @@ enum DSRadius {
     static let large: CGFloat = 12
     /// xLarge: 16 - Extra large, prominent elements
     static let xLarge: CGFloat = 16
+    /// huge: 28 - Very large, pill-shaped buttons or containers
+    static let huge: CGFloat = 28
 }
 
 /// Size constants for consistent component dimensions.

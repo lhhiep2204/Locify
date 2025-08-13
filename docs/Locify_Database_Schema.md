@@ -75,7 +75,7 @@ Stores all location information saved by the user, including shared locations. T
 | `user_id`     | VARCHAR(128)        | FOREIGN KEY (users.id), NOT NULL                | References `users(id)`                           |
 | `category_id` | UUID                | FOREIGN KEY (categories.id), NOT NULL           | References `categories(id)`                      |
 | `name`        | VARCHAR(255)        | NOT NULL                                        | Official or resolved name of the location        |
-| `displayName`| VARCHAR(255)        | NOT NULL                                        | Custom name input by the user                    |
+| `displayName` | VARCHAR(255)        |                                                 | Custom name input by the user                    |
 | `address`     | TEXT                |                                                 | Address of the location (e.g., "123 Main St")    |
 | `description` | TEXT                |                                                 | Optional description of the location             |
 | `latitude`    | DOUBLE PRECISION    | NOT NULL                                        | Latitude coordinate (between -90 and 90)         |

@@ -27,6 +27,13 @@ extension String {
     }
 }
 
+extension String? {
+    /// Checks if the string is nil or empty.
+    var isNilOrEmpty: Bool {
+        self == nil || (self ?? .empty).isEmpty
+    }
+}
+
 extension String {
     /// Parses a date string intended for user-facing display.
     ///

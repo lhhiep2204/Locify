@@ -34,7 +34,6 @@ struct LocationListView: View {
                 }
             }
             .navigationTitle(Text(categoryName))
-            .interactiveDismissDisabled()
             .task {
                 await viewModel.fetchLocations()
             }
