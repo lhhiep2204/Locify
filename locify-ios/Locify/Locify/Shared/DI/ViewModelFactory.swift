@@ -24,11 +24,18 @@ final class ViewModelFactory {
 
     // MARK: - Individual UseCases
     private lazy var fetchCategoriesUseCase = FetchCategoriesUseCase(repository: categoryRepository)
+    private lazy var addCategoryUseCase = AddCategoryUseCase(repository: categoryRepository)
+    private lazy var updateCategoryUseCase = UpdateCategoryUseCase(repository: categoryRepository)
+    private lazy var deleteCategoryUseCase = DeleteCategoryUseCase(repository: categoryRepository)
+
     private lazy var fetchLocationsUseCase = FetchLocationsUseCase(repository: locationRepository)
 
     // MARK: - Use Case Containers
     private lazy var categoryUseCases = CategoryUseCases(
-        fetch: fetchCategoriesUseCase
+        fetch: fetchCategoriesUseCase,
+        add: addCategoryUseCase,
+        update: updateCategoryUseCase,
+        delete: deleteCategoryUseCase
     )
 
     private lazy var locationUseCases = LocationUseCases(
@@ -46,9 +53,7 @@ extension ViewModelFactory {
     }
 
     func makeCategoryListViewModel() -> CategoryListViewModel {
-        .init(
-            fetchCategoriesUseCase: categoryUseCases.fetch
-        )
+        .init(categoryUseCases: categoryUseCases)
     }
 
     func makeLocationListViewModel(categoryId: UUID) -> LocationListViewModel {

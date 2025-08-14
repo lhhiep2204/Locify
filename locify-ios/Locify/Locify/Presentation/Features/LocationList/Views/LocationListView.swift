@@ -94,17 +94,6 @@ extension LocationListView {
         }
     }
 
-    private func shareButtonView(_ location: Location) -> some View {
-        ShareLink(item: "location.infoToShare()") {
-            Label {
-                DSText(.localized(CommonKeys.share))
-            } icon: {
-                Image.appSystemIcon(.share)
-            }
-        }
-        .tint(.blue)
-    }
-
     private func deleteButtonView(_ location: Location) -> some View {
         Button {
 
@@ -116,6 +105,17 @@ extension LocationListView {
             }
         }
         .tint(.red)
+    }
+
+    private func shareButtonView(_ location: Location) -> some View {
+        ShareLink(item: "location.infoToShare()") {
+            Label {
+                DSText(.localized(CommonKeys.share))
+            } icon: {
+                Image.appSystemIcon(.share)
+            }
+        }
+        .tint(.blue)
     }
 }
 

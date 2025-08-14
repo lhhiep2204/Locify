@@ -80,17 +80,6 @@ extension CategoryListView {
         }
     }
 
-    private func shareButtonView(_ category: Category) -> some View {
-        ShareLink(item: "location.infoToShare()") {
-            Label {
-                DSText(.localized(CommonKeys.share))
-            } icon: {
-                Image.appSystemIcon(.share)
-            }
-        }
-        .tint(.blue)
-    }
-
     private func deleteButtonView(_ category: Category) -> some View {
         Button {
 
@@ -102,6 +91,17 @@ extension CategoryListView {
             }
         }
         .tint(.red)
+    }
+    
+    private func shareButtonView(_ category: Category) -> some View {
+        ShareLink(item: "location.infoToShare()") {
+            Label {
+                DSText(.localized(CommonKeys.share))
+            } icon: {
+                Image.appSystemIcon(.share)
+            }
+        }
+        .tint(.blue)
     }
 }
 

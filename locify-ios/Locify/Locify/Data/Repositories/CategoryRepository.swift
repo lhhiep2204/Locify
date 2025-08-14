@@ -11,4 +11,16 @@ final class CategoryRepository: CategoryRepositoryProtocol {
     func fetchCategories() async throws -> [Category] {
         Category.mockList
     }
+
+    func addCategory(_ category: Category) async throws -> Category {
+        category
+    }
+
+    func updateCategory(_ category: Category) async throws -> Category {
+        category
+    }
+
+    func deleteCategory(_ category: Category) async throws -> Category {
+        category
+    }
 }

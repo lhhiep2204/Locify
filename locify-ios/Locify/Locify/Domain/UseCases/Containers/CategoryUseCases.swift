@@ -9,4 +9,7 @@ import Foundation
 
 struct CategoryUseCases {
     let fetch: FetchCategoriesUseCaseProtocol
+    let add: AddCategoryUseCaseProtocol
+    let update: UpdateCategoryUseCaseProtocol
+    let delete: DeleteCategoryUseCaseProtocol
 }
