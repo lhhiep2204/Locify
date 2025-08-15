@@ -8,6 +8,9 @@
 import Foundation
 
 enum CommonKeys: String, LocalizedKey {
+    // MARK: - A
+    case add = "Add"
+
     // MARK: - B
     case back = "Back"
 

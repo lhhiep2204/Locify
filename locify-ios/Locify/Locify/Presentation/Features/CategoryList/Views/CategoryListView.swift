@@ -13,6 +13,9 @@ struct CategoryListView: View {
 
     @State private var viewModel: CategoryListViewModel
 
+    @State private var showDeleteAlert: Bool = false
+    @State private var categoryToDelete: Category?
+
     init(_ viewModel: CategoryListViewModel) {
         self.viewModel = viewModel
     }
@@ -20,17 +23,50 @@ struct CategoryListView: View {
     var body: some View {
         listView
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismissSheet()
                     } label: {
                         Image.appSystemIcon(.close)
                     }
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+
+                    } label: {
+                        Text(String.localized(CommonKeys.add))
+                    }
+                }
             }
             .navigationTitle(Text(CategoryKeys.title))
             .task {
                 await viewModel.fetchCategories()
+            }
+            .alert(
+                Text(
+                    String(
+                        format: .localized(MessageKeys.deleteAlertTitle),
+                        categoryToDelete?.name ?? ""
+                    )
+                ),
+                isPresented: $showDeleteAlert,
+                presenting: categoryToDelete
+            ) { category in
+                Button(
+                    String.localized(CommonKeys.delete),
+                    role: .destructive
+                ) {
+                    Task {
+                        await viewModel.deleteCategory(category)
+                    }
+                }
+                Button(
+                    String.localized(CommonKeys.cancel),
+                    role: .cancel
+                ) {}
+            } message: { _ in
+                Text(String.localized(MessageKeys.deleteAlertMessage))
             }
     }
 }
@@ -50,12 +86,8 @@ extension CategoryListView {
                             deleteButtonView(item)
                             editButtonView(item)
                         }
-                        .swipeActions(edge: .leading) {
-                            shareButtonView(item)
-                        }
                         .contextMenu {
                             editButtonView(item)
-                            shareButtonView(item)
                             deleteButtonView(item)
                         }
                 }
@@ -82,7 +114,8 @@ extension CategoryListView {
 
     private func deleteButtonView(_ category: Category) -> some View {
         Button {
-
+            categoryToDelete = category
+            showDeleteAlert = true
         } label: {
             Label {
                 DSText(.localized(CommonKeys.delete))
@@ -91,17 +124,6 @@ extension CategoryListView {
             }
         }
         .tint(.red)
-    }
-
-    private func shareButtonView(_ category: Category) -> some View {
-        ShareLink(item: "location.infoToShare()") {
-            Label {
-                DSText(.localized(CommonKeys.share))
-            } icon: {
-                Image.appSystemIcon(.share)
-            }
-        }
-        .tint(.blue)
     }
 }
 

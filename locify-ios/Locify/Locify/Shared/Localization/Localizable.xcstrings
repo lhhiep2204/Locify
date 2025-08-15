@@ -1,7 +1,13 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Add" : {
+
+    },
     "Address" : {
+
+    },
+    "Are you sure you want to delete '%@'?" : {
 
     },
     "Categories" : {
@@ -35,6 +41,9 @@
 
     },
     "Share" : {
+
+    },
+    "This action cannot be undone." : {
 
     }
   },

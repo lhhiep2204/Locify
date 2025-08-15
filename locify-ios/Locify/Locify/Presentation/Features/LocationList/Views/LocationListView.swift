@@ -14,6 +14,9 @@ struct LocationListView: View {
     @State private var viewModel: LocationListViewModel
     private let categoryName: String
 
+    @State private var showDeleteAlert: Bool = false
+    @State private var locationToDelete: Location?
+
     init(
         _ viewModel: LocationListViewModel,
         categoryName: String
@@ -25,17 +28,49 @@ struct LocationListView: View {
     var body: some View {
         listView
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismissSheet()
                     } label: {
                         Image.appSystemIcon(.close)
                     }
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+
+                    } label: {
+                        Text(String.localized(CommonKeys.add))
+                    }
+                }
             }
             .navigationTitle(Text(categoryName))
             .task {
                 await viewModel.fetchLocations()
+            }
+            .alert(
+                Text(
+                    String(
+                        format: MessageKeys.deleteAlertTitle.rawValue, locationToDelete?.name ?? ""
+                    )
+                ),
+                isPresented: $showDeleteAlert,
+                presenting: locationToDelete
+            ) { location in
+                Button(
+                    String.localized(CommonKeys.delete),
+                    role: .destructive
+                ) {
+                    Task {
+                        await viewModel.deleteLocation(location)
+                    }
+                }
+                Button(
+                    String.localized(CommonKeys.cancel),
+                    role: .cancel
+                ) {}
+            } message: { _ in
+                Text(MessageKeys.deleteAlertMessage.rawValue)
             }
     }
 }
@@ -96,7 +131,8 @@ extension LocationListView {
 
     private func deleteButtonView(_ location: Location) -> some View {
         Button {
-
+            locationToDelete = location
+            showDeleteAlert = true
         } label: {
             Label {
                 DSText(.localized(CommonKeys.delete))
