@@ -92,7 +92,7 @@ extension CategoryListView {
         }
         .tint(.red)
     }
-    
+
     private func shareButtonView(_ category: Category) -> some View {
         ShareLink(item: "location.infoToShare()") {
             Label {

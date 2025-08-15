@@ -9,7 +9,7 @@ import Foundation
 
 @Observable
 class CategoryListViewModel {
-    var categories: [Category] = []
+    private(set) var categories: [Category] = []
 
     private let categoryUseCases: CategoryUseCases
 

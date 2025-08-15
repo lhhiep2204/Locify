@@ -29,6 +29,9 @@ final class ViewModelFactory {
     private lazy var deleteCategoryUseCase = DeleteCategoryUseCase(repository: categoryRepository)
 
     private lazy var fetchLocationsUseCase = FetchLocationsUseCase(repository: locationRepository)
+    private lazy var addLocationUseCase = AddLocationUseCase(repository: locationRepository)
+    private lazy var updateLocationUseCase = UpdateLocationUseCase(repository: locationRepository)
+    private lazy var deleteLocationUseCase = DeleteLocationUseCase(repository: locationRepository)
 
     // MARK: - Use Case Containers
     private lazy var categoryUseCases = CategoryUseCases(
@@ -39,7 +42,10 @@ final class ViewModelFactory {
     )
 
     private lazy var locationUseCases = LocationUseCases(
-        fetch: fetchLocationsUseCase
+        fetch: fetchLocationsUseCase,
+        add: addLocationUseCase,
+        update: updateLocationUseCase,
+        delete: deleteLocationUseCase
     )
 
     /// Private initializer to enforce the singleton pattern.
@@ -59,7 +65,7 @@ extension ViewModelFactory {
     func makeLocationListViewModel(categoryId: UUID) -> LocationListViewModel {
         .init(
             categoryId: categoryId,
-            fetchLocationsUseCase: locationUseCases.fetch
+            locationUseCase: locationUseCases
         )
     }
 }
