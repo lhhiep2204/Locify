@@ -34,7 +34,6 @@ struct DSText: View {
         self.color = color
     }
 
-    /// The SwiftUI body that defines the view hierarchy.
     var body: some View {
         Text(title)
             .font(.appFont(font))

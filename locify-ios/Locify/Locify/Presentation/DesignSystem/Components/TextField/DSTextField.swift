@@ -138,7 +138,6 @@ struct DSTextField: View {
 
 // MARK: - Private Methods
 extension DSTextField {
-    /// A view representing the main text field component.
     private var inputView: some View {
         HStack(spacing: DSSpacing.small) {
             object.image
@@ -170,7 +169,6 @@ extension DSTextField {
         }
     }
 
-    /// The actual text field input view, supporting secure and non-secure modes.
     private var textFieldView: some View {
         Group {
             if isSecure && !showPassword {
@@ -198,7 +196,6 @@ extension DSTextField {
         .disabled(object.disabled)
     }
 
-    /// A button for clearing the text input.
     private var clearButtonView: some View {
         Button(action: {
             text = ""
@@ -209,7 +206,6 @@ extension DSTextField {
         })
     }
 
-    /// A button for toggling the visibility of secure text input.
     private var showPasswordButtonView: some View {
         Button(action: {
             showPassword.toggle()
@@ -222,7 +218,7 @@ extension DSTextField {
     }
 }
 
-// MARK: - methods
+// MARK: - Methods
 extension DSTextField {
     /// Sets the disabled state of the text field.
     /// - Parameter disabled: A Boolean value indicating whether the text field is disabled.
@@ -273,6 +269,7 @@ extension DSTextField {
     }
 }
 
+// MARK: - Preview
 #Preview {
     ScrollView {
         VStack(spacing: DSSpacing.large) {

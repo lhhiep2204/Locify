@@ -128,7 +128,7 @@ struct DSButton<Style: ButtonStyle>: View {
             ) {}
             DSButton(
                 "Bordered Destructive",
-                style: .borderedDestructive,
+                style: .borderedDestructiveLarge,
                 loading: true
             ) {}
             DSButton(

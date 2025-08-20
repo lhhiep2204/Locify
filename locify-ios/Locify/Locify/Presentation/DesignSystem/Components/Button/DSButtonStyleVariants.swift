@@ -64,8 +64,8 @@ extension ButtonStyle where Self == DSButtonStyle {
         DSButtonStyle(type: .bordered(.large(.adaptive)))
     }
 
-    static var borderedDestructive: DSButtonStyle {
-        DSButtonStyle(type: .bordered(.medium(.expanded)), primaryColor: .red)
+    static var borderedDestructiveLarge: DSButtonStyle {
+        DSButtonStyle(type: .bordered(.large(.expanded)), primaryColor: .red)
     }
 
     static var borderedDestructiveFit: DSButtonStyle {
