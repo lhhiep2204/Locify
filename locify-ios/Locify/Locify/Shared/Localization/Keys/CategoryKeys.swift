@@ -8,6 +8,12 @@
 import Foundation
 
 enum CategoryKeys: String, LocalizedKey {
+    // MARK: - A
+    case addCategory = "Add category"
+
     // MARK: - T
     case title = "Categories"
+
+    // MARK: - U
+    case updateCategory = "Update category"
 }

@@ -14,6 +14,11 @@ struct LocationListView: View {
     @State private var viewModel: LocationListViewModel
     private let categoryName: String
 
+    @State private var showAddLocation: Bool = false
+
+    @State private var showUpdateLocation: Bool = false
+    @State private var locationToUpdate: Location?
+
     @State private var showDeleteAlert: Bool = false
     @State private var locationToDelete: Location?
 
@@ -38,7 +43,7 @@ struct LocationListView: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-
+                        showAddLocation = true
                     } label: {
                         Text(String.localized(CommonKeys.add))
                     }
@@ -47,6 +52,23 @@ struct LocationListView: View {
             .navigationTitle(Text(categoryName))
             .task {
                 await viewModel.fetchLocations()
+            }
+            .sheet(isPresented: $showAddLocation) {
+                EditLocationView(editMode: .add) { location in
+                    Task {
+                        await viewModel.addLocation(location)
+                    }
+                }
+            }
+            .sheet(isPresented: $showUpdateLocation) {
+                EditLocationView(
+                    editMode: .update,
+                    locationToUpdate: locationToUpdate
+                ) { location in
+                    Task {
+                        await viewModel.updateLocation(location)
+                    }
+                }
             }
             .alert(
                 Text(
@@ -94,6 +116,9 @@ extension LocationListView {
                     }
             }
         }
+        .refreshable {
+            await viewModel.fetchLocations()
+        }
     }
 
     private func locationItemView(_ location: Location) -> some View {
@@ -119,7 +144,8 @@ extension LocationListView {
 
     private func editButtonView(_ location: Location) -> some View {
         Button {
-
+            locationToDelete = location
+            showUpdateLocation = true
         } label: {
             Label {
                 DSText(.localized(CommonKeys.edit))

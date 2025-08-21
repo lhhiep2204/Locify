@@ -26,6 +26,7 @@ class LocationListViewModel {
 extension LocationListViewModel {
     func fetchLocations() async {
         do {
+            try? await Task.sleep(for: .seconds(1))
             locations = try await locationUseCase.fetch.execute(for: categoryId)
         } catch {
             Logger.error(error.localizedDescription)

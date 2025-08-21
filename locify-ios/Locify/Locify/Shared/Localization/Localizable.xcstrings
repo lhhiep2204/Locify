@@ -4,6 +4,9 @@
     "Add" : {
 
     },
+    "Add category" : {
+
+    },
     "Address" : {
 
     },
@@ -44,6 +47,9 @@
 
     },
     "This action cannot be undone." : {
+
+    },
+    "Update category" : {
 
     }
   },

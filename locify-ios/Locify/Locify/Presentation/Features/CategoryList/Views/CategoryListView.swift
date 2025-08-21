@@ -13,6 +13,11 @@ struct CategoryListView: View {
 
     @State private var viewModel: CategoryListViewModel
 
+    @State private var showAddCategory: Bool = false
+
+    @State private var showUpdateCategory: Bool = false
+    @State private var categoryToUpdate: Category?
+
     @State private var showDeleteAlert: Bool = false
     @State private var categoryToDelete: Category?
 
@@ -33,7 +38,7 @@ struct CategoryListView: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-
+                        showAddCategory = true
                     } label: {
                         Text(String.localized(CommonKeys.add))
                     }
@@ -42,6 +47,23 @@ struct CategoryListView: View {
             .navigationTitle(Text(CategoryKeys.title))
             .task {
                 await viewModel.fetchCategories()
+            }
+            .sheet(isPresented: $showAddCategory) {
+                EditCategoryView(editMode: .add) { category in
+                    Task {
+                        await viewModel.addCategory(category)
+                    }
+                }
+            }
+            .sheet(isPresented: $showUpdateCategory) {
+                EditCategoryView(
+                    editMode: .update,
+                    categoryToUpdate: categoryToUpdate
+                ) { category in
+                    Task {
+                        await viewModel.updateCategory(category)
+                    }
+                }
             }
             .alert(
                 Text(
@@ -93,6 +115,9 @@ extension CategoryListView {
                 }
             }
         }
+        .refreshable {
+            await viewModel.fetchCategories()
+        }
     }
 
     private func categoryItemView(_ category: Category) -> some View {
@@ -102,7 +127,8 @@ extension CategoryListView {
 
     private func editButtonView(_ category: Category) -> some View {
         Button {
-
+            categoryToUpdate = category
+            showUpdateCategory = true
         } label: {
             Label {
                 DSText(.localized(CommonKeys.edit))

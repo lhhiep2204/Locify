@@ -23,6 +23,7 @@ class CategoryListViewModel {
 extension CategoryListViewModel {
     func fetchCategories() async {
         do {
+            try? await Task.sleep(for: .seconds(1))
             categories = try await categoryUseCases.fetch.execute()
         } catch {
             Logger.error(error.localizedDescription)
