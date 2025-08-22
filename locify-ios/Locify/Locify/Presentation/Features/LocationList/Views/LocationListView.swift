@@ -12,22 +12,18 @@ struct LocationListView: View {
     @Environment(\.selectLocation) private var selectLocation
 
     @State private var viewModel: LocationListViewModel
-    private let categoryName: String
+
+    @State private var isFetched: Bool = false
 
     @State private var showAddLocation: Bool = false
 
-    @State private var showUpdateLocation: Bool = false
     @State private var locationToUpdate: Location?
 
     @State private var showDeleteAlert: Bool = false
     @State private var locationToDelete: Location?
 
-    init(
-        _ viewModel: LocationListViewModel,
-        categoryName: String
-    ) {
+    init(_ viewModel: LocationListViewModel) {
         self.viewModel = viewModel
-        self.categoryName = categoryName
     }
 
     var body: some View {
@@ -49,24 +45,31 @@ struct LocationListView: View {
                     }
                 }
             }
-            .navigationTitle(Text(categoryName))
+            .navigationTitle(Text(viewModel.category.name))
             .task {
-                await viewModel.fetchLocations()
+                if !isFetched {
+                    await viewModel.fetchLocations()
+                    isFetched.toggle()
+                }
             }
             .sheet(isPresented: $showAddLocation) {
-                EditLocationView(editMode: .add) { location in
+                EditLocationView(
+                    editMode: .add,
+                    category: viewModel.category
+                ) { location in
                     Task {
                         await viewModel.addLocation(location)
                     }
                 }
             }
-            .sheet(isPresented: $showUpdateLocation) {
+            .sheet(item: $locationToUpdate) { location in
                 EditLocationView(
                     editMode: .update,
-                    locationToUpdate: locationToUpdate
-                ) { location in
+                    category: viewModel.category,
+                    locationToUpdate: location
+                ) { updatedLocation in
                     Task {
-                        await viewModel.updateLocation(location)
+                        await viewModel.updateLocation(updatedLocation)
                     }
                 }
             }
@@ -124,7 +127,7 @@ extension LocationListView {
     private func locationItemView(_ location: Location) -> some View {
         VStack(alignment: .leading) {
             DSText(
-                location.name,
+                location.displayName,
                 font: .bold(.large)
             )
             .lineLimit(1)
@@ -144,8 +147,7 @@ extension LocationListView {
 
     private func editButtonView(_ location: Location) -> some View {
         Button {
-            locationToDelete = location
-            showUpdateLocation = true
+            locationToUpdate = location
         } label: {
             Label {
                 DSText(.localized(CommonKeys.edit))
@@ -185,8 +187,7 @@ extension LocationListView {
     if let category = Category.mockList.first {
         NavigationStack {
             LocationListView(
-                ViewModelFactory.shared.makeLocationListViewModel(categoryId: category.id),
-                categoryName: category.name
+                ViewModelFactory.shared.makeLocationListViewModel(category: category)
             )
         }
     }

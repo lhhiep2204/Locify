@@ -28,7 +28,7 @@ struct LocationDetailView: View {
                     }
                 }
                 .padding([.bottom, .horizontal], DSSpacing.large)
-                .navigationTitle(location.displayName ?? location.name)
+                .navigationTitle(location.displayName)
             }
             .id(location.id)
         } else {
@@ -40,10 +40,7 @@ struct LocationDetailView: View {
 extension LocationDetailView {
     private func infoView(location: Location) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            if !location.displayName.isNilOrEmpty {
-                nameView(name: location.name)
-            }
-
+            nameView(name: location.name)
             addressView(address: location.address)
             coordinatesView(
                 latitude: location.latitude,

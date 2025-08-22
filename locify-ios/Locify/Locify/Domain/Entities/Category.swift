@@ -10,10 +10,10 @@ import Foundation
 /// A domain entity representing a category for grouping locations, owned by a user.
 struct Category: Identifiable, Equatable, Hashable {
     let id: UUID
-    let name: String
-    let syncStatus: SyncStatus
+    var name: String
+    var syncStatus: SyncStatus
     let createdAt: Date
-    let updatedAt: Date
+    var updatedAt: Date
 
     init(
         id: UUID = UUID(),

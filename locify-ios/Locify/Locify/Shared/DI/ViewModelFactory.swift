@@ -62,9 +62,9 @@ extension ViewModelFactory {
         .init(categoryUseCases: categoryUseCases)
     }
 
-    func makeLocationListViewModel(categoryId: UUID) -> LocationListViewModel {
+    func makeLocationListViewModel(category: Category) -> LocationListViewModel {
         .init(
-            categoryId: categoryId,
+            category: category,
             locationUseCase: locationUseCases
         )
     }

@@ -11,14 +11,14 @@ import Foundation
 class LocationListViewModel {
     private(set) var locations: [Location] = []
 
-    private let categoryId: UUID
+    let category: Category
     private let locationUseCase: LocationUseCases
 
     init(
-        categoryId: UUID,
+        category: Category,
         locationUseCase: LocationUseCases
     ) {
-        self.categoryId = categoryId
+        self.category = category
         self.locationUseCase = locationUseCase
     }
 }
@@ -26,8 +26,8 @@ class LocationListViewModel {
 extension LocationListViewModel {
     func fetchLocations() async {
         do {
-            try? await Task.sleep(for: .seconds(1))
-            locations = try await locationUseCase.fetch.execute(for: categoryId)
+            try await Task.sleep(for: .seconds(0.5))
+            locations = try await locationUseCase.fetch.execute(for: category.id)
         } catch {
             Logger.error(error.localizedDescription)
         }

@@ -16,6 +16,7 @@ enum DSIcon: String {
 /// A design system enum that defines system-provided SF Symbols used in the app.
 enum DSSystemIcon: String {
     // MARK: - C
+    case chevronDown = "chevron.down"
     case clearText = "multiply.circle.fill"
     case close = "xmark"
 
@@ -24,6 +25,9 @@ enum DSSystemIcon: String {
 
     // MARK: - E
     case edit = "square.and.pencil"
+
+    // MARK: - F
+    case folder = "folder"
 
     // MARK: - L
     case list = "list.bullet"

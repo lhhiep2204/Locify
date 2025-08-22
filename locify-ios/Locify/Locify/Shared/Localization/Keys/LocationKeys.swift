@@ -15,6 +15,9 @@ enum LocationKeys: String, LocalizedKey {
     // MARK: - C
     case coordinates = "Coordinates"
 
+    // MARK: - D
+    case displayName = "Display name"
+
     // MARK: - N
     case name = "Name"
     case notes = "Notes"

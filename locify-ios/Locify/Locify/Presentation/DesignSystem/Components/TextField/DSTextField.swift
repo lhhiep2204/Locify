@@ -13,11 +13,14 @@ final class DSTextFieldObservable {
     /// The axis of the text field, determining whether it supports multiline input.
     var axis: Axis = .horizontal
 
-    /// A Boolean value that indicates whether the text field is disabled.
-    var disabled: Bool = false
+    /// A Boolean value that indicates whether the text field is enabled.
+    var enabled: Bool = true
 
     /// An optional image displayed inside the text field, typically used as an icon.
     var image: Image?
+
+    /// An optional image displayed at the trailing end inside the text field.
+    var trailingImage: Image?
 
     /// The label text displayed above the text field.
     var label: String = ""
@@ -86,16 +89,16 @@ struct DSTextField: View {
 
     /// Computes the border color based on the state of the text field.
     private var borderColor: Color {
-        if object.disabled {
+        if !object.enabled {
             return .appColor(.gray20)
         }
 
-        return editing ? .accent : state.borderColor
+        return editing ? .appColor(.accent) : state.borderColor
     }
 
-    /// Computes the border width based on the disabled state.
+    /// Computes the border width based on the enabled state.
     private var borderWidth: CGFloat {
-        object.disabled ? 0 : DSStroke.thin
+        object.enabled ? DSStroke.thin : 0
     }
 
     /// Computes the background color when the text field is disabled.
@@ -151,6 +154,8 @@ extension DSTextField {
             if isSecure {
                 showPasswordButtonView
             }
+
+            object.trailingImage
         }
         .padding(.horizontal, DSSpacing.medium)
         .if(translucent) {
@@ -158,13 +163,13 @@ extension DSTextField {
         } else: {
             $0.background(Color.appColor(.backgroundSecondary))
         }
-        .cornerRadius(DSRadius.xLarge)
+        .cornerRadius(DSRadius.xxLarge)
         .overlay {
-            RoundedRectangle(cornerRadius: DSRadius.xLarge)
+            RoundedRectangle(cornerRadius: DSRadius.xxLarge)
                 .stroke(borderColor, lineWidth: borderWidth)
-                .if(object.disabled) {
+                .if(!object.enabled) {
                     $0.background(disabledBackground)
-                        .cornerRadius(DSRadius.xLarge)
+                        .cornerRadius(DSRadius.xxLarge)
                 }
         }
     }
@@ -188,12 +193,12 @@ extension DSTextField {
             DSTextFieldStyle()
         )
         .if(object.axis == .horizontal) {
-            $0.frame(height: DSSize.xLarge)
+            $0.frame(height: DSSize.huge)
         } else: {
-            $0.padding(.vertical, DSSpacing.small)
+            $0.padding(.vertical, DSSpacing.medium)
         }
         .focused($editing)
-        .disabled(object.disabled)
+        .disabled(!object.enabled)
     }
 
     private var clearButtonView: some View {
@@ -220,11 +225,11 @@ extension DSTextField {
 
 // MARK: - Methods
 extension DSTextField {
-    /// Sets the disabled state of the text field.
-    /// - Parameter disabled: A Boolean value indicating whether the text field is disabled.
+    /// Sets the enabled state of the text field.
+    /// - Parameter enabled: A Boolean value indicating whether the text field is enabled.
     /// - Returns: The updated DSTextField.
-    func disabled(_ disabled: Bool) -> Self {
-        object.disabled = disabled
+    func enabled(_ enabled: Bool) -> Self {
+        object.enabled = enabled
         return self
     }
 
@@ -233,6 +238,14 @@ extension DSTextField {
     /// - Returns: The updated DSTextField.
     func image(_ image: Image) -> Self {
         object.image = image
+        return self
+    }
+
+    /// Sets the trailing image to be displayed at the end inside the text field.
+    /// - Parameter image: The trailing image.
+    /// - Returns: The updated DSTextField.
+    func trailingImage(_ image: Image) -> Self {
+        object.trailingImage = image
         return self
     }
 
@@ -306,7 +319,7 @@ extension DSTextField {
                 text: .constant("Disabled")
             )
             .image(.appSystemIcon(.location))
-            .disabled(true)
+            .enabled(false)
 
             // 5. Success state
             DSTextField(
@@ -345,6 +358,14 @@ extension DSTextField {
                 translucent: false
             )
             .label("Opaque Background")
+
+            // 10. With trailing image
+            DSTextField(
+                .constant("Trailing Image"),
+                text: .constant("")
+            )
+            .label("Trailing Image Example")
+            .trailingImage(.appSystemIcon(.location))
         }
         .padding()
     }

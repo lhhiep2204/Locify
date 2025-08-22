@@ -13,9 +13,10 @@ struct CategoryListView: View {
 
     @State private var viewModel: CategoryListViewModel
 
+    @State private var isFetched: Bool = false
+
     @State private var showAddCategory: Bool = false
 
-    @State private var showUpdateCategory: Bool = false
     @State private var categoryToUpdate: Category?
 
     @State private var showDeleteAlert: Bool = false
@@ -46,7 +47,10 @@ struct CategoryListView: View {
             }
             .navigationTitle(Text(CategoryKeys.title))
             .task {
-                await viewModel.fetchCategories()
+                if !isFetched {
+                    await viewModel.fetchCategories()
+                    isFetched.toggle()
+                }
             }
             .sheet(isPresented: $showAddCategory) {
                 EditCategoryView(editMode: .add) { category in
@@ -55,13 +59,13 @@ struct CategoryListView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showUpdateCategory) {
+            .sheet(item: $categoryToUpdate) { category in
                 EditCategoryView(
                     editMode: .update,
-                    categoryToUpdate: categoryToUpdate
-                ) { category in
+                    categoryToUpdate: category
+                ) { updatedCategory in
                     Task {
-                        await viewModel.updateCategory(category)
+                        await viewModel.updateCategory(updatedCategory)
                     }
                 }
             }
@@ -98,10 +102,7 @@ extension CategoryListView {
         List {
             ForEach(viewModel.categories) { item in
                 NavigationLink(
-                    .locationList(
-                        categoryId: item.id,
-                        categoryName: item.name
-                    )
+                    .locationList(category: item)
                 ) {
                     categoryItemView(item)
                         .swipeActions(edge: .trailing) {
@@ -128,7 +129,6 @@ extension CategoryListView {
     private func editButtonView(_ category: Category) -> some View {
         Button {
             categoryToUpdate = category
-            showUpdateCategory = true
         } label: {
             Label {
                 DSText(.localized(CommonKeys.edit))

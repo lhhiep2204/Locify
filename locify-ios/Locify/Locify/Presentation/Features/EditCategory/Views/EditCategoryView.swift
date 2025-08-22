@@ -14,6 +14,10 @@ enum EditMode {
 struct EditCategoryView: View {
     @Environment(\.dismiss) private var dismiss
 
+    @FocusState private var editing
+
+    @State private var name: String
+
     let editMode: EditMode
     let categoryToUpdate: Category?
     let onSave: (Category) -> Void
@@ -26,6 +30,12 @@ struct EditCategoryView: View {
         self.editMode = editMode
         self.categoryToUpdate = categoryToUpdate
         self.onSave = onSave
+
+        if let categoryToUpdate {
+            _name = State(initialValue: categoryToUpdate.name)
+        } else {
+            _name = State(initialValue: .empty)
+        }
     }
 
     var body: some View {
@@ -49,6 +59,8 @@ struct EditCategoryView: View {
                     }
                 }
                 .navigationTitle(navigationTitle)
+                .navigationBarTitleDisplayMode(.inline)
+                .presentationDetents([.fraction(0.25)])
                 .interactiveDismissDisabled()
         }
     }
@@ -56,7 +68,17 @@ struct EditCategoryView: View {
 
 extension EditCategoryView {
     private var contentView: some View {
-        Text(CategoryKeys.title)
+        ScrollView {
+            VStack(alignment: .leading) {
+                DSTextField(text: $name)
+                    .label(.localized(CategoryKeys.categoryName))
+                    .focused($editing)
+            }
+            .padding(DSSpacing.large)
+        }
+        .onTapGesture {
+            editing = false
+        }
     }
 
     private var navigationTitle: Text {
@@ -71,7 +93,18 @@ extension EditCategoryView {
 
 extension EditCategoryView {
     private func saveCategory() {
-        onSave(.mock)
+        var category: Category {
+            if let categoryToUpdate {
+                var category = categoryToUpdate
+                category.name = name
+                return category
+            } else {
+                let category = Category(name: name)
+                return category
+            }
+        }
+
+        onSave(category)
         dismiss()
     }
 }
