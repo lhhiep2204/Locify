@@ -12,11 +12,16 @@ enum CategoryKeys: String, LocalizedKey {
     case addCategory = "Add category"
 
     // MARK: - C
-    case categoryName = "Category name"
+    case category = "Category"
+    case categoryName = "Name"
+    case createCategory = "Create category"
 
     // MARK: - T
     case title = "Categories"
 
     // MARK: - U
     case updateCategory = "Update category"
+
+    // MARK: - S
+    case selectCategory = "Select category"
 }

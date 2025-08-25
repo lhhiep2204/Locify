@@ -12,47 +12,45 @@ struct EditLocationView: View {
 
     @FocusState private var editing
 
+    @State private var viewModel: EditLocationViewModel
+
     @State private var textSearch: String = .empty
     @State private var categoryName: String
-    @State private var displayName: String
-    @State private var name: String
-    @State private var address: String
-    @State private var latitude: String
-    @State private var longitude: String
-    @State private var notes: String
+
+    @State private var showCategoryList: Bool = false
+    @State private var showAddCategory: Bool = false
 
     let editMode: EditMode
-    let category: Category?
     let locationToUpdate: Location?
     let onSave: (Location) -> Void
 
     init(
+        _ viewModel: EditLocationViewModel,
         editMode: EditMode,
         category: Category? = nil,
         locationToUpdate: Location? = nil,
         onSave: @escaping (Location) -> Void
     ) {
+        self.viewModel = viewModel
         self.editMode = editMode
-        self.category = category
         self.locationToUpdate = locationToUpdate
         self.onSave = onSave
 
-        if let locationToUpdate {
-            _categoryName = State(initialValue: category?.name ?? .empty)
-            _displayName = State(initialValue: locationToUpdate.displayName)
-            _name = State(initialValue: locationToUpdate.name)
-            _address = State(initialValue: locationToUpdate.address)
-            _latitude = State(initialValue: String(locationToUpdate.latitude))
-            _longitude = State(initialValue: String(locationToUpdate.longitude))
-            _notes = State(initialValue: locationToUpdate.notes ?? .empty)
+        viewModel.category = category
+
+        if let category {
+            _categoryName = State(initialValue: category.name)
         } else {
             _categoryName = State(initialValue: .empty)
-            _displayName = State(initialValue: .empty)
-            _name = State(initialValue: .empty)
-            _address = State(initialValue: .empty)
-            _latitude = State(initialValue: .empty)
-            _longitude = State(initialValue: .empty)
-            _notes = State(initialValue: .empty)
+        }
+
+        if let locationToUpdate {
+            viewModel.displayName = locationToUpdate.displayName
+            viewModel.name = locationToUpdate.name
+            viewModel.address = locationToUpdate.address
+            viewModel.latitude = String(locationToUpdate.latitude)
+            viewModel.longitude = String(locationToUpdate.longitude)
+            viewModel.notes = locationToUpdate.notes ?? .empty
         }
     }
 
@@ -79,6 +77,15 @@ struct EditLocationView: View {
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .interactiveDismissDisabled()
+                .task {
+                    await viewModel.fetchCategories()
+                }
+                .onChange(of: viewModel.category) {
+                    categoryName = viewModel.category?.name ?? .empty
+                }
+                .sheet(isPresented: $showCategoryList) {
+                    selectCategoryView
+                }
         }
     }
 }
@@ -87,17 +94,27 @@ extension EditLocationView {
     private var contentView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                DSTextField(text: $textSearch)
-                    .image(.appSystemIcon(.search))
-                    .focused($editing)
+                DSTextField(
+                    .constant(.localized(LocationKeys.searchLocation)),
+                    text: $textSearch
+                )
+                .image(.appSystemIcon(.search))
+                .focused($editing)
 
                 Divider()
                     .padding(.vertical, DSSpacing.small)
 
-                DSTextField(text: $categoryName)
-                    .image(.appSystemIcon(.folder))
-                    .trailingImage(.appSystemIcon(.chevronDown))
-                    .disabled(true)
+                DSTextField(
+                    .constant(.localized(CategoryKeys.selectCategory)),
+                    text: $categoryName
+                )
+                .label(.localized(CategoryKeys.category))
+                .image(.appSystemIcon(.folder))
+                .trailingImage(.appSystemIcon(.chevronDown))
+                .disabled(true)
+                .onTapGesture {
+                    showCategoryList = true
+                }
 
                 Divider()
                     .padding(.vertical, DSSpacing.small)
@@ -122,62 +139,82 @@ extension EditLocationView {
 
     private var locationInfoView: some View {
         Group {
-            DSTextField(text: $displayName)
+            DSTextField(text: $viewModel.displayName)
                 .label(.localized(LocationKeys.displayName))
                 .focused($editing)
-            DSTextField(text: $name)
+            DSTextField(text: $viewModel.name)
                 .label(.localized(LocationKeys.name))
                 .enabled(false)
-            DSTextField(text: $address)
+            DSTextField(text: $viewModel.address)
                 .label(.localized(LocationKeys.address))
                 .enabled(false)
             HStack {
-                DSTextField(text: $latitude)
+                DSTextField(text: $viewModel.latitude)
                     .label(.localized(LocationKeys.latitude))
                     .enabled(false)
-                DSTextField(text: $longitude)
+                DSTextField(text: $viewModel.longitude)
                     .label(.localized(LocationKeys.longitude))
                     .enabled(false)
             }
-            DSTextField(text: $notes)
+            DSTextField(text: $viewModel.notes)
                 .label(.localized(LocationKeys.notes))
                 .multiline()
                 .focused($editing)
+        }
+    }
+
+    private var selectCategoryView: some View {
+        VStack {
+            DSText(
+                .localized(CategoryKeys.selectCategory),
+                font: .bold(.large)
+            )
+            List {
+                ForEach(viewModel.categories) { item in
+                    DSText(item.name)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.category = item
+                            showCategoryList = false
+                        }
+                }
+            }
+            DSButton(
+                .localized(CategoryKeys.createCategory),
+                style: .filledLarge
+            ) {
+                showAddCategory = true
+            }
+            .padding([.horizontal], DSSpacing.large)
+        }
+        .padding([.vertical], DSSpacing.large)
+        .presentationDetents([.medium])
+        .sheet(isPresented: $showAddCategory) {
+            EditCategoryView(
+                EditCategoryViewModel(),
+                editMode: .add
+            ) { category in
+                Task {
+                    await viewModel.addCategory(category)
+                }
+            }
         }
     }
 }
 
 extension EditLocationView {
     private func saveLocation() {
-        var location: Location {
-            if let locationToUpdate {
-                var location = locationToUpdate
-                location.displayName = displayName
-                location.name = name
-                location.address = address
-                location.latitude = Double(latitude) ?? 0.0
-                location.longitude = Double(longitude) ?? 0.0
-                location.notes = notes
-                return location
-            } else {
-                let location = Location(
-                    categoryId: category?.id ?? UUID(),
-                    displayName: displayName,
-                    name: name,
-                    address: address,
-                    latitude: Double(latitude) ?? 0.0,
-                    longitude: Double(longitude) ?? 0.0,
-                    notes: notes
-                )
-                return location
-            }
+        viewModel.createLocation(locationToUpdate: locationToUpdate) { location in
+            onSave(location)
+            dismiss()
         }
-
-        onSave(location)
-        dismiss()
     }
 }
 
 #Preview {
-    EditLocationView(editMode: .add, onSave: { _ in })
+    EditLocationView(
+        ViewModelFactory.shared.makeEditLocationViewModel(),
+        editMode: .add
+    ) { _ in }
 }

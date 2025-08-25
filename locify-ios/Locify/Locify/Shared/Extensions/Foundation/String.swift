@@ -59,3 +59,12 @@ extension String {
         return formatter.date(from: self)
     }
 }
+
+extension String {
+    /// Converts the string to a `Double`.
+    ///
+    /// Returns `0.0` if the conversion fails.
+    var asDouble: Double {
+        Double(self) ?? 0.0
+    }
+}

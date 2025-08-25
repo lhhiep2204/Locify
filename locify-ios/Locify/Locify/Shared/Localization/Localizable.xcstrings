@@ -16,10 +16,13 @@
     "Categories" : {
 
     },
-    "Category name" : {
+    "Category" : {
 
     },
     "Coordinates" : {
+
+    },
+    "Create category" : {
 
     },
     "Delete" : {
@@ -47,6 +50,12 @@
 
     },
     "Related Locations" : {
+
+    },
+    "Search location" : {
+
+    },
+    "Select category" : {
 
     },
     "Share" : {

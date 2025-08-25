@@ -36,12 +36,7 @@ struct MapView: View {
                 }
             }
         }
-        .mapControls {
-            MapUserLocationButton()
-            MapPitchToggle()
-            MapCompass()
-            MapScaleView()
-        }
+        .mapControlVisibility(.hidden)
         .onAppear { updateCamera() }
         .onChange(of: selectedLocation) {
             updateCamera()

@@ -1,0 +1,97 @@
+//
+//  EditLocationViewModel.swift
+//  Locify
+//
+//  Created by Hoàng Hiệp Lê on 24/8/25.
+//
+
+import Foundation
+
+@Observable
+class EditLocationViewModel {
+    private(set) var categories: [Category] = []
+
+    private let fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol
+    private let addCategoryUseCase: AddCategoryUseCaseProtocol
+
+    var category: Category?
+
+    var displayName: String = .empty
+    var name: String = .empty
+    var address: String = .empty
+    var latitude: String = .empty
+    var longitude: String = .empty
+    var notes: String = .empty
+
+    var errorMessage: String?
+
+    init(
+        fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol,
+        addCategoryUseCase: AddCategoryUseCaseProtocol
+    ) {
+        self.fetchCategoriesUseCase = fetchCategoriesUseCase
+        self.addCategoryUseCase = addCategoryUseCase
+    }
+}
+
+extension EditLocationViewModel {
+    func fetchCategories() async {
+        do {
+            try await Task.sleep(for: .seconds(0.5))
+            categories = try await fetchCategoriesUseCase.execute()
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
+    }
+
+    func addCategory(_ category: Category) async {
+        do {
+            _ = try await addCategoryUseCase.execute(category)
+            categories.append(category)
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
+    }
+
+    func createLocation(locationToUpdate: Location?, completion: (Location) -> Void) {
+        var location: Location {
+            if let locationToUpdate {
+                var location = locationToUpdate
+                location.displayName = displayName
+                location.name = name
+                location.address = address
+                location.latitude = latitude.asDouble
+                location.longitude = longitude.asDouble
+                location.notes = notes.trimmed.isEmpty ? nil : notes
+                return location
+            } else {
+                let location = Location(
+                    categoryId: category?.id ?? UUID(),
+                    displayName: displayName,
+                    name: name,
+                    address: address,
+                    latitude: latitude.asDouble,
+                    longitude: longitude.asDouble,
+                    notes: notes.trimmed.isEmpty ? nil : notes
+                )
+                return location
+            }
+        }
+
+        guard isValid else { return }
+
+        completion(location)
+    }
+}
+
+extension EditLocationViewModel {
+    private var isValid: Bool {
+        if category == nil {
+            errorMessage = "Please select a category"
+            return false
+        }
+
+        errorMessage = nil
+        return true
+    }
+}

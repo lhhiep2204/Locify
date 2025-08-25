@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct CategoryListView: View {
-    @Environment(\.dismissSheet) private var dismissSheet
     @Environment(\.viewModelFactory) private var factory
+    @Environment(\.dismissSheet) private var dismissSheet
 
     @State private var viewModel: CategoryListViewModel
 
@@ -53,7 +53,10 @@ struct CategoryListView: View {
                 }
             }
             .sheet(isPresented: $showAddCategory) {
-                EditCategoryView(editMode: .add) { category in
+                EditCategoryView(
+                    factory.makeEditCategoryViewModel(),
+                    editMode: .add
+                ) { category in
                     Task {
                         await viewModel.addCategory(category)
                     }
@@ -61,6 +64,7 @@ struct CategoryListView: View {
             }
             .sheet(item: $categoryToUpdate) { category in
                 EditCategoryView(
+                    factory.makeEditCategoryViewModel(),
                     editMode: .update,
                     categoryToUpdate: category
                 ) { updatedCategory in
@@ -122,7 +126,7 @@ extension CategoryListView {
     }
 
     private func categoryItemView(_ category: Category) -> some View {
-        DSText(category.name, font: .bold(.medium))
+        DSText(category.name, font: .medium(.large))
             .lineLimit(1)
     }
 

@@ -16,25 +16,25 @@ struct EditCategoryView: View {
 
     @FocusState private var editing
 
-    @State private var name: String
+    @State private var viewModel: EditCategoryViewModel
 
     let editMode: EditMode
     let categoryToUpdate: Category?
     let onSave: (Category) -> Void
 
     init(
+        _ viewModel: EditCategoryViewModel,
         editMode: EditMode,
         categoryToUpdate: Category? = nil,
         onSave: @escaping (Category) -> Void
     ) {
+        self.viewModel = viewModel
         self.editMode = editMode
         self.categoryToUpdate = categoryToUpdate
         self.onSave = onSave
 
         if let categoryToUpdate {
-            _name = State(initialValue: categoryToUpdate.name)
-        } else {
-            _name = State(initialValue: .empty)
+            viewModel.name = categoryToUpdate.name
         }
     }
 
@@ -70,7 +70,7 @@ extension EditCategoryView {
     private var contentView: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                DSTextField(text: $name)
+                DSTextField(text: $viewModel.name)
                     .label(.localized(CategoryKeys.categoryName))
                     .focused($editing)
             }
@@ -93,22 +93,16 @@ extension EditCategoryView {
 
 extension EditCategoryView {
     private func saveCategory() {
-        var category: Category {
-            if let categoryToUpdate {
-                var category = categoryToUpdate
-                category.name = name
-                return category
-            } else {
-                let category = Category(name: name)
-                return category
-            }
+        viewModel.createCategory(categoryToUpdate: categoryToUpdate) { category in
+            onSave(category)
+            dismiss()
         }
-
-        onSave(category)
-        dismiss()
     }
 }
 
 #Preview {
-    EditCategoryView(editMode: .add, onSave: { _ in })
+    EditCategoryView(
+        ViewModelFactory.shared.makeEditCategoryViewModel(),
+        editMode: .add
+    ) { _ in }
 }

@@ -68,4 +68,15 @@ extension ViewModelFactory {
             locationUseCase: locationUseCases
         )
     }
+
+    func makeEditCategoryViewModel() -> EditCategoryViewModel {
+        .init()
+    }
+
+    func makeEditLocationViewModel() -> EditLocationViewModel {
+        .init(
+            fetchCategoriesUseCase: fetchCategoriesUseCase,
+            addCategoryUseCase: addCategoryUseCase
+        )
+    }
 }

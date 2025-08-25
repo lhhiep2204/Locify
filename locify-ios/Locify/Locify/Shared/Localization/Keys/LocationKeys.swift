@@ -28,4 +28,7 @@ enum LocationKeys: String, LocalizedKey {
 
     // MARK: - U
     case updateLocation = "Update location"
+
+    // MARK: - S
+    case searchLocation = "Search location"
 }
