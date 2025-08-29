@@ -72,7 +72,7 @@ extension HomeView {
                     locationDetailView
                 }
                 .presentationDetents(
-                    [.fraction(0.25), .medium],
+                    [.fraction(0.2), .fraction(0.5)],
                     selection: $locationDetailDetent
                 )
                 .interactiveDismissDisabled()

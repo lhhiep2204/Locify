@@ -17,6 +17,7 @@ struct EditCategoryView: View {
     @FocusState private var editing
 
     @State private var viewModel: EditCategoryViewModel
+    @State private var showErrorAlert: Bool = false
 
     let editMode: EditMode
     let categoryToUpdate: Category?
@@ -54,7 +55,7 @@ struct EditCategoryView: View {
                         Button {
                             saveCategory()
                         } label: {
-                            Text(String.localized(CommonKeys.save))
+                            Text(CommonKeys.save)
                         }
                     }
                 }
@@ -62,6 +63,14 @@ struct EditCategoryView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .presentationDetents([.fraction(0.25)])
                 .interactiveDismissDisabled()
+                .alert(
+                    viewModel.errorMessage,
+                    isPresented: $showErrorAlert
+                ) {
+                    Button(CommonKeys.close) {
+                        viewModel.clearErrorState()
+                    }
+                }
         }
     }
 }
@@ -94,8 +103,12 @@ extension EditCategoryView {
 extension EditCategoryView {
     private func saveCategory() {
         viewModel.createCategory(categoryToUpdate: categoryToUpdate) { category in
-            onSave(category)
-            dismiss()
+            if let category {
+                onSave(category)
+                dismiss()
+            } else {
+                showErrorAlert = true
+            }
         }
     }
 }

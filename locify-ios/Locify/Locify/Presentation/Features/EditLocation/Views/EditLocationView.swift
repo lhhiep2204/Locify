@@ -19,6 +19,7 @@ struct EditLocationView: View {
 
     @State private var showCategoryList: Bool = false
     @State private var showAddCategory: Bool = false
+    @State private var showErrorAlert: Bool = false
 
     let editMode: EditMode
     let locationToUpdate: Location?
@@ -70,7 +71,7 @@ struct EditLocationView: View {
                         Button {
                             saveLocation()
                         } label: {
-                            Text(String.localized(CommonKeys.save))
+                            Text(CommonKeys.save)
                         }
                     }
                 }
@@ -85,6 +86,25 @@ struct EditLocationView: View {
                 }
                 .sheet(isPresented: $showCategoryList) {
                     selectCategoryView
+                        .presentationDetents([.medium])
+                        .sheet(isPresented: $showAddCategory) {
+                            EditCategoryView(
+                                EditCategoryViewModel(),
+                                editMode: .add
+                            ) { category in
+                                Task {
+                                    await viewModel.addCategory(category)
+                                }
+                            }
+                        }
+                }
+                .alert(
+                    viewModel.errorMessage,
+                    isPresented: $showErrorAlert
+                ) {
+                    Button(CommonKeys.close) {
+                        viewModel.clearErrorState()
+                    }
                 }
         }
     }
@@ -164,11 +184,7 @@ extension EditLocationView {
     }
 
     private var selectCategoryView: some View {
-        VStack {
-            DSText(
-                .localized(CategoryKeys.selectCategory),
-                font: .bold(.large)
-            )
+        NavigationStack {
             List {
                 ForEach(viewModel.categories) { item in
                     DSText(item.name)
@@ -180,23 +196,22 @@ extension EditLocationView {
                         }
                 }
             }
-            DSButton(
-                .localized(CategoryKeys.createCategory),
-                style: .filledLarge
-            ) {
-                showAddCategory = true
-            }
-            .padding([.horizontal], DSSpacing.large)
-        }
-        .padding([.vertical], DSSpacing.large)
-        .presentationDetents([.medium])
-        .sheet(isPresented: $showAddCategory) {
-            EditCategoryView(
-                EditCategoryViewModel(),
-                editMode: .add
-            ) { category in
-                Task {
-                    await viewModel.addCategory(category)
+            .navigationTitle(Text(CategoryKeys.selectCategory))
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showCategoryList = false
+                    } label: {
+                        Image.appSystemIcon(.close)
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAddCategory = true
+                    } label: {
+                        Text(CommonKeys.add)
+                    }
                 }
             }
         }
@@ -206,8 +221,12 @@ extension EditLocationView {
 extension EditLocationView {
     private func saveLocation() {
         viewModel.createLocation(locationToUpdate: locationToUpdate) { location in
-            onSave(location)
-            dismiss()
+            if let location {
+                onSave(location)
+                dismiss()
+            } else {
+                showErrorAlert = true
+            }
         }
     }
 }

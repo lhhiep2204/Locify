@@ -41,7 +41,7 @@ struct CategoryListView: View {
                     Button {
                         showAddCategory = true
                     } label: {
-                        Text(String.localized(CommonKeys.add))
+                        Text(CommonKeys.add)
                     }
                 }
             }
@@ -96,7 +96,7 @@ struct CategoryListView: View {
                     role: .cancel
                 ) {}
             } message: { _ in
-                Text(String.localized(MessageKeys.deleteAlertMessage))
+                Text(MessageKeys.deleteAlertMessage)
             }
     }
 }

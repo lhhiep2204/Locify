@@ -23,7 +23,7 @@ class EditLocationViewModel {
     var longitude: String = .empty
     var notes: String = .empty
 
-    var errorMessage: String?
+    private(set) var errorMessage: String = .empty
 
     init(
         fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol,
@@ -53,7 +53,7 @@ extension EditLocationViewModel {
         }
     }
 
-    func createLocation(locationToUpdate: Location?, completion: (Location) -> Void) {
+    func createLocation(locationToUpdate: Location?, completion: (Location?) -> Void) {
         var location: Location {
             if let locationToUpdate {
                 var location = locationToUpdate
@@ -78,20 +78,32 @@ extension EditLocationViewModel {
             }
         }
 
-        guard isValid else { return }
+        guard isValid else {
+            completion(nil)
+            return
+        }
 
         completion(location)
+    }
+
+    func clearErrorState() {
+        errorMessage = .empty
     }
 }
 
 extension EditLocationViewModel {
     private var isValid: Bool {
         if category == nil {
-            errorMessage = "Please select a category"
+            errorMessage = "Please select a category."
             return false
         }
 
-        errorMessage = nil
+        if address.isEmpty {
+            errorMessage = "Please select a location."
+            return false
+        }
+
+        errorMessage = .empty
         return true
     }
 }

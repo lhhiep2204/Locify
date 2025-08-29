@@ -11,11 +11,14 @@ import Foundation
 class EditCategoryViewModel {
     var name: String = .empty
 
-    var errorMessage: String?
+    private(set) var errorMessage: String = .empty
 }
 
 extension EditCategoryViewModel {
-    func createCategory(categoryToUpdate: Category?, completion: (Category) -> Void) {
+    func createCategory(
+        categoryToUpdate: Category?,
+        completion: (Category?) -> Void
+    ) {
         var category: Category {
             if let categoryToUpdate {
                 var category = categoryToUpdate
@@ -27,9 +30,16 @@ extension EditCategoryViewModel {
             }
         }
 
-        guard isValid else { return }
+        guard isValid else {
+            completion(nil)
+            return
+        }
 
         completion(category)
+    }
+
+    func clearErrorState() {
+        errorMessage = .empty
     }
 }
 
@@ -40,7 +50,7 @@ extension EditCategoryViewModel {
             return false
         }
 
-        errorMessage = nil
+        errorMessage = .empty
         return true
     }
 }

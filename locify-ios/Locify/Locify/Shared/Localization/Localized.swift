@@ -39,4 +39,9 @@ extension Button where Label == Text {
     init(_ key: some LocalizedKey, action: @escaping () -> Void) {
         self.init(String.localized(key), action: action)
     }
+
+    /// Initializes a Button using a LocalizedKey as the title and a specific role.
+    init(_ key: some LocalizedKey, role: ButtonRole?, action: @escaping () -> Void) {
+        self.init(String.localized(key), role: role, action: action)
+    }
 }

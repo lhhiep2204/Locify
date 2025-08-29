@@ -42,7 +42,7 @@ struct LocationListView: View {
                     Button {
                         showAddLocation = true
                     } label: {
-                        Text(String.localized(CommonKeys.add))
+                        Text(CommonKeys.add)
                     }
                 }
             }
