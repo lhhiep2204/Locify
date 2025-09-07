@@ -196,7 +196,7 @@ extension EditLocationView {
                         }
                 }
             }
-            .navigationTitle(Text(CategoryKeys.selectCategory))
+            .navigationTitle(Text(CategoryKeys.title))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {

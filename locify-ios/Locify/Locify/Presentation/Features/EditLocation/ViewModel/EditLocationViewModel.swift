@@ -98,12 +98,12 @@ extension EditLocationViewModel {
             return false
         }
 
-        if address.isEmpty {
+        if address.trimmed.isEmpty {
             errorMessage = "Please select a location."
             return false
         }
 
-        errorMessage = .empty
+        clearErrorState()
         return true
     }
 }

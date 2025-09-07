@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LocationListView: View {
     @Environment(\.viewModelFactory) private var factory
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.dismissSheet) private var dismissSheet
     @Environment(\.selectLocation) private var selectLocation
 
@@ -29,7 +30,17 @@ struct LocationListView: View {
 
     var body: some View {
         listView
+            .navigationTitle(Text(viewModel.category.name))
+            .navigationBarBackButtonHidden(true)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image.appSystemIcon(.back)
+                    }
+                }
+
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismissSheet()
@@ -46,7 +57,6 @@ struct LocationListView: View {
                     }
                 }
             }
-            .navigationTitle(Text(viewModel.category.name))
             .task {
                 if !isFetched {
                     await viewModel.fetchLocations()

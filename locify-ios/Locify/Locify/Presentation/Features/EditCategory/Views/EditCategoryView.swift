@@ -12,12 +12,15 @@ enum EditMode {
 }
 
 struct EditCategoryView: View {
+    enum FocusField {
+        case name
+    }
+
+    @FocusState private var focusField: FocusField?
+
     @Environment(\.dismiss) private var dismiss
 
-    @FocusState private var editing
-
     @State private var viewModel: EditCategoryViewModel
-    @State private var showErrorAlert: Bool = false
 
     let editMode: EditMode
     let categoryToUpdate: Category?
@@ -42,6 +45,8 @@ struct EditCategoryView: View {
     var body: some View {
         NavigationStack {
             contentView
+                .navigationTitle(navigationTitle)
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
@@ -53,24 +58,15 @@ struct EditCategoryView: View {
 
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
+                            focusField = .none
                             saveCategory()
                         } label: {
                             Text(CommonKeys.save)
                         }
                     }
                 }
-                .navigationTitle(navigationTitle)
-                .navigationBarTitleDisplayMode(.inline)
                 .presentationDetents([.fraction(0.25)])
                 .interactiveDismissDisabled()
-                .alert(
-                    viewModel.errorMessage,
-                    isPresented: $showErrorAlert
-                ) {
-                    Button(CommonKeys.close) {
-                        viewModel.clearErrorState()
-                    }
-                }
         }
     }
 }
@@ -79,14 +75,26 @@ extension EditCategoryView {
     private var contentView: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                DSTextField(text: $viewModel.name)
-                    .label(.localized(CategoryKeys.categoryName))
-                    .focused($editing)
+                DSTextField(
+                    text: $viewModel.name,
+                    state: viewModel.errorMessage.isEmpty ? .normal : .error
+                )
+                .label(.localized(CategoryKeys.categoryName))
+                .description(viewModel.errorMessage)
+                .focused($focusField, equals: .name)
             }
             .padding(DSSpacing.large)
         }
+        .onChange(of: focusField) {
+            switch focusField {
+            case .name:
+                viewModel.clearErrorState()
+            case .none:
+                break
+            }
+        }
         .onTapGesture {
-            editing = false
+            focusField = .none
         }
     }
 
@@ -103,12 +111,10 @@ extension EditCategoryView {
 extension EditCategoryView {
     private func saveCategory() {
         viewModel.createCategory(categoryToUpdate: categoryToUpdate) { category in
-            if let category {
-                onSave(category)
-                dismiss()
-            } else {
-                showErrorAlert = true
-            }
+            guard let category else { return }
+
+            onSave(category)
+            dismiss()
         }
     }
 }

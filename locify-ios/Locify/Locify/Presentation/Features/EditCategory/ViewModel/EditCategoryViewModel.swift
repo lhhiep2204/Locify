@@ -45,12 +45,12 @@ extension EditCategoryViewModel {
 
 extension EditCategoryViewModel {
     private var isValid: Bool {
-        if name.isEmpty {
+        if name.trimmed.isEmpty {
             errorMessage = "Please enter a name."
             return false
         }
 
-        errorMessage = .empty
+        clearErrorState()
         return true
     }
 }

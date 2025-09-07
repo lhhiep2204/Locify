@@ -28,6 +28,7 @@ struct CategoryListView: View {
 
     var body: some View {
         listView
+            .navigationTitle(Text(CategoryKeys.title))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -45,7 +46,6 @@ struct CategoryListView: View {
                     }
                 }
             }
-            .navigationTitle(Text(CategoryKeys.title))
             .task {
                 if !isFetched {
                     await viewModel.fetchCategories()
