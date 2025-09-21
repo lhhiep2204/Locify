@@ -35,6 +35,8 @@ struct MapView: View {
                         }
                 }
             }
+
+            UserAnnotation()
         }
         .mapControlVisibility(.hidden)
         .onAppear { updateCamera() }

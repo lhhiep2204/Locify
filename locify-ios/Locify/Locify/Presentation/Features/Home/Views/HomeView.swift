@@ -13,7 +13,7 @@ struct HomeView: View {
     @State private var viewModel: HomeViewModel
 
     @State private var showLocationDetail: Bool = true
-    @State private var locationDetailDetent: PresentationDetent = .fraction(0.25)
+    @State private var locationDetailDetent: PresentationDetent = .small
 
     @State private var showCategoryListView: Bool = false
 
@@ -53,6 +53,27 @@ struct HomeView: View {
             viewModel.selectedLocationId = selectedId
             viewModel.locations = locations
         }
+        .alert(
+            Text(MessageKeys.permissionDeniedTitle),
+            isPresented: $viewModel.permissionDenied
+        ) {
+            Button(
+                String.localized(CommonKeys.settings)
+            ) {
+                showLocationDetail = true
+
+                guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                UIApplication.shared.open(url)
+            }
+            Button(
+                String.localized(CommonKeys.cancel),
+                role: .cancel
+            ) {
+                showLocationDetail = true
+            }
+        } message: {
+            Text(MessageKeys.permissionDeniedMessage)
+        }
     }
 }
 
@@ -72,22 +93,57 @@ extension HomeView {
                     locationDetailView
                 }
                 .presentationDetents(
-                    [.fraction(0.2), .fraction(0.5)],
+                    [.small, .medium, .fraction(0.90)],
                     selection: $locationDetailDetent
                 )
                 .interactiveDismissDisabled()
                 .presentationBackgroundInteraction(.enabled)
             }
             .onChange(of: viewModel.selectedLocationId) {
-                locationDetailDetent = .fraction(0.25)
+                locationDetailDetent = .small
             }
     }
 
     private var mapView: some View {
-        MapView(
-            selectedLocation: selectedLocation,
-            locations: viewModel.locations
-        )
+        ZStack {
+            MapView(
+                selectedLocation: selectedLocation,
+                locations: viewModel.locations.filter { $0.id != Constants.myLocationId }
+            )
+            topView
+        }
+    }
+
+    private var topView: some View {
+        VStack {
+            HStack {
+                showCategoryListButton
+                Spacer()
+                showUserLocationButton
+            }
+            Spacer()
+        }
+        .padding()
+    }
+
+    private var showCategoryListButton: some View {
+        Button {
+            showCategoryListView = true
+        } label: {
+            Image.appSystemIcon(.list)
+        }
+        .buttonStyle(.glass)
+    }
+
+    private var showUserLocationButton: some View {
+        Button {
+            Task {
+                await viewModel.getUserLocation()
+            }
+        } label: {
+            Image.appSystemIcon(.location)
+        }
+        .buttonStyle(.glass)
     }
 
     private var locationDetailView: some View {
@@ -95,31 +151,10 @@ extension HomeView {
             location: selectedLocation,
             relatedLocations: viewModel.relatedLocations
         ) { locationId in
+            viewModel.locations.removeAll { $0.id == Constants.myLocationId }
             viewModel.selectedLocationId = locationId
         }
-        .toolbar {
-            ToolbarItemGroup(placement: .topBarLeading) {
-                Button {
-                    showCategoryListView = true
-                } label: {
-                    Image.appSystemIcon(.list)
-                }
-
-                Button {
-
-                } label: {
-                    Image.appSystemIcon(.search)
-                }
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-
-                } label: {
-                    Image.appSystemIcon(.settings)
-                }
-            }
-        }
+        .toolbar(.hidden)
         .sheet(isPresented: $showCategoryListView) {
             RouterView(router)
         }

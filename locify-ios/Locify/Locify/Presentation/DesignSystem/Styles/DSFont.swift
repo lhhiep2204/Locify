@@ -30,14 +30,15 @@ enum DSFont {
 }
 
 enum DSFontSize {
-    case small, medium, large, custom(CGFloat)
+    case small, medium, large, xLarge, custom(CGFloat)
 
     /// Retrieves the corresponding font size in points.
     var size: CGFloat {
         switch self {
         case .small: 13
-        case .medium: 16
+        case .medium: 17
         case .large: 20
+        case .xLarge: 22
         case .custom(let size): size
         }
     }

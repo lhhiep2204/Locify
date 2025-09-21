@@ -14,26 +14,38 @@ struct LocationDetailView: View {
     let onSelectLocation: (UUID) -> Void
 
     var body: some View {
-        if let location {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: DSSpacing.medium) {
-                    infoView(location: location)
+        Group {
+            if let location {
+                VStack(alignment: .leading, spacing: DSSpacing.medium) {
+                    DSText(
+                        location.displayName,
+                        font: .bold(.xLarge)
+                    )
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: DSSpacing.medium) {
+                            infoView(location: location)
 
-                    if let notes = location.notes {
-                        notesView(notes: notes)
-                    }
+                            if let notes = location.notes {
+                                notesView(notes: notes)
+                            }
 
-                    if !relatedLocations.isEmpty {
-                        relatedLocationSection
+                            if !relatedLocations.isEmpty {
+                                relatedLocationSection
+                            }
+                        }
+                        .padding(.bottom, DSSpacing.large)
                     }
+                    .id(location.id)
                 }
-                .padding([.bottom, .horizontal], DSSpacing.large)
-                .navigationTitle(location.displayName)
+            } else {
+                ScrollView {
+                    DSText(.localized(HomeKeys.locationEmpty))
+                        .padding(DSSpacing.large)
+                }
             }
-            .id(location.id)
-        } else {
-            DSText(.localized(HomeKeys.locationEmpty))
         }
+        .padding(.top, DSSpacing.xLarge)
+        .padding(.horizontal, DSSpacing.large)
     }
 }
 
@@ -52,7 +64,7 @@ extension LocationDetailView {
     }
 
     private func nameView(name: String) -> some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
             DSText(
                 .localized(LocationKeys.name),
                 font: .bold(.small)
@@ -65,7 +77,7 @@ extension LocationDetailView {
     }
 
     private func addressView(address: String) -> some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
             DSText(
                 .localized(LocationKeys.address),
                 font: .bold(.small)
@@ -81,7 +93,7 @@ extension LocationDetailView {
         latitude: Double,
         longitude: Double
     ) -> some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
             DSText(
                 .localized(LocationKeys.coordinates),
                 font: .bold(.small)
@@ -89,7 +101,7 @@ extension LocationDetailView {
             HStack {
                 DSText(
                     .localized(LocationKeys.latitude),
-                    font: .bold(.small)
+                    font: .medium(.small)
                 )
                 DSText(
                     String(latitude),
@@ -99,7 +111,7 @@ extension LocationDetailView {
             HStack {
                 DSText(
                     .localized(LocationKeys.longitude),
-                    font: .bold(.small)
+                    font: .medium(.small)
                 )
                 DSText(
                     String(longitude),
@@ -125,7 +137,7 @@ extension LocationDetailView {
     }
 
     private var relatedLocationSection: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.small) {
+        VStack(alignment: .leading, spacing: DSSpacing.medium) {
             DSText(
                 .localized(HomeKeys.relatedLocations),
                 font: .bold(.small)
@@ -134,16 +146,16 @@ extension LocationDetailView {
             Divider()
 
             ForEach(relatedLocations) { item in
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
                     DSText(
                         item.name,
-                        font: .bold(.medium)
+                        font: .medium(.medium)
                     )
                     .lineLimit(1)
 
                     DSText(
                         item.address,
-                        font: .medium(.small)
+                        font: .regular(.small)
                     )
                     .lineLimit(1)
                 }
@@ -159,10 +171,8 @@ extension LocationDetailView {
 }
 
 #Preview {
-    NavigationStack {
-        LocationDetailView(
-            location: .constant(.mock),
-            relatedLocations: Location.mockList
-        ) { _ in }
-    }
+    LocationDetailView(
+        location: .constant(.mock),
+        relatedLocations: Location.mockList
+    ) { _ in }
 }

@@ -11,4 +11,8 @@ enum MessageKeys: String, LocalizedKey {
     // MARK: - D
     case deleteAlertTitle = "Are you sure you want to delete '%@'?"
     case deleteAlertMessage = "This action cannot be undone."
+
+    // MARK: - P
+    case permissionDeniedTitle = "Permission Denied"
+    case permissionDeniedMessage = "Please enable location services in settings."
 }

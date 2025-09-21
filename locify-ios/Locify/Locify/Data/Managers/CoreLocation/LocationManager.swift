@@ -7,7 +7,6 @@
 
 import Combine
 import CoreLocation
-import Foundation
 
 // MARK: - Protocols and Enums
 
@@ -15,9 +14,6 @@ import Foundation
 protocol LocationManagerProtocol {
     /// The current authorization status for location services.
     var authorizationStatus: CLAuthorizationStatus { get }
-
-    /// The last known location, if available.
-    var lastKnownLocation: CLLocation? { get }
 
     /// Requests location permission for the specified type.
     /// - Parameter type: The type of permission to request (`whenInUse` or `always`).
@@ -34,12 +30,6 @@ protocol LocationManagerProtocol {
 
     /// Stops updating the user's location.
     func stopUpdatingLocation()
-
-    /// Retrieves location information as a `Location` object for a given location.
-    /// - Parameter location: The `CLLocation` to geocode.
-    /// - Returns: A `Location` object containing detailed location data.
-    /// - Throws: `LocationError` if geocoding fails or network is unavailable.
-    func getLocationInfo(for location: CLLocation) async throws -> Location
 
     /// Publisher for real-time location updates.
     var locationUpdates: AnyPublisher<CLLocation, Never> { get }
@@ -94,7 +84,6 @@ final class LocationManager: NSObject, LocationManagerProtocol {
     static let shared = LocationManager()
 
     private let locationManager: CLLocationManager
-    private let geocoder: CLGeocoder
     private let locationSubject = PassthroughSubject<CLLocation, Never>()
     private let authorizationSubject = PassthroughSubject<CLAuthorizationStatus, Never>()
     private let errorSubject = PassthroughSubject<LocationError, Never>()
@@ -105,11 +94,6 @@ final class LocationManager: NSObject, LocationManagerProtocol {
     /// The current authorization status for location services.
     var authorizationStatus: CLAuthorizationStatus {
         locationManager.authorizationStatus
-    }
-
-    /// The last known location, if available.
-    var lastKnownLocation: CLLocation? {
-        lastKnownLocationStorage
     }
 
     /// Publisher for real-time location updates.
@@ -130,15 +114,9 @@ final class LocationManager: NSObject, LocationManagerProtocol {
     // MARK: - Initialization
 
     /// Initializes the location manager with dependencies.
-    /// - Parameters:
-    ///   - locationManager: The `CLLocationManager` instance (default: new instance).
-    ///   - geocoder: The `CLGeocoder` instance for reverse geocoding (default: new instance).
-    init(
-        locationManager: CLLocationManager = CLLocationManager(),
-        geocoder: CLGeocoder = CLGeocoder()
-    ) {
+    /// - Parameter locationManager: The `CLLocationManager` instance (default: new instance).
+    init(locationManager: CLLocationManager = CLLocationManager()) {
         self.locationManager = locationManager
-        self.geocoder = geocoder
         super.init()
         locationManager.delegate = self
     }
@@ -242,42 +220,32 @@ extension LocationManager {
     func stopUpdatingLocation() {
         locationManager.stopUpdatingLocation()
     }
-}
 
-// MARK: - Geocoding
-extension LocationManager {
-    /// Retrieves location information as a `Location` object for a given location.
-    /// - Parameter location: The `CLLocation` to geocode.
-    /// - Returns: A `Location` object containing detailed location data.
-    /// - Throws: `LocationError` if geocoding fails or network is unavailable.
-    func getLocationInfo(for location: CLLocation) async throws -> Location {
-        do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            guard let placemark = placemarks.first else {
-                throw LocationError.geocodingFailed("No address found.")
-            }
-
-            guard let address = placemark.locationAddress else {
-                throw LocationError.geocodingFailed("Invalid address data.")
-            }
-
-            let name = placemark.name ?? "My location"
-
-            return Location(
-                id: Constants.myLocationId,
-                categoryId: UUID(),
-                displayName: "My location",
-                name: name,
-                address: address,
-                latitude: location.coordinate.latitude,
-                longitude: location.coordinate.longitude,
-                createdAt: Date(),
-                updatedAt: Date()
-            )
-        } catch {
-            errorSubject.send(.geocodingFailed(error.localizedDescription))
-            throw LocationError.geocodingFailed(error.localizedDescription)
+    /// Returns the most recently recorded user location, if available.
+    ///
+    /// This method provides access to the last location delivered by Core Location and cached by the manager.
+    /// It retries up to 3 times, waiting 0.5 seconds between attempts, to give Core Location time to deliver
+    /// a value if updates have just started.
+    /// - Returns: The last known `CLLocation` if one has been received.
+    /// - Throws: `LocationError.locationUnavailable` if no location is available after retries.
+    func getLastKnownLocation() async throws -> CLLocation {
+        // Fast path if we already have a cached location
+        if let location = lastKnownLocationStorage {
+            return location
         }
+
+        // Retry up to 3 times, waiting 0.5 seconds between attempts
+        let maxRetries = 3
+        for attempt in 1...maxRetries {
+            try await Task.sleep(for: .seconds(0.5))
+            if let location = lastKnownLocationStorage {
+                return location
+            }
+            Logger.debug("Last known location unavailable. Retry #\(attempt) of #\(maxRetries)")
+        }
+
+        // After retries, still no location
+        throw LocationError.locationUnavailable
     }
 }
 
@@ -308,16 +276,5 @@ extension LocationManager: CLLocationManagerDelegate {
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         Logger.debug("Authorization changed: \(manager.authorizationStatus)")
         authorizationSubject.send(manager.authorizationStatus)
-    }
-}
-
-// MARK: - CLPlacemark Extension
-extension CLPlacemark {
-    /// Formats the placemark into a human-readable address string.
-    var locationAddress: String? {
-        let components = [subThoroughfare, thoroughfare, locality, administrativeArea, postalCode, country]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-        return components.isEmpty ? nil : components.joined(separator: ", ")
     }
 }

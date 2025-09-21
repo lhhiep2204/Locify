@@ -31,16 +31,7 @@ struct LocationListView: View {
     var body: some View {
         listView
             .navigationTitle(Text(viewModel.category.name))
-            .navigationBarBackButtonHidden(true)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image.appSystemIcon(.back)
-                    }
-                }
-
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         dismissSheet()
@@ -138,16 +129,16 @@ extension LocationListView {
     }
 
     private func locationItemView(_ location: Location) -> some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
             DSText(
                 location.displayName,
-                font: .bold(.large)
+                font: .medium(.medium)
             )
             .lineLimit(1)
 
             DSText(
                 location.address,
-                font: .medium(.medium)
+                font: .regular(.small)
             )
             .lineLimit(2)
         }

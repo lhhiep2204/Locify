@@ -126,8 +126,11 @@ extension CategoryListView {
     }
 
     private func categoryItemView(_ category: Category) -> some View {
-        DSText(category.name, font: .medium(.large))
-            .lineLimit(1)
+        HStack(spacing: DSSpacing.small) {
+            Image.appSystemIcon(.folder)
+            DSText(category.name, font: .medium(.medium))
+                .lineLimit(1)
+        }
     }
 
     private func editButtonView(_ category: Category) -> some View {

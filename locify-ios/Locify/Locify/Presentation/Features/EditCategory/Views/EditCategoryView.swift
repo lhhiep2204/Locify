@@ -65,7 +65,7 @@ struct EditCategoryView: View {
                         }
                     }
                 }
-                .presentationDetents([.fraction(0.25)])
+                .presentationDetents([.small])
                 .interactiveDismissDisabled()
         }
     }
