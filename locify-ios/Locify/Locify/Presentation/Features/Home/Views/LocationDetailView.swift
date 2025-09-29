@@ -12,30 +12,25 @@ struct LocationDetailView: View {
 
     let relatedLocations: [Location]
     let onSelectLocation: (UUID) -> Void
+    let onSearchLocation: () -> Void
+    let onCloseSelectedLocation: () -> Void
 
     var body: some View {
         Group {
             if let location {
                 VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                    DSText(
-                        location.displayName,
-                        font: .bold(.xLarge)
-                    )
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: DSSpacing.medium) {
-                            infoView(location: location)
+                    topView(location: location)
+                        .padding(.horizontal, DSSpacing.xLarge)
 
-                            if let notes = location.notes {
-                                notesView(notes: notes)
-                            }
+                    List {
+                        infoView(location: location)
 
-                            if !relatedLocations.isEmpty {
-                                relatedLocationSection
-                            }
+                        if !relatedLocations.isEmpty {
+                            relatedLocationSection
                         }
-                        .padding(.bottom, DSSpacing.large)
                     }
                     .id(location.id)
+                    .scrollContentBackground(.hidden)
                 }
             } else {
                 ScrollView {
@@ -45,46 +40,78 @@ struct LocationDetailView: View {
             }
         }
         .padding(.top, DSSpacing.xLarge)
-        .padding(.horizontal, DSSpacing.large)
     }
 }
 
 extension LocationDetailView {
+    private func topView(location: Location) -> some View {
+        HStack(alignment: .top, spacing: DSSpacing.small) {
+            DSText(
+                location.displayName,
+                font: .bold(.xLarge)
+            )
+            .lineLimit(2)
+            .minimumScaleFactor(0.7)
+            .padding(.top, DSSpacing.xSmall)
+
+            Spacer()
+
+            Button {
+                onSearchLocation()
+            } label: {
+                Image.appSystemIcon(.search)
+                    .frame(height: DSSize.large)
+            }
+            .buttonStyle(.glass)
+
+            if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
+                Button {
+                    onCloseSelectedLocation()
+                } label: {
+                    Image.appSystemIcon(.close)
+                        .frame(height: DSSize.large)
+                }
+                .buttonStyle(.glass)
+            }
+        }
+    }
+
     private func infoView(location: Location) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            nameView(name: location.name)
-            addressView(address: location.address)
-            coordinatesView(
-                latitude: location.latitude,
-                longitude: location.longitude
+        Section {
+            Group {
+                nameView(name: location.name)
+                addressView(address: location.address)
+                coordinatesView(
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                )
+
+                if let notes = location.notes {
+                    notesView(notes: notes)
+                }
+            }
+        } header: {
+            DSText(
+                .localized(HomeKeys.locationInfo),
+                font: .regular(.small)
             )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dsContainerStyle()
     }
 
     private func nameView(name: String) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
-            DSText(
-                .localized(LocationKeys.name),
-                font: .bold(.small)
-            )
-            DSText(
-                name,
-                font: .regular(.medium)
+            infoItemView(
+                title: .localized(LocationKeys.name),
+                value: name
             )
         }
     }
 
     private func addressView(address: String) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
-            DSText(
-                .localized(LocationKeys.address),
-                font: .bold(.small)
-            )
-            DSText(
-                address,
-                font: .regular(.medium)
+            infoItemView(
+                title: .localized(LocationKeys.address),
+                value: address
             )
         }
     }
@@ -123,28 +150,28 @@ extension LocationDetailView {
 
     private func notesView(notes: String) -> some View {
         VStack(alignment: .leading) {
+            infoItemView(
+                title: .localized(LocationKeys.notes),
+                value: notes
+            )
+        }
+    }
+
+    private func infoItemView(title: String, value: String) -> some View {
+        Group {
             DSText(
-                .localized(LocationKeys.notes),
+                title,
                 font: .bold(.small)
             )
             DSText(
-                notes,
+                value,
                 font: .regular(.medium)
             )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dsContainerStyle()
     }
 
     private var relatedLocationSection: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.medium) {
-            DSText(
-                .localized(HomeKeys.relatedLocations),
-                font: .bold(.small)
-            )
-
-            Divider()
-
+        Section {
             ForEach(relatedLocations) { item in
                 VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
                     DSText(
@@ -165,8 +192,12 @@ extension LocationDetailView {
                     onSelectLocation(item.id)
                 }
             }
+        } header: {
+            DSText(
+                .localized(HomeKeys.relatedLocations),
+                font: .regular(.small)
+            )
         }
-        .dsContainerStyle()
     }
 }
 
@@ -175,4 +206,6 @@ extension LocationDetailView {
         location: .constant(.mock),
         relatedLocations: Location.mockList
     ) { _ in }
+    onSearchLocation: { }
+    onCloseSelectedLocation: { }
 }

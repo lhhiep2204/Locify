@@ -61,6 +61,13 @@ extension HomeViewModel {
             }
         }
     }
+
+    func clearSelectedLocation() {
+        Task {
+            await getUserLocation()
+        }
+        locations = []
+    }
 }
 
 extension HomeViewModel {

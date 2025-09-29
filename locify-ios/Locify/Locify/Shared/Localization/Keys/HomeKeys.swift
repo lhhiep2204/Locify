@@ -10,6 +10,7 @@ import Foundation
 enum HomeKeys: String, LocalizedKey {
     // MARK: - L
     case locationEmpty = "Please select a location"
+    case locationInfo = "Location Info"
 
     // MARK: - R
     case relatedLocations = "Related Locations"

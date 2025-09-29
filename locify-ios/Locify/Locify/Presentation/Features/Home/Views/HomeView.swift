@@ -131,6 +131,7 @@ extension HomeView {
             showCategoryListView = true
         } label: {
             Image.appSystemIcon(.list)
+                .frame(height: DSSize.large)
         }
         .buttonStyle(.glass)
     }
@@ -142,6 +143,7 @@ extension HomeView {
             }
         } label: {
             Image.appSystemIcon(.location)
+                .frame(height: DSSize.large)
         }
         .buttonStyle(.glass)
     }
@@ -153,6 +155,11 @@ extension HomeView {
         ) { locationId in
             viewModel.locations.removeAll { $0.id == Constants.myLocationId }
             viewModel.selectedLocationId = locationId
+        } onSearchLocation: {
+            Logger.info("Comming soon")
+        } onCloseSelectedLocation: {
+            viewModel.clearSelectedLocation()
+            router.popToRoot()
         }
         .toolbar(.hidden)
         .sheet(isPresented: $showCategoryListView) {

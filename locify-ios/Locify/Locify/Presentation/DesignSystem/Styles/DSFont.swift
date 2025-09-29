@@ -38,7 +38,7 @@ enum DSFontSize {
         case .small: 13
         case .medium: 17
         case .large: 20
-        case .xLarge: 22
+        case .xLarge: 24
         case .custom(let size): size
         }
     }
