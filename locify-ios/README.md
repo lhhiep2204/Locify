@@ -183,7 +183,7 @@ locify-ios
 ```
 
 ### Key Components
-- **Dependency Injection**: A custom `ViewModelFactory` in `Shared/DI` serves as a singleton factory for creating ViewModels (e.g., `HomeViewModel`, `SettingsViewModel`) with their dependencies, using Swift’s modern concurrency model (`actor`) for thread-safe access. Dependencies (e.g., `MapService`, `SyncService`, `FetchCategoriesUseCase`) are initialized on demand in factory methods to ensure unused services are not created, optimizing resource efficiency. The factory supports a configuration option to toggle between mock and production services (e.g., Firebase, Google Maps) and integrates with SwiftUI using `async` methods for ViewModel creation.
+- **Dependency Injection**: A custom `AppContainer` in `Shared/DI` serves as the composition root, acting as a singleton factory for creating ViewModels (e.g., `HomeViewModel`, `SettingsViewModel`) and their dependencies, including repositories and use cases, using Swift’s modern concurrency model (`actor`) for thread-safe access. Dependencies (e.g., `MapService`, `SyncService`, `FetchCategoriesUseCase`) are initialized on demand in factory methods to optimize resource efficiency. The container supports a configuration option to toggle between mock and production services (e.g., Firebase, Google Maps) and integrates with SwiftUI using `async` methods for ViewModel creation.
 - **Navigation**: Managed in `Presentation/Routing` using `NavigationStack` and `NavigationPath`, with a centralized `Router` for consistent navigation across features.
 - **Offline Support**: SwiftData in `Data/Storage/LocalData/SwiftData` handles local storage, with `SyncManager` managing offline/online synchronization using `sync_status` (synced, pendingCreate, pendingUpdate, pendingDelete), as detailed in the [Locify_Data_Sync_Flow.md](./../docs/Locify_Data_Sync_Flow.md). Offline mode displays the last known location on the selected map provider.
 - **Design System**: Reusable UI components (e.g., `Button`, `Map`, `TextField`) in `Presentation/DesignSystem/Components` ensure consistent styling across SwiftUI views, with styles defined in `Styles`. Custom components are stored in `Presentation/DesignSystem/Components/Custom` to organize complex or domain-specific UI elements (e.g., `LocationCardView`, `MapPreviewView`, `CategoryTagView`) separately from core components (e.g., `Button`, `Dialog`).
@@ -196,14 +196,14 @@ locify-ios
 - **Testing**: Comprehensive test suites in `Tests/UnitTests` cover `Data` (Repositories, Network, Storage, MapKit), `Domain` (Entities, UseCases), and `Presentation` (ViewModels, Routing), with `Mocks` for repositories, services (including `MapService` for both Google Maps and Apple Maps), and ViewModels in `Tests/Mocks`. `Tests/UITests` validate UI flows, including map provider switching, offline sync, and error handling scenarios.
 
 ### Architecture Diagram
-The following diagram illustrates the relationships between directories in Locify’s Clean Architecture, highlighting dependency flow through the `ViewModelFactory`.
+The following diagram illustrates the relationships between directories in Locify’s Clean Architecture, highlighting dependency flow through the `AppContainer`.
 
 ```mermaid
 graph LR
     A[App] -->|Initializes| B[Shared]
-    B -->|ViewModelFactory| C[Domain]
-    B -->|ViewModelFactory| D[Data]
-    B -->|ViewModelFactory| E[Presentation]
+    B -->|AppContainer| C[Domain]
+    B -->|AppContainer| D[Data]
+    B -->|AppContainer| E[Presentation]
     D -->|Implements Protocols| C
     E -->|Calls UseCases| C
     E -->|Uses| F[Resources]

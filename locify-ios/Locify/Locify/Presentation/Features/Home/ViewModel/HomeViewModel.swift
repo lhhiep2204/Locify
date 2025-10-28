@@ -6,42 +6,59 @@
 //
 
 import Combine
+import CoreLocation
 import Foundation
 
+@MainActor
 @Observable
 class HomeViewModel {
-    var selectedLocationId: UUID?
-    var locations: [Location] = []
+    private let getUserLocationUseCase: GetUserLocationUseCaseProtocol
+    private let locationManager: LocationManagerProtocol
+    private let appleMapService: AppleMapServiceProtocol
+
+    private(set) var selectedLocationId: UUID?
+    private(set) var locationList: [Location] = []
     var permissionDenied: Bool = false
 
-    private let locationManager = LocationManager.shared
-    private let appleMapService = AppleMapService()
+    private var cancellables = Set<AnyCancellable>()
 
     var selectedLocation: Location? {
-        guard let selectedLocationId else { return nil }
-        return locations.first(where: { $0.id == selectedLocationId })
+        locationList.first(where: { $0.id == selectedLocationId })
     }
 
     var relatedLocations: [Location] {
-        guard let selectedLocationId else { return [] }
-        return locations.filter { $0.id != selectedLocationId }
+        locationList.filter { $0.id != selectedLocationId }
     }
 
-    init() {
+    init(
+        getUserLocationUseCase: GetUserLocationUseCaseProtocol,
+        locationManager: LocationManagerProtocol,
+        appleMapService: AppleMapServiceProtocol
+    ) {
+        self.getUserLocationUseCase = getUserLocationUseCase
+        self.locationManager = locationManager
+        self.appleMapService = appleMapService
+
         Task {
             do {
                 try await requestAndUpdateUserLocation()
+            } catch LocationError.permissionDenied {
+                handlePermissionDenied()
             } catch {
-                if let error = error as? LocationError {
-                    switch error {
-                    case .permissionDenied:
-                        Logger.error("Permission denied")
-                    default:
-                        Logger.error(error.localizedDescription)
-                    }
-                }
+                Logger.error(error.localizedDescription)
             }
         }
+
+        locationManager.authorizationUpdates
+            .dropFirst()
+            .sink { [weak self] status in
+                guard let self else { return }
+
+                if case .denied = status {
+                    handlePermissionDenied()
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -49,41 +66,67 @@ extension HomeViewModel {
     func getUserLocation() async {
         do {
             try await requestAndUpdateUserLocation()
+        } catch LocationError.permissionDenied {
+            handlePermissionDenied()
+            permissionDenied = true
         } catch {
-            if let error = error as? LocationError {
-                switch error {
-                case .permissionDenied:
-                    Logger.error("Permission denied")
-                    permissionDenied = true
-                default:
-                    Logger.error(error.localizedDescription)
-                }
-            }
+            Logger.error(error.localizedDescription)
         }
     }
 
-    func clearSelectedLocation() {
-        Task {
+    func selectLocation(_ location: Location?) {
+        selectedLocationId = location?.id
+    }
+
+    func selectLocationFromCategoryList(id: UUID, locations: [Location]) {
+        selectedLocationId = id
+        locationList = locations
+    }
+
+    func selectRelatedLocation(_ locationId: UUID) {
+        selectedLocationId = locationId
+        locationList.removeAll(where: \.isTemporary)
+    }
+
+    func selectLocationFromSearch(_ location: Location) {
+        selectedLocationId = location.id
+        locationList.removeAll(where: \.isTemporary)
+        locationList.insert(location, at: 0)
+    }
+
+    func clearSelectedLocation() async {
+        let isTemporaryLocation: Bool = {
+            selectedLocationId == Constants.myLocationId ||
+            selectedLocationId == Constants.searchedLocationId
+        }()
+
+        if locationList.count > 2 && isTemporaryLocation {
+            locationList.removeAll(where: \.isTemporary)
+            selectedLocationId = locationList.first?.id
+        } else {
+            locationList.removeAll()
             await getUserLocation()
         }
-        locations = []
     }
 }
 
 extension HomeViewModel {
     private func requestAndUpdateUserLocation() async throws {
-        let isGranted = try await locationManager.requestPermission(type: .whenInUse)
+        let location = try await getUserLocationUseCase.execute()
+        selectedLocationId = location.id
+        locationList.removeAll { $0.id == Constants.searchedLocationId }
+        locationList.insert(location, at: 0)
+    }
 
-        if isGranted {
-            try await locationManager.startUpdatingLocation()
+    private func handlePermissionDenied() {
+        Logger.error("Permission denied")
+        selectedLocationId = nil
+        locationList.removeAll { $0.id == Constants.myLocationId }
+    }
+}
 
-            let locationInfo = try await appleMapService.getLocationInfo(
-                for: locationManager.getLastKnownLocation()
-            )
-            locations.insert(locationInfo, at: 0)
-            selectedLocationId = locationInfo.id
-        } else {
-            Logger.warning("Permission not granted")
-        }
+private extension Location {
+    var isTemporary: Bool {
+        id == Constants.myLocationId || id == Constants.searchedLocationId
     }
 }

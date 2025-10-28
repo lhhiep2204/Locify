@@ -32,6 +32,7 @@ enum CommonKeys: String, LocalizedKey {
 
     // MARK: - S
     case save = "Save"
+    case search = "Search"
     case settings = "Settings"
     case share = "Share"
 }

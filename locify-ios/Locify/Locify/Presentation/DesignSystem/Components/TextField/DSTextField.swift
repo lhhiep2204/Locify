@@ -119,6 +119,7 @@ struct DSTextField: View {
             }
 
             inputView
+                .glassEffect(.clear.interactive())
 
             if !object.description.isEmpty {
                 DSText(

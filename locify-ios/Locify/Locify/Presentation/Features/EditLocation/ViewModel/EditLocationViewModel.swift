@@ -7,12 +7,13 @@
 
 import Foundation
 
+@MainActor
 @Observable
 class EditLocationViewModel {
-    private(set) var categories: [Category] = []
-
     private let fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol
     private let addCategoryUseCase: AddCategoryUseCaseProtocol
+
+    private(set) var categories: [Category] = []
 
     var category: Category?
 

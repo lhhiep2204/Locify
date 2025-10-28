@@ -7,12 +7,13 @@
 
 import Foundation
 
+@MainActor
 @Observable
 class LocationListViewModel {
-    private(set) var locations: [Location] = []
-
-    let category: Category
     private let locationUseCase: LocationUseCases
+
+    private(set) var locations: [Location] = []
+    let category: Category
 
     init(
         category: Category,

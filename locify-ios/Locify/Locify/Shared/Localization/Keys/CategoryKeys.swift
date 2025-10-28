@@ -9,19 +9,18 @@ import Foundation
 
 enum CategoryKeys: String, LocalizedKey {
     // MARK: - A
-    case addCategory = "Add category"
+    case addCategory = "New List"
 
     // MARK: - C
     case category = "Category"
     case categoryName = "Name"
-    case createCategory = "Create category"
 
     // MARK: - T
-    case title = "Categories"
+    case title = "My Lists"
 
     // MARK: - U
-    case updateCategory = "Update category"
+    case updateCategory = "Edit List"
 
     // MARK: - S
-    case selectCategory = "Select category"
+    case selectCategory = "Select a List"
 }

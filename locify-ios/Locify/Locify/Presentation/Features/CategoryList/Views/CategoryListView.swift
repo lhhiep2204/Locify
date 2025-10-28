@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CategoryListView: View {
-    @Environment(\.viewModelFactory) private var factory
+    @Environment(\.appContainer) private var container
     @Environment(\.dismissSheet) private var dismissSheet
 
     @State private var viewModel: CategoryListViewModel
@@ -54,7 +54,7 @@ struct CategoryListView: View {
             }
             .sheet(isPresented: $showAddCategory) {
                 EditCategoryView(
-                    factory.makeEditCategoryViewModel(),
+                    container.makeEditCategoryViewModel(),
                     editMode: .add
                 ) { category in
                     Task {
@@ -64,7 +64,7 @@ struct CategoryListView: View {
             }
             .sheet(item: $categoryToUpdate) { category in
                 EditCategoryView(
-                    factory.makeEditCategoryViewModel(),
+                    container.makeEditCategoryViewModel(),
                     editMode: .update,
                     categoryToUpdate: category
                 ) { updatedCategory in
@@ -162,6 +162,6 @@ extension CategoryListView {
 
 #Preview {
     NavigationStack {
-        CategoryListView(ViewModelFactory.shared.makeCategoryListViewModel())
+        CategoryListView(AppContainer.shared.makeCategoryListViewModel())
     }
 }

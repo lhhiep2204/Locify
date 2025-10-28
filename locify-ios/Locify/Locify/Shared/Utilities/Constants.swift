@@ -9,4 +9,5 @@ import Foundation
 
 struct Constants {
     static let myLocationId: UUID = .init()
+    static let searchedLocationId: UUID = .init()
 }

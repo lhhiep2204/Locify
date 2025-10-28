@@ -10,7 +10,7 @@ import Foundation
 enum LocationKeys: String, LocalizedKey {
     // MARK: - A
     case address = "Address"
-    case addLocation = "Add location"
+    case addLocation = "New Location"
 
     // MARK: - C
     case coordinates = "Coordinates"
@@ -27,8 +27,8 @@ enum LocationKeys: String, LocalizedKey {
     case longitude = "Longitude"
 
     // MARK: - U
-    case updateLocation = "Update location"
+    case updateLocation = "Edit Location"
 
     // MARK: - S
-    case searchLocation = "Search location"
+    case searchLocation = "Search Location"
 }

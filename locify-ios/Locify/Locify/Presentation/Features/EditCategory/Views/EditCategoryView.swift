@@ -38,7 +38,7 @@ struct EditCategoryView: View {
         self.onSave = onSave
 
         if let categoryToUpdate {
-            viewModel.name = categoryToUpdate.name
+            viewModel.updateCategoryName(categoryToUpdate.name)
         }
     }
 
@@ -67,6 +67,9 @@ struct EditCategoryView: View {
                 }
                 .presentationDetents([.small])
                 .interactiveDismissDisabled()
+                .onAppear {
+                    focusField = .name
+                }
         }
     }
 }
@@ -121,7 +124,7 @@ extension EditCategoryView {
 
 #Preview {
     EditCategoryView(
-        ViewModelFactory.shared.makeEditCategoryViewModel(),
+        AppContainer.shared.makeEditCategoryViewModel(),
         editMode: .add
     ) { _ in }
 }

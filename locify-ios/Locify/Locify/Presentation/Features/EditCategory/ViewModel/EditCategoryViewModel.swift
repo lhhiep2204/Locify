@@ -7,10 +7,10 @@
 
 import Foundation
 
+@MainActor
 @Observable
 class EditCategoryViewModel {
     var name: String = .empty
-
     private(set) var errorMessage: String = .empty
 }
 
@@ -36,6 +36,10 @@ extension EditCategoryViewModel {
         }
 
         completion(category)
+    }
+
+    func updateCategoryName(_ categoryName: String) {
+        name = categoryName
     }
 
     func clearErrorState() {

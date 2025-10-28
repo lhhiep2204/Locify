@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LocationListView: View {
-    @Environment(\.viewModelFactory) private var factory
+    @Environment(\.appContainer) private var container
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dismissSheet) private var dismissSheet
     @Environment(\.selectLocation) private var selectLocation
@@ -56,7 +56,7 @@ struct LocationListView: View {
             }
             .sheet(isPresented: $showAddLocation) {
                 EditLocationView(
-                    factory.makeEditLocationViewModel(),
+                    container.makeEditLocationViewModel(),
                     editMode: .add,
                     category: viewModel.category
                 ) { location in
@@ -67,7 +67,7 @@ struct LocationListView: View {
             }
             .sheet(item: $locationToUpdate) { location in
                 EditLocationView(
-                    factory.makeEditLocationViewModel(),
+                    container.makeEditLocationViewModel(),
                     editMode: .update,
                     category: viewModel.category,
                     locationToUpdate: location
@@ -191,7 +191,7 @@ extension LocationListView {
     if let category = Category.mockList.first {
         NavigationStack {
             LocationListView(
-                ViewModelFactory.shared.makeLocationListViewModel(category: category)
+                AppContainer.shared.makeLocationListViewModel(category: category)
             )
         }
     }

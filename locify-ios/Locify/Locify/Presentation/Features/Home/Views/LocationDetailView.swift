@@ -16,30 +16,37 @@ struct LocationDetailView: View {
     let onCloseSelectedLocation: () -> Void
 
     var body: some View {
-        Group {
-            if let location {
-                VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                    topView(location: location)
-                        .padding(.horizontal, DSSpacing.xLarge)
+        ZStack(alignment: .bottomTrailing) {
+            Group {
+                if let location {
+                    VStack(alignment: .leading, spacing: DSSpacing.medium) {
+                        topView(location: location)
+                            .padding(.horizontal, DSSpacing.xLarge)
 
-                    List {
-                        infoView(location: location)
+                        List {
+                            infoView(location: location)
 
-                        if !relatedLocations.isEmpty {
-                            relatedLocationSection
+                            if !relatedLocations.isEmpty {
+                                relatedLocationSection
+                            }
                         }
+                        .id(location.id)
+                        .scrollContentBackground(.hidden)
                     }
-                    .id(location.id)
-                    .scrollContentBackground(.hidden)
-                }
-            } else {
-                ScrollView {
-                    DSText(.localized(HomeKeys.locationEmpty))
-                        .padding(DSSpacing.large)
+                } else {
+                    VStack(alignment: .center, spacing: DSSpacing.medium) {
+                        DSText(.localized(HomeKeys.locationEmpty))
+                            .padding(DSSpacing.large)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .padding(.horizontal, DSSpacing.xLarge)
                 }
             }
+            .padding(.top, DSSpacing.xLarge)
+
+            bottomView
+                .padding(.horizontal, DSSpacing.large)
         }
-        .padding(.top, DSSpacing.xLarge)
     }
 }
 
@@ -56,22 +63,18 @@ extension LocationDetailView {
 
             Spacer()
 
-            Button {
-                onSearchLocation()
-            } label: {
-                Image.appSystemIcon(.search)
-                    .frame(height: DSSize.large)
+            ShareLink(item: "location.infoToShare()") {
+                Image.appSystemIcon(.share)
             }
-            .buttonStyle(.glass)
+            .circularGlassEffect()
 
             if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
                 Button {
                     onCloseSelectedLocation()
                 } label: {
                     Image.appSystemIcon(.close)
-                        .frame(height: DSSize.large)
                 }
-                .buttonStyle(.glass)
+                .circularGlassEffect()
             }
         }
     }
@@ -197,6 +200,20 @@ extension LocationDetailView {
                 .localized(HomeKeys.relatedLocations),
                 font: .regular(.small)
             )
+        }
+    }
+
+    private var bottomView: some View {
+        HStack(alignment: .top, spacing: DSSpacing.small) {
+            Spacer()
+
+            Button {
+                onSearchLocation()
+            } label: {
+                Image.appSystemIcon(.search)
+                    .font(.appFont(.regular(.large)))
+            }
+            .circularGlassEffect(size: 52)
         }
     }
 }

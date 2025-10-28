@@ -58,6 +58,8 @@ struct EditLocationView: View {
     var body: some View {
         NavigationStack {
             contentView
+                .navigationTitle(navigationTitle)
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
@@ -75,8 +77,6 @@ struct EditLocationView: View {
                         }
                     }
                 }
-                .navigationTitle(navigationTitle)
-                .navigationBarTitleDisplayMode(.inline)
                 .interactiveDismissDisabled()
                 .task {
                     await viewModel.fetchCategories()
@@ -233,7 +233,7 @@ extension EditLocationView {
 
 #Preview {
     EditLocationView(
-        ViewModelFactory.shared.makeEditLocationViewModel(),
+        AppContainer.shared.makeEditLocationViewModel(),
         editMode: .add
     ) { _ in }
 }

@@ -8,8 +8,6 @@
 import Combine
 import CoreLocation
 
-// MARK: - Protocols and Enums
-
 /// Protocol defining the interface for location management operations.
 protocol LocationManagerProtocol {
     /// The current authorization status for location services.
@@ -21,15 +19,17 @@ protocol LocationManagerProtocol {
     /// - Throws: `LocationError` if permission cannot be requested or is denied.
     func requestPermission(type: LocationPermissionType) async throws -> Bool
 
-    /// Starts updating the user's location with specified accuracy and distance filter.
-    /// - Parameters:
-    ///   - accuracy: Desired location accuracy (e.g., `kCLLocationAccuracyBest`).
-    ///   - distanceFilter: Minimum distance (in meters) before updating location.
+    /// Starts updating the user's location.
     /// - Throws: `LocationError` if location services are disabled or permission is denied.
-    func startUpdatingLocation(accuracy: CLLocationAccuracy, distanceFilter: CLLocationDistance) async throws
+    func startUpdatingLocation() async throws
 
     /// Stops updating the user's location.
     func stopUpdatingLocation()
+
+    /// Returns the most recently recorded user location, if available.
+    /// - Returns: The last known `CLLocation` if one has been received.
+    /// - Throws: `LocationError.locationUnavailable` if no location is available after retries.
+    func getLastKnownLocation() async throws -> CLLocation
 
     /// Publisher for real-time location updates.
     var locationUpdates: AnyPublisher<CLLocation, Never> { get }
@@ -52,6 +52,7 @@ enum LocationPermissionType {
 
 /// Enum representing possible errors during location operations.
 enum LocationError: Error, LocalizedError {
+    case permissionNotGranted
     case permissionDenied
     case permissionRestricted
     case locationUnavailable
@@ -60,16 +61,12 @@ enum LocationError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .permissionDenied:
-            return "Location permission was denied."
-        case .permissionRestricted:
-            return "Location permission is restricted."
-        case .locationUnavailable:
-            return "Location is currently unavailable."
-        case .geocodingFailed(let message):
-            return "Geocoding failed: \(message)"
-        case .unknown:
-            return "An unknown error occurred."
+        case .permissionNotGranted: "Location permission was not granted."
+        case .permissionDenied: "Location permission was denied."
+        case .permissionRestricted: "Location permission is restricted."
+        case .locationUnavailable: "Location is currently unavailable."
+        case .geocodingFailed(let message): "Geocoding failed: \(message)"
+        case .unknown: "An unknown error occurred."
         }
     }
 }
@@ -198,21 +195,15 @@ extension LocationManager {
 // MARK: - Location Updates
 extension LocationManager {
     /// Starts updating the user's location with specified accuracy and distance filter.
-    /// - Parameters:
-    ///   - accuracy: Desired location accuracy (default: `kCLLocationAccuracyBest`).
-    ///   - distanceFilter: Minimum distance (in meters) before updating location (default: `kCLDistanceFilterNone`).
     /// - Throws: `LocationError` if location services are disabled or permission is denied.
-    func startUpdatingLocation(
-        accuracy: CLLocationAccuracy = kCLLocationAccuracyBest,
-        distanceFilter: CLLocationDistance = kCLDistanceFilterNone
-    ) async throws {
+    func startUpdatingLocation() async throws {
         guard authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways else {
             errorSubject.send(.permissionDenied)
             throw LocationError.permissionDenied
         }
 
-        locationManager.desiredAccuracy = accuracy
-        locationManager.distanceFilter = distanceFilter
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = kCLDistanceFilterNone
         locationManager.startUpdatingLocation()
     }
 
@@ -253,7 +244,7 @@ extension LocationManager {
 extension LocationManager: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        Logger.debug("Location updated: \(location.coordinate)")
+
         lastKnownLocationStorage = location
         locationSubject.send(location)
     }

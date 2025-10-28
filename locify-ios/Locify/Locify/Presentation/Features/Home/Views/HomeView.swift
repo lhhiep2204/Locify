@@ -16,15 +16,15 @@ struct HomeView: View {
     @State private var locationDetailDetent: PresentationDetent = .small
 
     @State private var showCategoryListView: Bool = false
+    @State private var showSearchView: Bool = false
 
-    private var router: Router<Route> = .init(root: .categoryList)
+    private var categoryRouter: Router<Route> = .init(root: .categoryList)
+    private var searchRouter: Router<Route> = .init(root: .search)
 
     private var selectedLocation: Binding<Location?> {
-        Binding<Location?>(
+        .init(
             get: { viewModel.selectedLocation },
-            set: { newValue in
-                viewModel.selectedLocationId = newValue?.id
-            }
+            set: { viewModel.selectLocation($0) }
         )
     }
 
@@ -49,9 +49,10 @@ struct HomeView: View {
         }
         .environment(\.selectLocation) { (selectedId, locations) in
             showCategoryListView = false
-
-            viewModel.selectedLocationId = selectedId
-            viewModel.locations = locations
+            viewModel.selectLocationFromCategoryList(id: selectedId, locations: locations)
+        }
+        .environment(\.selectSearchedLocation) { location in
+            viewModel.selectLocationFromSearch(location)
         }
         .alert(
             Text(MessageKeys.permissionDeniedTitle),
@@ -83,6 +84,7 @@ extension HomeView {
             locationDetailView
         } detail: {
             mapView
+                .toolbar(.hidden)
         }
     }
 
@@ -92,10 +94,14 @@ extension HomeView {
                 NavigationStack {
                     locationDetailView
                 }
-                .presentationDetents(
-                    [.small, .medium, .fraction(0.90)],
-                    selection: $locationDetailDetent
-                )
+                .if(viewModel.selectedLocationId != nil) {
+                    $0.presentationDetents(
+                        [.small, .medium, .fraction(0.90)],
+                        selection: $locationDetailDetent
+                    )
+                } else: {
+                    $0.presentationDetents([.small])
+                }
                 .interactiveDismissDisabled()
                 .presentationBackgroundInteraction(.enabled)
             }
@@ -108,7 +114,7 @@ extension HomeView {
         ZStack {
             MapView(
                 selectedLocation: selectedLocation,
-                locations: viewModel.locations.filter { $0.id != Constants.myLocationId }
+                locations: viewModel.locationList.filter { $0.id != Constants.myLocationId }
             )
             topView
         }
@@ -131,9 +137,8 @@ extension HomeView {
             showCategoryListView = true
         } label: {
             Image.appSystemIcon(.list)
-                .frame(height: DSSize.large)
         }
-        .buttonStyle(.glass)
+        .circularGlassEffect()
     }
 
     private var showUserLocationButton: some View {
@@ -143,9 +148,8 @@ extension HomeView {
             }
         } label: {
             Image.appSystemIcon(.location)
-                .frame(height: DSSize.large)
         }
-        .buttonStyle(.glass)
+        .circularGlassEffect()
     }
 
     private var locationDetailView: some View {
@@ -153,21 +157,25 @@ extension HomeView {
             location: selectedLocation,
             relatedLocations: viewModel.relatedLocations
         ) { locationId in
-            viewModel.locations.removeAll { $0.id == Constants.myLocationId }
-            viewModel.selectedLocationId = locationId
+            viewModel.selectRelatedLocation(locationId)
         } onSearchLocation: {
-            Logger.info("Comming soon")
+            showSearchView = true
         } onCloseSelectedLocation: {
-            viewModel.clearSelectedLocation()
-            router.popToRoot()
+            Task {
+                await viewModel.clearSelectedLocation()
+            }
+            categoryRouter.popToRoot()
         }
         .toolbar(.hidden)
         .sheet(isPresented: $showCategoryListView) {
-            RouterView(router)
+            RouterView(categoryRouter)
+        }
+        .sheet(isPresented: $showSearchView) {
+            RouterView(searchRouter)
         }
     }
 }
 
 #Preview {
-    HomeView(ViewModelFactory.shared.makeHomeViewModel())
+    HomeView(AppContainer.shared.makeHomeViewModel())
 }

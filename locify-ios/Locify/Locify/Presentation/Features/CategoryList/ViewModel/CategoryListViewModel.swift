@@ -7,15 +7,14 @@
 
 import Foundation
 
+@MainActor
 @Observable
 class CategoryListViewModel {
-    private(set) var categories: [Category] = []
-
     private let categoryUseCases: CategoryUseCases
 
-    init(
-        categoryUseCases: CategoryUseCases
-    ) {
+    private(set) var categories: [Category] = []
+
+    init(categoryUseCases: CategoryUseCases) {
         self.categoryUseCases = categoryUseCases
     }
 }

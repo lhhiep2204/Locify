@@ -4,25 +4,16 @@
     "Add" : {
 
     },
-    "Add category" : {
-
-    },
     "Address" : {
 
     },
     "Are you sure you want to delete '%@'?" : {
 
     },
-    "Categories" : {
-
-    },
     "Category" : {
 
     },
     "Coordinates" : {
-
-    },
-    "Create category" : {
 
     },
     "Delete" : {
@@ -55,19 +46,13 @@
     "Related Locations" : {
 
     },
-    "Search location" : {
-
-    },
-    "Select category" : {
+    "Search" : {
 
     },
     "Share" : {
 
     },
     "This action cannot be undone." : {
-
-    },
-    "Update category" : {
 
     }
   },

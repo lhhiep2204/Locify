@@ -12,6 +12,7 @@ enum Route {
     case home
     case categoryList
     case locationList(category: Category)
+    case search
 }
 
 /// Makes `Route` conform to `AppRoute` by implementing a `View` body for each case.
@@ -25,16 +26,18 @@ extension Route: @MainActor AppRoute {
 private struct RouteContentView: View {
     let route: Route
 
-    @Environment(\.viewModelFactory) private var factory
+    @Environment(\.appContainer) private var container
 
     var body: some View {
         switch route {
         case .home:
-            HomeView(factory.makeHomeViewModel())
+            HomeView(container.makeHomeViewModel())
         case .categoryList:
-            CategoryListView(factory.makeCategoryListViewModel())
+            CategoryListView(container.makeCategoryListViewModel())
         case .locationList(let category):
-            LocationListView(factory.makeLocationListViewModel(category: category))
+            LocationListView(container.makeLocationListViewModel(category: category))
+        case .search:
+            SearchView()
         }
     }
 }
