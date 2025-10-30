@@ -6,42 +6,46 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		724B25982EB3C2210032B5CE /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 724B25972EB3C2210032B5CE /* README.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
-		72DEB76B2E0D97DE00ADDB36 /* PBXContainerItemProxy */ = {
+		724B249F2EB3C1490032B5CE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 72DEB7532E0D97DC00ADDB36 /* Project object */;
+			containerPortal = 724B24872EB3C1460032B5CE /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 72DEB75A2E0D97DC00ADDB36;
+			remoteGlobalIDString = 724B248E2EB3C1460032B5CE;
 			remoteInfo = Locify;
 		};
-		72DEB7752E0D97DE00ADDB36 /* PBXContainerItemProxy */ = {
+		724B24A92EB3C1490032B5CE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 72DEB7532E0D97DC00ADDB36 /* Project object */;
+			containerPortal = 724B24872EB3C1460032B5CE /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 72DEB75A2E0D97DC00ADDB36;
+			remoteGlobalIDString = 724B248E2EB3C1460032B5CE;
 			remoteInfo = Locify;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		72DEB75B2E0D97DC00ADDB36 /* Locify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Locify.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		72DEB76A2E0D97DE00ADDB36 /* LocifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		72DEB7742E0D97DE00ADDB36 /* LocifyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocifyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		72DEB9B12E1584D900ADDB36 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
+		724B248F2EB3C1460032B5CE /* Locify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Locify.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		724B249E2EB3C1490032B5CE /* LocifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		724B24A82EB3C1490032B5CE /* LocifyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocifyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		724B25972EB3C2210032B5CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		72DEB75D2E0D97DC00ADDB36 /* Locify */ = {
+		724B24912EB3C1460032B5CE /* Locify */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Locify;
 			sourceTree = "<group>";
 		};
-		72DEB76D2E0D97DE00ADDB36 /* LocifyTests */ = {
+		724B24A12EB3C1490032B5CE /* LocifyTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = LocifyTests;
 			sourceTree = "<group>";
 		};
-		72DEB7772E0D97DE00ADDB36 /* LocifyUITests */ = {
+		724B24AB2EB3C1490032B5CE /* LocifyUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = LocifyUITests;
 			sourceTree = "<group>";
@@ -49,21 +53,21 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		72DEB7582E0D97DC00ADDB36 /* Frameworks */ = {
+		724B248C2EB3C1460032B5CE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72DEB7672E0D97DE00ADDB36 /* Frameworks */ = {
+		724B249B2EB3C1490032B5CE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72DEB7712E0D97DE00ADDB36 /* Frameworks */ = {
+		724B24A52EB3C1490032B5CE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -73,23 +77,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		72DEB7522E0D97DC00ADDB36 = {
+		724B24862EB3C1460032B5CE = {
 			isa = PBXGroup;
 			children = (
-				72DEB9B12E1584D900ADDB36 /* README.md */,
-				72DEB75D2E0D97DC00ADDB36 /* Locify */,
-				72DEB76D2E0D97DE00ADDB36 /* LocifyTests */,
-				72DEB7772E0D97DE00ADDB36 /* LocifyUITests */,
-				72DEB75C2E0D97DC00ADDB36 /* Products */,
+				724B25972EB3C2210032B5CE /* README.md */,
+				724B24912EB3C1460032B5CE /* Locify */,
+				724B24A12EB3C1490032B5CE /* LocifyTests */,
+				724B24AB2EB3C1490032B5CE /* LocifyUITests */,
+				724B24902EB3C1460032B5CE /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		72DEB75C2E0D97DC00ADDB36 /* Products */ = {
+		724B24902EB3C1460032B5CE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				72DEB75B2E0D97DC00ADDB36 /* Locify.app */,
-				72DEB76A2E0D97DE00ADDB36 /* LocifyTests.xctest */,
-				72DEB7742E0D97DE00ADDB36 /* LocifyUITests.xctest */,
+				724B248F2EB3C1460032B5CE /* Locify.app */,
+				724B249E2EB3C1490032B5CE /* LocifyTests.xctest */,
+				724B24A82EB3C1490032B5CE /* LocifyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -97,135 +101,136 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		72DEB75A2E0D97DC00ADDB36 /* Locify */ = {
+		724B248E2EB3C1460032B5CE /* Locify */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 72DEB77E2E0D97DE00ADDB36 /* Build configuration list for PBXNativeTarget "Locify" */;
+			buildConfigurationList = 724B24B22EB3C1490032B5CE /* Build configuration list for PBXNativeTarget "Locify" */;
 			buildPhases = (
-				72DEB7572E0D97DC00ADDB36 /* Sources */,
-				72DEB7872E0D983700ADDB36 /* Run Script - Swiftlint */,
-				72DEB7582E0D97DC00ADDB36 /* Frameworks */,
-				72DEB7592E0D97DC00ADDB36 /* Resources */,
+				724B248B2EB3C1460032B5CE /* Sources */,
+				724B29192EB3C2A60032B5CE /* Run Script - Swiftlint */,
+				724B248C2EB3C1460032B5CE /* Frameworks */,
+				724B248D2EB3C1460032B5CE /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				72DEB75D2E0D97DC00ADDB36 /* Locify */,
+				724B24912EB3C1460032B5CE /* Locify */,
 			);
 			name = Locify;
 			packageProductDependencies = (
 			);
 			productName = Locify;
-			productReference = 72DEB75B2E0D97DC00ADDB36 /* Locify.app */;
+			productReference = 724B248F2EB3C1460032B5CE /* Locify.app */;
 			productType = "com.apple.product-type.application";
 		};
-		72DEB7692E0D97DE00ADDB36 /* LocifyTests */ = {
+		724B249D2EB3C1490032B5CE /* LocifyTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 72DEB7812E0D97DE00ADDB36 /* Build configuration list for PBXNativeTarget "LocifyTests" */;
+			buildConfigurationList = 724B24B52EB3C1490032B5CE /* Build configuration list for PBXNativeTarget "LocifyTests" */;
 			buildPhases = (
-				72DEB7662E0D97DE00ADDB36 /* Sources */,
-				72DEB7672E0D97DE00ADDB36 /* Frameworks */,
-				72DEB7682E0D97DE00ADDB36 /* Resources */,
+				724B249A2EB3C1490032B5CE /* Sources */,
+				724B249B2EB3C1490032B5CE /* Frameworks */,
+				724B249C2EB3C1490032B5CE /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				72DEB76C2E0D97DE00ADDB36 /* PBXTargetDependency */,
+				724B24A02EB3C1490032B5CE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				72DEB76D2E0D97DE00ADDB36 /* LocifyTests */,
+				724B24A12EB3C1490032B5CE /* LocifyTests */,
 			);
 			name = LocifyTests;
 			packageProductDependencies = (
 			);
 			productName = LocifyTests;
-			productReference = 72DEB76A2E0D97DE00ADDB36 /* LocifyTests.xctest */;
+			productReference = 724B249E2EB3C1490032B5CE /* LocifyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		72DEB7732E0D97DE00ADDB36 /* LocifyUITests */ = {
+		724B24A72EB3C1490032B5CE /* LocifyUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 72DEB7842E0D97DE00ADDB36 /* Build configuration list for PBXNativeTarget "LocifyUITests" */;
+			buildConfigurationList = 724B24B82EB3C1490032B5CE /* Build configuration list for PBXNativeTarget "LocifyUITests" */;
 			buildPhases = (
-				72DEB7702E0D97DE00ADDB36 /* Sources */,
-				72DEB7712E0D97DE00ADDB36 /* Frameworks */,
-				72DEB7722E0D97DE00ADDB36 /* Resources */,
+				724B24A42EB3C1490032B5CE /* Sources */,
+				724B24A52EB3C1490032B5CE /* Frameworks */,
+				724B24A62EB3C1490032B5CE /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				72DEB7762E0D97DE00ADDB36 /* PBXTargetDependency */,
+				724B24AA2EB3C1490032B5CE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				72DEB7772E0D97DE00ADDB36 /* LocifyUITests */,
+				724B24AB2EB3C1490032B5CE /* LocifyUITests */,
 			);
 			name = LocifyUITests;
 			packageProductDependencies = (
 			);
 			productName = LocifyUITests;
-			productReference = 72DEB7742E0D97DE00ADDB36 /* LocifyUITests.xctest */;
+			productReference = 724B24A82EB3C1490032B5CE /* LocifyUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		72DEB7532E0D97DC00ADDB36 /* Project object */ = {
+		724B24872EB3C1460032B5CE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
-					72DEB75A2E0D97DC00ADDB36 = {
-						CreatedOnToolsVersion = 26.0;
+					724B248E2EB3C1460032B5CE = {
+						CreatedOnToolsVersion = 26.0.1;
 					};
-					72DEB7692E0D97DE00ADDB36 = {
-						CreatedOnToolsVersion = 26.0;
-						TestTargetID = 72DEB75A2E0D97DC00ADDB36;
+					724B249D2EB3C1490032B5CE = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = 724B248E2EB3C1460032B5CE;
 					};
-					72DEB7732E0D97DE00ADDB36 = {
-						CreatedOnToolsVersion = 26.0;
-						TestTargetID = 72DEB75A2E0D97DC00ADDB36;
+					724B24A72EB3C1490032B5CE = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = 724B248E2EB3C1460032B5CE;
 					};
 				};
 			};
-			buildConfigurationList = 72DEB7562E0D97DC00ADDB36 /* Build configuration list for PBXProject "Locify" */;
+			buildConfigurationList = 724B248A2EB3C1460032B5CE /* Build configuration list for PBXProject "Locify" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 72DEB7522E0D97DC00ADDB36;
+			mainGroup = 724B24862EB3C1460032B5CE;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 72DEB75C2E0D97DC00ADDB36 /* Products */;
+			productRefGroup = 724B24902EB3C1460032B5CE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				72DEB75A2E0D97DC00ADDB36 /* Locify */,
-				72DEB7692E0D97DE00ADDB36 /* LocifyTests */,
-				72DEB7732E0D97DE00ADDB36 /* LocifyUITests */,
+				724B248E2EB3C1460032B5CE /* Locify */,
+				724B249D2EB3C1490032B5CE /* LocifyTests */,
+				724B24A72EB3C1490032B5CE /* LocifyUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		72DEB7592E0D97DC00ADDB36 /* Resources */ = {
+		724B248D2EB3C1460032B5CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				724B25982EB3C2210032B5CE /* README.md in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		724B249C2EB3C1490032B5CE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72DEB7682E0D97DE00ADDB36 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		72DEB7722E0D97DE00ADDB36 /* Resources */ = {
+		724B24A62EB3C1490032B5CE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -235,7 +240,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		72DEB7872E0D983700ADDB36 /* Run Script - Swiftlint */ = {
+		724B29192EB3C2A60032B5CE /* Run Script - Swiftlint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -257,21 +262,21 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		72DEB7572E0D97DC00ADDB36 /* Sources */ = {
+		724B248B2EB3C1460032B5CE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72DEB7662E0D97DE00ADDB36 /* Sources */ = {
+		724B249A2EB3C1490032B5CE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72DEB7702E0D97DE00ADDB36 /* Sources */ = {
+		724B24A42EB3C1490032B5CE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -281,20 +286,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		72DEB76C2E0D97DE00ADDB36 /* PBXTargetDependency */ = {
+		724B24A02EB3C1490032B5CE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 72DEB75A2E0D97DC00ADDB36 /* Locify */;
-			targetProxy = 72DEB76B2E0D97DE00ADDB36 /* PBXContainerItemProxy */;
+			target = 724B248E2EB3C1460032B5CE /* Locify */;
+			targetProxy = 724B249F2EB3C1490032B5CE /* PBXContainerItemProxy */;
 		};
-		72DEB7762E0D97DE00ADDB36 /* PBXTargetDependency */ = {
+		724B24AA2EB3C1490032B5CE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 72DEB75A2E0D97DC00ADDB36 /* Locify */;
-			targetProxy = 72DEB7752E0D97DE00ADDB36 /* PBXContainerItemProxy */;
+			target = 724B248E2EB3C1460032B5CE /* Locify */;
+			targetProxy = 724B24A92EB3C1490032B5CE /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		72DEB77C2E0D97DE00ADDB36 /* Debug */ = {
+		724B24B02EB3C1490032B5CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -352,12 +357,11 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		72DEB77D2E0D97DE00ADDB36 /* Release */ = {
+		724B24B12EB3C1490032B5CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -408,11 +412,10 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
 		};
-		72DEB77F2E0D97DE00ADDB36 /* Debug */ = {
+		724B24B32EB3C1490032B5CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -435,8 +438,8 @@
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -447,8 +450,8 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
-				SUPPORTS_MACCATALYST = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -458,7 +461,7 @@
 			};
 			name = Debug;
 		};
-		72DEB7802E0D97DE00ADDB36 /* Release */ = {
+		724B24B42EB3C1490032B5CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -481,8 +484,8 @@
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -493,8 +496,8 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
-				SUPPORTS_MACCATALYST = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -504,7 +507,7 @@
 			};
 			name = Release;
 		};
-		72DEB7822E0D97DE00ADDB36 /* Debug */ = {
+		724B24B62EB3C1490032B5CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -520,6 +523,7 @@
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -529,7 +533,7 @@
 			};
 			name = Debug;
 		};
-		72DEB7832E0D97DE00ADDB36 /* Release */ = {
+		724B24B72EB3C1490032B5CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -545,6 +549,7 @@
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -554,7 +559,7 @@
 			};
 			name = Release;
 		};
-		72DEB7852E0D97DE00ADDB36 /* Debug */ = {
+		724B24B92EB3C1490032B5CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -569,6 +574,7 @@
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -578,7 +584,7 @@
 			};
 			name = Debug;
 		};
-		72DEB7862E0D97DE00ADDB36 /* Release */ = {
+		724B24BA2EB3C1490032B5CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -593,6 +599,7 @@
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -605,43 +612,43 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		72DEB7562E0D97DC00ADDB36 /* Build configuration list for PBXProject "Locify" */ = {
+		724B248A2EB3C1460032B5CE /* Build configuration list for PBXProject "Locify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				72DEB77C2E0D97DE00ADDB36 /* Debug */,
-				72DEB77D2E0D97DE00ADDB36 /* Release */,
+				724B24B02EB3C1490032B5CE /* Debug */,
+				724B24B12EB3C1490032B5CE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		72DEB77E2E0D97DE00ADDB36 /* Build configuration list for PBXNativeTarget "Locify" */ = {
+		724B24B22EB3C1490032B5CE /* Build configuration list for PBXNativeTarget "Locify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				72DEB77F2E0D97DE00ADDB36 /* Debug */,
-				72DEB7802E0D97DE00ADDB36 /* Release */,
+				724B24B32EB3C1490032B5CE /* Debug */,
+				724B24B42EB3C1490032B5CE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		72DEB7812E0D97DE00ADDB36 /* Build configuration list for PBXNativeTarget "LocifyTests" */ = {
+		724B24B52EB3C1490032B5CE /* Build configuration list for PBXNativeTarget "LocifyTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				72DEB7822E0D97DE00ADDB36 /* Debug */,
-				72DEB7832E0D97DE00ADDB36 /* Release */,
+				724B24B62EB3C1490032B5CE /* Debug */,
+				724B24B72EB3C1490032B5CE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		72DEB7842E0D97DE00ADDB36 /* Build configuration list for PBXNativeTarget "LocifyUITests" */ = {
+		724B24B82EB3C1490032B5CE /* Build configuration list for PBXNativeTarget "LocifyUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				72DEB7852E0D97DE00ADDB36 /* Debug */,
-				72DEB7862E0D97DE00ADDB36 /* Release */,
+				724B24B92EB3C1490032B5CE /* Debug */,
+				724B24BA2EB3C1490032B5CE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 72DEB7532E0D97DC00ADDB36 /* Project object */;
+	rootObject = 724B24872EB3C1460032B5CE /* Project object */;
 }
