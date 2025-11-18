@@ -124,9 +124,3 @@ extension HomeViewModel {
         locationList.removeAll { $0.id == Constants.myLocationId }
     }
 }
-
-private extension Location {
-    var isTemporary: Bool {
-        id == Constants.myLocationId || id == Constants.searchedLocationId
-    }
-}

@@ -66,6 +66,12 @@ struct Location: Identifiable, Equatable, Hashable {
     }
 }
 
+extension Location {
+    var isTemporary: Bool {
+        id == Constants.myLocationId || id == Constants.searchedLocationId
+    }
+}
+
 // swiftlint:disable all
 extension Location {
     /// A mock location with real coordinates

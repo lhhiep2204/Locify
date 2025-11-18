@@ -119,7 +119,6 @@ struct DSTextField: View {
             }
 
             inputView
-                .glassEffect(.clear.interactive())
 
             if !object.description.isEmpty {
                 DSText(
@@ -164,6 +163,10 @@ extension DSTextField {
         } else: {
             $0.background(Color.appColor(.backgroundSecondary))
         }
+        .glassEffect(
+            .clear.interactive(),
+            in: RoundedRectangle(cornerRadius: DSSpacing.medium)
+        )
         .cornerRadius(DSRadius.xxLarge)
         .overlay {
             RoundedRectangle(cornerRadius: DSRadius.xxLarge)

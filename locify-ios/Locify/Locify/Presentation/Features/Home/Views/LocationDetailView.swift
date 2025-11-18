@@ -13,6 +13,7 @@ struct LocationDetailView: View {
     let relatedLocations: [Location]
     let onSelectLocation: (UUID) -> Void
     let onSearchLocation: () -> Void
+    let onAddLocation: (Location) -> Void
     let onCloseSelectedLocation: () -> Void
 
     var body: some View {
@@ -207,6 +208,16 @@ extension LocationDetailView {
         HStack(alignment: .top, spacing: DSSpacing.small) {
             Spacer()
 
+            if let location, location.isTemporary {
+                Button {
+                    onAddLocation(location)
+                } label: {
+                    Image.appSystemIcon(.add)
+                        .font(.appFont(.regular(.large)))
+                }
+                .circularGlassEffect(size: 52)
+            }
+
             Button {
                 onSearchLocation()
             } label: {
@@ -224,5 +235,6 @@ extension LocationDetailView {
         relatedLocations: Location.mockList
     ) { _ in }
     onSearchLocation: { }
+    onAddLocation: { _ in }
     onCloseSelectedLocation: { }
 }

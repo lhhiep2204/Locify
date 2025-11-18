@@ -96,7 +96,7 @@ extension HomeView {
                 }
                 .if(viewModel.selectedLocationId != nil) {
                     $0.presentationDetents(
-                        [.small, .medium, .fraction(0.90)],
+                        [.small, .fraction(0.90)],
                         selection: $locationDetailDetent
                     )
                 } else: {
@@ -160,6 +160,8 @@ extension HomeView {
             viewModel.selectRelatedLocation(locationId)
         } onSearchLocation: {
             showSearchView = true
+        } onAddLocation: { location in
+            Logger.info(location)
         } onCloseSelectedLocation: {
             Task {
                 await viewModel.clearSelectedLocation()
