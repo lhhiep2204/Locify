@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Environment(\.appContainer) private var container
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var viewModel: HomeViewModel
@@ -17,6 +18,7 @@ struct HomeView: View {
 
     @State private var showCategoryListView: Bool = false
     @State private var showSearchView: Bool = false
+    @State private var showAddLocationView: Bool = false
 
     private var categoryRouter: Router<Route> = .init(root: .categoryList)
     private var searchRouter: Router<Route> = .init(root: .search)
@@ -47,9 +49,13 @@ struct HomeView: View {
         .environment(\.dismissSheet) {
             showCategoryListView = false
         }
-        .environment(\.selectLocation) { (selectedId, locations) in
+        .environment(\.selectLocation) { category, selectedId, locations in
             showCategoryListView = false
-            viewModel.selectLocationFromCategoryList(id: selectedId, locations: locations)
+            viewModel.selectLocationFromCategoryList(
+                category: category,
+                id: selectedId,
+                locations: locations
+            )
         }
         .environment(\.selectSearchedLocation) { location in
             viewModel.selectLocationFromSearch(location)
@@ -160,8 +166,8 @@ extension HomeView {
             viewModel.selectRelatedLocation(locationId)
         } onSearchLocation: {
             showSearchView = true
-        } onAddLocation: { location in
-            Logger.info(location)
+        } onAddLocation: {
+            showAddLocationView = true
         } onCloseSelectedLocation: {
             Task {
                 await viewModel.clearSelectedLocation()
@@ -174,6 +180,18 @@ extension HomeView {
         }
         .sheet(isPresented: $showSearchView) {
             RouterView(searchRouter)
+        }
+        .sheet(isPresented: $showAddLocationView) {
+            EditLocationView(
+                container.makeEditLocationViewModel(),
+                editMode: .add,
+                category: viewModel.selectedCategory,
+                locationToSave: viewModel.selectedLocation
+            ) { location in
+                Task {
+                    await viewModel.addLocation(location)
+                }
+            }
         }
     }
 }

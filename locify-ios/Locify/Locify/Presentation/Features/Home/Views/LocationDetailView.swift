@@ -13,7 +13,7 @@ struct LocationDetailView: View {
     let relatedLocations: [Location]
     let onSelectLocation: (UUID) -> Void
     let onSearchLocation: () -> Void
-    let onAddLocation: (Location) -> Void
+    let onAddLocation: () -> Void
     let onCloseSelectedLocation: () -> Void
 
     var body: some View {
@@ -55,7 +55,7 @@ extension LocationDetailView {
     private func topView(location: Location) -> some View {
         HStack(alignment: .top, spacing: DSSpacing.small) {
             DSText(
-                location.displayName,
+                location.displayName.isEmpty ? location.name : location.displayName,
                 font: .bold(.xLarge)
             )
             .lineLimit(2)
@@ -179,7 +179,7 @@ extension LocationDetailView {
             ForEach(relatedLocations) { item in
                 VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
                     DSText(
-                        item.name,
+                        item.displayName.isEmpty ? item.name : item.displayName,
                         font: .medium(.medium)
                     )
                     .lineLimit(1)
@@ -210,7 +210,7 @@ extension LocationDetailView {
 
             if let location, location.isTemporary {
                 Button {
-                    onAddLocation(location)
+                    onAddLocation()
                 } label: {
                     Image.appSystemIcon(.add)
                         .font(.appFont(.regular(.large)))
@@ -235,6 +235,6 @@ extension LocationDetailView {
         relatedLocations: Location.mockList
     ) { _ in }
     onSearchLocation: { }
-    onAddLocation: { _ in }
+    onAddLocation: { }
     onCloseSelectedLocation: { }
 }

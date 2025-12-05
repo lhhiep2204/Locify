@@ -19,7 +19,7 @@ struct DismissSheetKey: EnvironmentKey {
 
 /// An `EnvironmentKey` for injecting a callback that handles location selection events.
 struct SelectLocationKey: EnvironmentKey {
-    static let defaultValue: (UUID, [Location]) -> Void = { _, _ in }
+    static let defaultValue: (Category, UUID, [Location]) -> Void = { _, _, _ in }
 }
 
 /// An `EnvironmentKey` for injecting a callback that handles the selection of a searched location..
@@ -40,11 +40,12 @@ extension EnvironmentValues {
         set { self[DismissSheetKey.self] = newValue }
     }
 
-    /// A closure called when a user selects a location item.
+    /// A closure called when a user selects a location item within a specific category.
     /// - Parameters:
+    ///   - category: The `Category` in which the selection occurred.
     ///   - selectedId: The UUID of the selected location.
     ///   - locations: The full list of locations, used to provide context or show related locations.
-    var selectLocation: (UUID, [Location]) -> Void {
+    var selectLocation: (Category, UUID, [Location]) -> Void {
         get { self[SelectLocationKey.self] }
         set { self[SelectLocationKey.self] = newValue }
     }

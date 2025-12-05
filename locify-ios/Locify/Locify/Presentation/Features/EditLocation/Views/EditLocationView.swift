@@ -22,19 +22,19 @@ struct EditLocationView: View {
     @State private var showErrorAlert: Bool = false
 
     let editMode: EditMode
-    let locationToUpdate: Location?
+    let locationToSave: Location?
     let onSave: (Location) -> Void
 
     init(
         _ viewModel: EditLocationViewModel,
         editMode: EditMode,
         category: Category? = nil,
-        locationToUpdate: Location? = nil,
+        locationToSave: Location? = nil,
         onSave: @escaping (Location) -> Void
     ) {
         self.viewModel = viewModel
         self.editMode = editMode
-        self.locationToUpdate = locationToUpdate
+        self.locationToSave = locationToSave
         self.onSave = onSave
 
         viewModel.category = category
@@ -45,13 +45,13 @@ struct EditLocationView: View {
             _categoryName = State(initialValue: .empty)
         }
 
-        if let locationToUpdate {
-            viewModel.displayName = locationToUpdate.displayName
-            viewModel.name = locationToUpdate.name
-            viewModel.address = locationToUpdate.address
-            viewModel.latitude = String(locationToUpdate.latitude)
-            viewModel.longitude = String(locationToUpdate.longitude)
-            viewModel.notes = locationToUpdate.notes ?? .empty
+        if let locationToSave {
+            viewModel.displayName = locationToSave.displayName
+            viewModel.name = locationToSave.name
+            viewModel.address = locationToSave.address
+            viewModel.latitude = String(locationToSave.latitude)
+            viewModel.longitude = String(locationToSave.longitude)
+            viewModel.notes = locationToSave.notes ?? .empty
         }
     }
 
@@ -220,12 +220,23 @@ extension EditLocationView {
 
 extension EditLocationView {
     private func saveLocation() {
-        viewModel.createLocation(locationToUpdate: locationToUpdate) { location in
+        func handleLocationResult(_ location: Location?) {
             if let location {
                 onSave(location)
                 dismiss()
             } else {
                 showErrorAlert = true
+            }
+        }
+
+        switch editMode {
+        case .add:
+            viewModel.createLocation { location in
+                handleLocationResult(location)
+            }
+        case .update:
+            viewModel.updateLocation(locationToUpdate: locationToSave) { location in
+                handleLocationResult(location)
             }
         }
     }

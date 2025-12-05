@@ -19,7 +19,7 @@ struct LocationListView: View {
 
     @State private var showAddLocation: Bool = false
 
-    @State private var locationToUpdate: Location?
+    @State private var locationToSave: Location?
 
     @State private var showDeleteAlert: Bool = false
     @State private var locationToDelete: Location?
@@ -65,12 +65,12 @@ struct LocationListView: View {
                     }
                 }
             }
-            .sheet(item: $locationToUpdate) { location in
+            .sheet(item: $locationToSave) { location in
                 EditLocationView(
                     container.makeEditLocationViewModel(),
                     editMode: .update,
                     category: viewModel.category,
-                    locationToUpdate: location
+                    locationToSave: location
                 ) { updatedLocation in
                     Task {
                         await viewModel.updateLocation(updatedLocation)
@@ -131,7 +131,7 @@ extension LocationListView {
     private func locationItemView(_ location: Location) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
             DSText(
-                location.displayName,
+                location.displayName.isEmpty ? location.name : location.displayName,
                 font: .medium(.medium)
             )
             .lineLimit(1)
@@ -145,13 +145,17 @@ extension LocationListView {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .onTapGesture {
-            selectLocation(location.id, viewModel.locations)
+            selectLocation(
+                viewModel.category,
+                location.id,
+                viewModel.locations
+            )
         }
     }
 
     private func editButtonView(_ location: Location) -> some View {
         Button {
-            locationToUpdate = location
+            locationToSave = location
         } label: {
             Label {
                 DSText(.localized(CommonKeys.edit))

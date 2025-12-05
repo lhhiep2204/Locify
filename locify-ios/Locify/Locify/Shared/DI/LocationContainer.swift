@@ -51,6 +51,14 @@ final class LocationContainer {
 
 // MARK: - ViewModel Factories
 extension LocationContainer {
+    func makeHomeViewModel() -> HomeViewModel {
+        HomeViewModel(
+            getUserLocationUseCase: getUserLocationUseCase,
+            locationUseCase: useCases,
+            locationManager: locationManager
+        )
+    }
+
     func makeLocationListViewModel(category: Category) -> LocationListViewModel {
         LocationListViewModel(category: category, locationUseCase: useCases)
     }

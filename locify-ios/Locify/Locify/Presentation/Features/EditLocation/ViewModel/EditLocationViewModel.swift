@@ -54,30 +54,38 @@ extension EditLocationViewModel {
         }
     }
 
-    func createLocation(locationToUpdate: Location?, completion: (Location?) -> Void) {
-        var location: Location {
-            if let locationToUpdate {
-                var location = locationToUpdate
-                location.displayName = displayName
-                location.name = name
-                location.address = address
-                location.latitude = latitude.asDouble
-                location.longitude = longitude.asDouble
-                location.notes = notes.trimmed.isEmpty ? nil : notes
-                return location
-            } else {
-                let location = Location(
-                    categoryId: category?.id ?? UUID(),
-                    displayName: displayName,
-                    name: name,
-                    address: address,
-                    latitude: latitude.asDouble,
-                    longitude: longitude.asDouble,
-                    notes: notes.trimmed.isEmpty ? nil : notes
-                )
-                return location
-            }
+    func createLocation(completion: (Location?) -> Void) {
+        let location: Location = .init(
+            categoryId: category?.id ?? UUID(),
+            displayName: displayName,
+            name: name,
+            address: address,
+            latitude: latitude.asDouble,
+            longitude: longitude.asDouble,
+            notes: notes.trimmed.isEmpty ? nil : notes
+        )
+
+        guard isValid else {
+            completion(nil)
+            return
         }
+
+        completion(location)
+    }
+
+    func updateLocation(locationToUpdate: Location?, completion: (Location?) -> Void) {
+        guard let locationToUpdate else {
+            completion(nil)
+            return
+        }
+
+        var location = locationToUpdate
+        location.displayName = displayName
+        location.name = name
+        location.address = address
+        location.latitude = latitude.asDouble
+        location.longitude = longitude.asDouble
+        location.notes = notes.trimmed.isEmpty ? nil : notes
 
         guard isValid else {
             completion(nil)
@@ -95,7 +103,7 @@ extension EditLocationViewModel {
 extension EditLocationViewModel {
     private var isValid: Bool {
         if category == nil {
-            errorMessage = "Please select a category."
+            errorMessage = "Please select a list."
             return false
         }
 

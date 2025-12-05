@@ -13,9 +13,10 @@ import Foundation
 @Observable
 class HomeViewModel {
     private let getUserLocationUseCase: GetUserLocationUseCaseProtocol
+    private let locationUseCase: LocationUseCases
     private let locationManager: LocationManagerProtocol
-    private let appleMapService: AppleMapServiceProtocol
 
+    private(set) var selectedCategory: Category?
     private(set) var selectedLocationId: UUID?
     private(set) var locationList: [Location] = []
     var permissionDenied: Bool = false
@@ -32,12 +33,12 @@ class HomeViewModel {
 
     init(
         getUserLocationUseCase: GetUserLocationUseCaseProtocol,
-        locationManager: LocationManagerProtocol,
-        appleMapService: AppleMapServiceProtocol
+        locationUseCase: LocationUseCases,
+        locationManager: LocationManagerProtocol
     ) {
         self.getUserLocationUseCase = getUserLocationUseCase
+        self.locationUseCase = locationUseCase
         self.locationManager = locationManager
-        self.appleMapService = appleMapService
 
         Task {
             do {
@@ -78,7 +79,8 @@ extension HomeViewModel {
         selectedLocationId = location?.id
     }
 
-    func selectLocationFromCategoryList(id: UUID, locations: [Location]) {
+    func selectLocationFromCategoryList(category: Category, id: UUID, locations: [Location]) {
+        selectedCategory = category
         selectedLocationId = id
         locationList = locations
     }
@@ -108,19 +110,30 @@ extension HomeViewModel {
             await getUserLocation()
         }
     }
+
+    func addLocation(_ location: Location) async {
+        do {
+            _ = try await locationUseCase.add.execute(location)
+            selectedLocationId = location.id
+            locationList.removeAll(where: \.isTemporary)
+            locationList.append(location)
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
+    }
 }
 
 extension HomeViewModel {
     private func requestAndUpdateUserLocation() async throws {
         let location = try await getUserLocationUseCase.execute()
         selectedLocationId = location.id
-        locationList.removeAll { $0.id == Constants.searchedLocationId }
+        locationList.removeAll(where: \.isTemporary)
         locationList.insert(location, at: 0)
     }
 
     private func handlePermissionDenied() {
         Logger.error("Permission denied")
         selectedLocationId = nil
-        locationList.removeAll { $0.id == Constants.myLocationId }
+        locationList.removeAll(where: \.isTemporary)
     }
 }

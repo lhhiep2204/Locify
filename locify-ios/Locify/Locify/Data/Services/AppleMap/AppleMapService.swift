@@ -141,7 +141,7 @@ extension AppleMapService {
                 .init(
                     id: Constants.searchedLocationId,
                     categoryId: UUID(),
-                    displayName: $0.name ?? .empty,
+                    displayName: .empty,
                     name: $0.name ?? .empty,
                     address: $0.addressRepresentations?.fullAddress(includingRegion: true, singleLine: true) ?? .empty,
                     latitude: $0.location.coordinate.latitude,

@@ -34,11 +34,7 @@ final class AppContainer {
 // MARK: - ViewModel Builders
 extension AppContainer {
     func makeHomeViewModel() -> HomeViewModel {
-        HomeViewModel(
-            getUserLocationUseCase: locationContainer.getUserLocationUseCase,
-            locationManager: locationManager,
-            appleMapService: appleMapService
-        )
+        locationContainer.makeHomeViewModel()
     }
 
     func makeCategoryListViewModel() -> CategoryListViewModel {
