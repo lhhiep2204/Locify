@@ -77,7 +77,7 @@ struct CategoryListView: View {
                 Text(
                     String(
                         format: .localized(MessageKeys.deleteAlertTitle),
-                        categoryToDelete?.name ?? ""
+                        categoryToDelete?.name ?? .empty
                     )
                 ),
                 isPresented: $showDeleteAlert,

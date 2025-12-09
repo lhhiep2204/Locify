@@ -8,15 +8,20 @@
 import SwiftUI
 
 struct EditLocationView: View {
+    enum FocusField {
+        case displayName, notes
+    }
+
     @Environment(\.dismiss) private var dismiss
 
-    @FocusState private var editing
+    @FocusState private var focusField: FocusField?
 
     @State private var viewModel: EditLocationViewModel
 
     @State private var textSearch: String = .empty
     @State private var categoryName: String
 
+    @State private var showSearchView: Bool = false
     @State private var showCategoryList: Bool = false
     @State private var showAddCategory: Bool = false
     @State private var showErrorAlert: Bool = false
@@ -46,6 +51,7 @@ struct EditLocationView: View {
         }
 
         if let locationToSave {
+            viewModel.placeId = locationToSave.placeId
             viewModel.displayName = locationToSave.displayName
             viewModel.name = locationToSave.name
             viewModel.address = locationToSave.address
@@ -84,6 +90,15 @@ struct EditLocationView: View {
                 .onChange(of: viewModel.category) {
                     categoryName = viewModel.category?.name ?? .empty
                 }
+                .sheet(isPresented: $showSearchView) {
+                    RouterView(
+                        Router<Route>(
+                            root: .search { location in
+                                viewModel.selectSearchedLocation(location)
+                            }
+                        )
+                    )
+                }
                 .sheet(isPresented: $showCategoryList) {
                     selectCategoryView
                         .presentationDetents([.medium])
@@ -114,37 +129,16 @@ extension EditLocationView {
     private var contentView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                DSTextField(
-                    .constant(.localized(LocationKeys.searchLocation)),
-                    text: $textSearch
-                )
-                .image(.appSystemIcon(.search))
-                .focused($editing)
-
-                Divider()
-                    .padding(.vertical, DSSpacing.small)
-
-                DSTextField(
-                    .constant(.localized(CategoryKeys.selectCategory)),
-                    text: $categoryName
-                )
-                .label(.localized(CategoryKeys.category))
-                .image(.appSystemIcon(.folder))
-                .trailingImage(.appSystemIcon(.chevronDown))
-                .disabled(true)
-                .onTapGesture {
-                    showCategoryList = true
+                if locationToSave == nil {
+                    searchView
                 }
-
-                Divider()
-                    .padding(.vertical, DSSpacing.small)
-
+                categoryView
                 locationInfoView
             }
             .padding(DSSpacing.large)
         }
         .onTapGesture {
-            editing = false
+            focusField = nil
         }
     }
 
@@ -157,16 +151,57 @@ extension EditLocationView {
         }
     }
 
+    private var searchView: some View {
+        Group {
+            DSTextField(
+                .constant(.localized(LocationKeys.searchLocation)),
+                text: $textSearch
+            )
+            .image(.appSystemIcon(.search))
+            .disabled(true)
+            .onTapGesture {
+                showSearchView = true
+            }
+
+            Divider()
+                .padding(.vertical, DSSpacing.small)
+        }
+    }
+
+    private var categoryView: some View {
+        Group {
+            DSTextField(
+                .constant(.localized(CategoryKeys.selectCategory)),
+                text: $categoryName
+            )
+            .label(.localized(CategoryKeys.category))
+            .image(.appSystemIcon(.folder))
+            .trailingImage(.appSystemIcon(.chevronDown))
+            .disabled(true)
+            .onTapGesture {
+                showCategoryList = true
+            }
+
+            Divider()
+                .padding(.vertical, DSSpacing.small)
+        }
+    }
+
     private var locationInfoView: some View {
         Group {
             DSTextField(text: $viewModel.displayName)
                 .label(.localized(LocationKeys.displayName))
-                .focused($editing)
+                .focused($focusField, equals: .displayName)
+                .onSubmit {
+                    focusField = .notes
+                }
             DSTextField(text: $viewModel.name)
                 .label(.localized(LocationKeys.name))
+                .multiline()
                 .enabled(false)
             DSTextField(text: $viewModel.address)
                 .label(.localized(LocationKeys.address))
+                .multiline()
                 .enabled(false)
             HStack {
                 DSTextField(text: $viewModel.latitude)
@@ -179,7 +214,7 @@ extension EditLocationView {
             DSTextField(text: $viewModel.notes)
                 .label(.localized(LocationKeys.notes))
                 .multiline()
-                .focused($editing)
+                .focused($focusField, equals: .notes)
         }
     }
 

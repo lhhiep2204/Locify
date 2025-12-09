@@ -11,6 +11,7 @@ import Foundation
 struct Location: Identifiable, Equatable, Hashable {
     let id: UUID
     let categoryId: UUID
+    var placeId: String?
     var displayName: String
     var name: String
     var address: String
@@ -25,6 +26,7 @@ struct Location: Identifiable, Equatable, Hashable {
     init(
         id: UUID = UUID(),
         categoryId: UUID,
+        placeId: String? = nil,
         displayName: String,
         name: String,
         address: String,
@@ -38,6 +40,7 @@ struct Location: Identifiable, Equatable, Hashable {
     ) {
         self.id = id
         self.categoryId = categoryId
+        self.placeId = placeId
         self.displayName = displayName
         self.name = name
         self.address = address
@@ -53,6 +56,7 @@ struct Location: Identifiable, Equatable, Hashable {
     static func == (lhs: Location, rhs: Location) -> Bool {
         lhs.id == rhs.id &&
         lhs.categoryId == rhs.categoryId &&
+        lhs.placeId == rhs.placeId &&
         lhs.displayName == rhs.displayName &&
         lhs.name == rhs.name &&
         lhs.address == rhs.address &&
@@ -72,12 +76,55 @@ extension Location {
     }
 }
 
+extension Location {
+    var shareMessage: String {
+        var lines: [String] = []
+
+        if !displayName.trimmed.isEmpty {
+            lines.append("Title: \(displayName)")
+        }
+
+        lines.append("Name: \(name)")
+        lines.append("Address: \(address)")
+        lines.append("Latitude: \(latitude)")
+        lines.append("Longitude: \(longitude)")
+
+        if let notes, !notes.trimmed.isEmpty {
+            lines.append("Notes: \(notes)")
+        }
+
+        lines.append("Apple Maps: \(appleMapsURL)")
+
+        return lines.joined(separator: "\n")
+    }
+
+    private var appleMapsURL: String {
+        let encodedName = name.urlEncoded
+        let encodedAddress = address.urlEncoded
+
+        var parts: [String] = []
+
+        if let placeId, !placeId.isEmpty {
+            parts.append("place-id=\(placeId)")
+        }
+
+        parts.append("address=\(encodedAddress)")
+        parts.append("coordinate=\(latitude),\(longitude)")
+        parts.append("q=\(encodedName)")
+
+        let query = parts.joined(separator: "&")
+
+        return "http://maps.apple.com/place?\(query.trimmed)"
+    }
+}
+
 // swiftlint:disable all
 extension Location {
     /// A mock location with real coordinates
     static let mock: Location = .init(
         id: UUID(uuidString: "223e4567-e89b-12d3-a456-426614174000")!,
         categoryId: Category.mock.id,
+        placeId: .empty,
         displayName: "Shake Shack",
         name: "Shake Shack Madison Square Park",
         address: "Madison Ave & E.23rd St, New York, NY 10010",
@@ -134,6 +181,7 @@ extension Location {
                     Location(
                         id: UUID(),
                         categoryId: category.id,
+                        placeId: .empty,
                         displayName: place.displayName ?? place.name,
                         name: place.name,
                         address: place.address,

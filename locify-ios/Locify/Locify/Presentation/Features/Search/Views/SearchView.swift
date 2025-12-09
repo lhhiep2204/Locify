@@ -9,12 +9,13 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.selectSearchedLocation) private var selectLocation
 
     @FocusState private var editing: Bool
 
     @State private var textSearch: String = .empty
     @State private var searchResults: [Location] = []
+
+    var onSelect: (Location) -> Void
 
     var body: some View {
         NavigationStack {
@@ -80,7 +81,7 @@ extension SearchView {
                         let location = await AppleMapService.shared.search(for: item)
                         guard let location else { return }
 
-                        selectLocation(location)
+                        onSelect(location)
                         dismiss()
                     }
                 }
@@ -91,5 +92,5 @@ extension SearchView {
 }
 
 #Preview {
-    SearchView()
+    SearchView { _ in }
 }

@@ -17,6 +17,7 @@ class EditLocationViewModel {
 
     var category: Category?
 
+    var placeId: String?
     var displayName: String = .empty
     var name: String = .empty
     var address: String = .empty
@@ -54,9 +55,18 @@ extension EditLocationViewModel {
         }
     }
 
+    func selectSearchedLocation(_ location: Location) {
+        placeId = location.placeId
+        name = location.name
+        address = location.address
+        latitude = String(location.latitude)
+        longitude = String(location.longitude)
+    }
+
     func createLocation(completion: (Location?) -> Void) {
         let location: Location = .init(
             categoryId: category?.id ?? UUID(),
+            placeId: placeId,
             displayName: displayName,
             name: name,
             address: address,

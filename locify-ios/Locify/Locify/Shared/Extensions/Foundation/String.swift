@@ -68,3 +68,12 @@ extension String {
         Double(self) ?? 0.0
     }
 }
+
+extension String {
+    /// Returns a percent-encoded string for safe use in URLs.
+    ///
+    /// - Returns: A new string that is URL-safe, or the original string if encoding fails.
+    var urlEncoded: String {
+        addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? self
+    }
+}

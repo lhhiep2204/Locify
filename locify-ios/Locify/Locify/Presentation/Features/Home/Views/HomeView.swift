@@ -21,7 +21,6 @@ struct HomeView: View {
     @State private var showAddLocationView: Bool = false
 
     private var categoryRouter: Router<Route> = .init(root: .categoryList)
-    private var searchRouter: Router<Route> = .init(root: .search)
 
     private var selectedLocation: Binding<Location?> {
         .init(
@@ -56,9 +55,6 @@ struct HomeView: View {
                 id: selectedId,
                 locations: locations
             )
-        }
-        .environment(\.selectSearchedLocation) { location in
-            viewModel.selectLocationFromSearch(location)
         }
         .alert(
             Text(MessageKeys.permissionDeniedTitle),
@@ -179,7 +175,13 @@ extension HomeView {
             RouterView(categoryRouter)
         }
         .sheet(isPresented: $showSearchView) {
-            RouterView(searchRouter)
+            RouterView(
+                Router<Route>(
+                    root: .search { location in
+                        viewModel.selectLocationFromSearch(location)
+                    }
+                )
+            )
         }
         .sheet(isPresented: $showAddLocationView) {
             EditLocationView(

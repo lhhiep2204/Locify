@@ -64,7 +64,17 @@ extension LocationDetailView {
 
             Spacer()
 
-            ShareLink(item: "location.infoToShare()") {
+            if location.isTemporary {
+                Button {
+                    onAddLocation()
+                } label: {
+                    Image.appSystemIcon(.add)
+                        .font(.appFont(.regular(.large)))
+                }
+                .circularGlassEffect()
+            }
+
+            ShareLink(item: location.shareMessage) {
                 Image.appSystemIcon(.share)
             }
             .circularGlassEffect()
@@ -207,16 +217,6 @@ extension LocationDetailView {
     private var bottomView: some View {
         HStack(alignment: .top, spacing: DSSpacing.small) {
             Spacer()
-
-            if let location, location.isTemporary {
-                Button {
-                    onAddLocation()
-                } label: {
-                    Image.appSystemIcon(.add)
-                        .font(.appFont(.regular(.large)))
-                }
-                .circularGlassEffect(size: 52)
-            }
 
             Button {
                 onSearchLocation()

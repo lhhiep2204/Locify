@@ -165,7 +165,7 @@ extension DSTextField {
         }
         .glassEffect(
             .clear.interactive(),
-            in: RoundedRectangle(cornerRadius: DSSpacing.medium)
+            in: RoundedRectangle(cornerRadius: DSRadius.xxLarge)
         )
         .cornerRadius(DSRadius.xxLarge)
         .overlay {

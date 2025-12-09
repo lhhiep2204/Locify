@@ -80,7 +80,7 @@ struct LocationListView: View {
             .alert(
                 Text(
                     String(
-                        format: MessageKeys.deleteAlertTitle.rawValue, locationToDelete?.name ?? ""
+                        format: MessageKeys.deleteAlertTitle.rawValue, locationToDelete?.name ?? .empty
                     )
                 ),
                 isPresented: $showDeleteAlert,
@@ -180,7 +180,7 @@ extension LocationListView {
     }
 
     private func shareButtonView(_ location: Location) -> some View {
-        ShareLink(item: "location.infoToShare()") {
+        ShareLink(item: location.shareMessage) {
             Label {
                 DSText(.localized(CommonKeys.share))
             } icon: {

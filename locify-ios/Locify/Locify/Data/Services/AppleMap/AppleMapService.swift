@@ -90,6 +90,7 @@ extension AppleMapService {
         return .init(
             id: Constants.myLocationId,
             categoryId: UUID(),
+            placeId: item.identifier?.rawValue,
             displayName: "My location",
             name: name,
             address: address,
@@ -141,6 +142,7 @@ extension AppleMapService {
                 .init(
                     id: Constants.searchedLocationId,
                     categoryId: UUID(),
+                    placeId: $0.identifier?.rawValue,
                     displayName: .empty,
                     name: $0.name ?? .empty,
                     address: $0.addressRepresentations?.fullAddress(includingRegion: true, singleLine: true) ?? .empty,

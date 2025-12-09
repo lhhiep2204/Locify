@@ -7,12 +7,43 @@
 
 import SwiftUI
 
+typealias SearchCompleter = (Location) -> Void
+
 /// An enum representing all possible navigation routes in the app.
 enum Route {
     case home
     case categoryList
     case locationList(category: Category)
-    case search
+    case search(SearchCompleter)
+}
+
+extension Route: Equatable, Hashable {
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .home:
+            hasher.combine("home")
+        case .categoryList:
+            hasher.combine("categoryList")
+        case .locationList(let category):
+            hasher.combine("locationList")
+            hasher.combine(category.id)
+        case .search:
+            hasher.combine("search")
+        }
+    }
+
+    static func == (lhs: Route, rhs: Route) -> Bool {
+        switch (lhs, rhs) {
+        case (.home, .home),
+            (.categoryList, .categoryList),
+            (.search, .search):
+            true
+        case (.locationList(let categoryA), .locationList(let categoryB)):
+            categoryA == categoryB
+        default:
+            false
+        }
+    }
 }
 
 /// Makes `Route` conform to `AppRoute` by implementing a `View` body for each case.
@@ -36,8 +67,8 @@ private struct RouteContentView: View {
             CategoryListView(container.makeCategoryListViewModel())
         case .locationList(let category):
             LocationListView(container.makeLocationListViewModel(category: category))
-        case .search:
-            SearchView()
+        case .search(let searchCompletion):
+            SearchView { searchCompletion($0) }
         }
     }
 }
