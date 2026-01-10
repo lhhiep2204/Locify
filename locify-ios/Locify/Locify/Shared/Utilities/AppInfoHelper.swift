@@ -8,7 +8,7 @@
 import Foundation
 
 /// Provides information about the app from Info.plist.
-enum AppInfoProvider {
+enum AppInfoHelper {
     /// The display name of the app.
     static var appName: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ??

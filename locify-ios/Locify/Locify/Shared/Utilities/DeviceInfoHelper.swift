@@ -8,7 +8,7 @@
 import UIKit
 
 /// Provides information about the current device and system environment.
-enum DeviceInfoProvider {
+enum DeviceInfoHelper {
     /// The operating system name (e.g., "iOS", "visionOS", "watchOS").
     static var systemName: String {
         UIDevice.current.systemName

@@ -62,7 +62,7 @@ struct Logger {
         let messageString = messages.map { "\($0)" }.joined(separator: "\n")
 
         print("""
-            \(level.rawValue) \(AppInfoProvider.appName) - \(fileName): Line \(line), Column: \(column)
+            \(level.rawValue) \(AppInfoHelper.appName) - \(fileName): Line \(line), Column: \(column)
             - Function: \(function)
             - Messages:
             \(messageString)

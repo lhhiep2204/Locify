@@ -65,8 +65,7 @@ struct HomeView: View {
             ) {
                 showLocationDetail = true
 
-                guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                UIApplication.shared.open(url)
+                URLHelper.openAppSettings()
             }
             Button(
                 String.localized(CommonKeys.cancel),
