@@ -45,8 +45,8 @@ struct Location: Identifiable, Equatable, Hashable {
         self.name = name
         self.address = address
         self.description = description
-        self.latitude = latitude
-        self.longitude = longitude
+        self.latitude = latitude.rounded(toDecimalPlaces: 8)
+        self.longitude = longitude.rounded(toDecimalPlaces: 8)
         self.notes = notes
         self.syncStatus = syncStatus
         self.createdAt = createdAt
@@ -73,48 +73,6 @@ struct Location: Identifiable, Equatable, Hashable {
 extension Location {
     var isTemporary: Bool {
         id == Constants.myLocationId || id == Constants.searchedLocationId
-    }
-}
-
-extension Location {
-    var shareMessage: String {
-        var lines: [String] = []
-
-        if !displayName.trimmed.isEmpty {
-            lines.append("Title: \(displayName)")
-        }
-
-        lines.append("Name: \(name)")
-        lines.append("Address: \(address)")
-        lines.append("Latitude: \(latitude)")
-        lines.append("Longitude: \(longitude)")
-
-        if let notes, !notes.trimmed.isEmpty {
-            lines.append("Notes: \(notes)")
-        }
-
-        lines.append("Apple Maps: \(appleMapsURL)")
-
-        return lines.joined(separator: "\n")
-    }
-
-    private var appleMapsURL: String {
-        let encodedName = name.urlEncoded
-        let encodedAddress = address.urlEncoded
-
-        var parts: [String] = []
-
-        if let placeId, !placeId.isEmpty {
-            parts.append("place-id=\(placeId)")
-        }
-
-        parts.append("address=\(encodedAddress)")
-        parts.append("coordinate=\(latitude),\(longitude)")
-        parts.append("q=\(encodedName)")
-
-        let query = parts.joined(separator: "&")
-
-        return "http://maps.apple.com/place?\(query.trimmed)"
     }
 }
 

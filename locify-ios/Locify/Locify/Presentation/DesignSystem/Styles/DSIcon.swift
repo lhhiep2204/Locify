@@ -22,6 +22,7 @@ enum DSSystemIcon: String {
     case back = "chevron.backward"
 
     // MARK: - C
+    case copy = "document.on.document"
     case chevronDown = "chevron.down"
     case clearText = "multiply.circle.fill"
     case close = "xmark"

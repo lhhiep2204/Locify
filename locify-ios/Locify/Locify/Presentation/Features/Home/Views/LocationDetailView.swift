@@ -54,13 +54,20 @@ struct LocationDetailView: View {
 extension LocationDetailView {
     private func topView(location: Location) -> some View {
         HStack(alignment: .top, spacing: DSSpacing.small) {
-            DSText(
-                location.displayName.isEmpty ? location.name : location.displayName,
-                font: .bold(.xLarge)
-            )
-            .lineLimit(2)
-            .minimumScaleFactor(0.7)
-            .padding(.top, DSSpacing.xSmall)
+            VStack(alignment: .leading) {
+                DSText(
+                    location.displayName.isEmpty ? location.name : location.displayName,
+                    font: .bold(.xLarge)
+                )
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .padding(.top, DSSpacing.xSmall)
+
+                DSText(
+                    location.address,
+                    font: .regular(.small)
+                )
+            }
 
             Spacer()
 
@@ -69,7 +76,6 @@ extension LocationDetailView {
                     onAddLocation()
                 } label: {
                     Image.appSystemIcon(.add)
-                        .font(.appFont(.regular(.large)))
                 }
                 .circularGlassEffect()
             }
@@ -94,7 +100,6 @@ extension LocationDetailView {
         Section {
             Group {
                 nameView(name: location.name)
-                addressView(address: location.address)
                 coordinatesView(
                     latitude: location.latitude,
                     longitude: location.longitude
@@ -121,44 +126,52 @@ extension LocationDetailView {
         }
     }
 
-    private func addressView(address: String) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
-            infoItemView(
-                title: .localized(LocationKeys.address),
-                value: address
-            )
-        }
-    }
-
     private func coordinatesView(
         latitude: Double,
         longitude: Double
     ) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
-            DSText(
-                .localized(LocationKeys.coordinates),
-                font: .bold(.small)
-            )
-            HStack {
+        HStack {
+            VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
                 DSText(
-                    .localized(LocationKeys.latitude),
-                    font: .medium(.small)
+                    .localized(LocationKeys.coordinates),
+                    font: .bold(.small)
                 )
-                DSText(
-                    String(latitude),
-                    font: .regular(.small)
-                )
+                HStack {
+                    DSText(
+                        .localized(LocationKeys.latitude),
+                        font: .medium(.small)
+                    )
+                    DSText(
+                        String(latitude),
+                        font: .regular(.small)
+                    )
+                }
+                HStack {
+                    DSText(
+                        .localized(LocationKeys.longitude),
+                        font: .medium(.small)
+                    )
+                    DSText(
+                        String(longitude),
+                        font: .regular(.small)
+                    )
+                }
             }
-            HStack {
-                DSText(
-                    .localized(LocationKeys.longitude),
-                    font: .medium(.small)
+
+            Spacer()
+
+            Button {
+                CommonHelper.Clipboard.copy(
+                """
+                \(String.localized(LocationKeys.latitude)): \(latitude)
+                \(String.localized(LocationKeys.longitude)): \(longitude)
+                """
                 )
-                DSText(
-                    String(longitude),
-                    font: .regular(.small)
-                )
+            } label: {
+                Image.appSystemIcon(.copy)
+                    .font(.appFont(.regular(.small)))
             }
+            .circularGlassEffect()
         }
     }
 
