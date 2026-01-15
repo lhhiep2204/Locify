@@ -50,7 +50,7 @@ struct LocationDetailView: View {
             }
 
             bottomView
-                .padding(.horizontal, DSSpacing.large)
+                .padding([.horizontal, .bottom], DSSpacing.large)
         }
     }
 }
