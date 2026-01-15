@@ -15,6 +15,7 @@ struct HomeView: View {
 
     @State private var showLocationDetail: Bool = true
     @State private var locationDetailDetent: PresentationDetent = .small
+    @State private var locationDetailHeight: CGFloat = locationDetailMinHeight
 
     @State private var showCollectionListView: Bool = false
     @State private var showSearchView: Bool = false
@@ -31,6 +32,8 @@ struct HomeView: View {
             set: { viewModel.selectLocation($0) }
         )
     }
+
+    private static let locationDetailMinHeight: CGFloat = 300
 
     init(_ viewModel: HomeViewModel) {
         self.viewModel = viewModel
@@ -82,7 +85,8 @@ struct HomeView: View {
         .alert(
             Text(
                 String(
-                    format: MessageKeys.deleteAlertTitle.rawValue, selectedLocation.wrappedValue?.name ?? .empty
+                    format: MessageKeys.deleteAlertTitle.rawValue,
+                    selectedLocation.wrappedValue?.name ?? .empty
                 )
             ),
             isPresented: $showDeleteAlert
@@ -120,37 +124,30 @@ extension HomeView {
     }
 
     private var compactContentView: some View {
-        mapView
-            .sheet(isPresented: $showLocationDetail) {
-                NavigationStack {
-                    locationDetailView
-                }
-                .if(viewModel.selectedLocationId != nil) {
-                    $0.presentationDetents(
-                        [.small, .medium],
-                        selection: $locationDetailDetent
-                    )
-                } else: {
-                    $0.presentationDetents([.small])
-                }
-                .interactiveDismissDisabled()
-                .presentationBackgroundInteraction(.enabled)
+        ZStack {
+            mapView
+            VStack {
+                Spacer()
+                locationDetailContainerView
+                    .onChange(of: viewModel.selectedLocationId) {
+                        withAnimation(.spring) {
+                            locationDetailHeight = HomeView.locationDetailMinHeight
+                        }
+                    }
             }
-            .onChange(of: viewModel.selectedLocationId) {
-                locationDetailDetent = .small
-            }
+            .ignoresSafeArea(edges: .bottom)
+        }
     }
 
     private var mapView: some View {
         ZStack {
             MapView(
                 selectedLocation: selectedLocation,
-                locations: viewModel.locationList.filter {
-                    $0.id != Constants.myLocationId && $0.id != Constants.mapSelectionId
-                }
+                locations: viewModel.locationList.filter { $0.id != Constants.myLocationId }
             ) { location in
                 viewModel.selectLocation(location)
             }
+            .safeAreaPadding(.leading, DSSpacing.large)
             topView
         }
     }
@@ -185,6 +182,35 @@ extension HomeView {
             Image.appSystemIcon(.location)
         }
         .circularGlassEffect()
+    }
+
+    private var locationDetailContainerView: some View {
+        ConcentricRectangle(corners: .concentric, isUniform: true)
+            .fill(.backgroundPrimary.opacity(0.8))
+            .frame(height: locationDetailHeight)
+            .overlay {
+                locationDetailView
+            }
+            .clipShape(ConcentricRectangle(corners: .concentric, isUniform: true))
+            .padding(DSSpacing.large)
+            .gesture(
+                DragGesture()
+                    .onChanged {
+                        let height = $0.translation.height
+
+                        if height < 0 {
+                            locationDetailHeight = min(locationDetailHeight + abs(height), 550)
+                        } else {
+                            locationDetailHeight = max(locationDetailHeight - abs(height), 200)
+                        }
+                    }
+                    .onEnded {
+                        let height = $0.translation.height
+                        withAnimation(.spring) {
+                            locationDetailHeight = height > 0 ? 250 : 500
+                        }
+                    }
+            )
     }
 
     private var locationDetailView: some View {
