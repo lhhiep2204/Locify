@@ -46,7 +46,7 @@ struct LocationDetailView: View {
             .padding(.top, DSSpacing.xLarge)
 
             bottomView
-                .padding(.horizontal, DSSpacing.large)
+                .padding([.horizontal, .bottom], DSSpacing.large)
         }
     }
 }
