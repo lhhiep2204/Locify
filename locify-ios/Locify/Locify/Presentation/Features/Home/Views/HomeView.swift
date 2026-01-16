@@ -19,6 +19,9 @@ struct HomeView: View {
     @State private var showCategoryListView: Bool = false
     @State private var showSearchView: Bool = false
     @State private var showAddLocationView: Bool = false
+    @State private var showEditLocationView: Bool = false
+
+    @State private var showDeleteAlert: Bool = false
 
     private var categoryRouter: Router<Route> = .init(root: .categoryList)
 
@@ -75,6 +78,33 @@ struct HomeView: View {
             }
         } message: {
             Text(MessageKeys.permissionDeniedMessage)
+        }
+        .alert(
+            Text(
+                String(
+                    format: MessageKeys.deleteAlertTitle.rawValue, selectedLocation.wrappedValue?.name ?? .empty
+                )
+            ),
+            isPresented: $showDeleteAlert
+        ) {
+            Button(
+                String.localized(CommonKeys.delete),
+                role: .destructive
+            ) {
+                showLocationDetail = true
+
+                Task {
+                    await viewModel.deleteLocation()
+                }
+            }
+            Button(
+                String.localized(CommonKeys.cancel),
+                role: .cancel
+            ) {
+                showLocationDetail = true
+            }
+        } message: {
+            Text(MessageKeys.deleteAlertMessage.rawValue)
         }
     }
 }
@@ -163,6 +193,10 @@ extension HomeView {
             showSearchView = true
         } onAddLocation: {
             showAddLocationView = true
+        } onEditLocation: {
+            showEditLocationView = true
+        } onDeleteLocation: {
+            showDeleteAlert = true
         } onCloseSelectedLocation: {
             Task {
                 await viewModel.clearSelectedLocation()
@@ -191,6 +225,18 @@ extension HomeView {
             ) { location in
                 Task {
                     await viewModel.addLocation(location)
+                }
+            }
+        }
+        .sheet(isPresented: $showEditLocationView) {
+            EditLocationView(
+                container.makeEditLocationViewModel(),
+                editMode: .update,
+                category: viewModel.selectedCategory,
+                locationToSave: viewModel.selectedLocation
+            ) { location in
+                Task {
+                    await viewModel.updateLocation(location)
                 }
             }
         }

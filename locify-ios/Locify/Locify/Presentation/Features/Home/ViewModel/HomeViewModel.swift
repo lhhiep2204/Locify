@@ -107,6 +107,7 @@ extension HomeViewModel {
             selectedLocationId = locationList.first?.id
         } else {
             locationList.removeAll()
+            selectedCategory = nil
             await getUserLocation()
         }
     }
@@ -117,6 +118,35 @@ extension HomeViewModel {
             selectedLocationId = location.id
             locationList.removeAll(where: \.isTemporary)
             locationList.append(location)
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
+    }
+
+    func updateLocation(_ location: Location) async {
+        do {
+            guard let index = locationList.firstIndex(where: { $0.id == location.id }) else { return }
+
+            _ = try await locationUseCase.update.execute(location)
+            locationList[index] = location
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
+    }
+
+    func deleteLocation() async {
+        guard let locationToDelete = locationList.first(where: { $0.id == selectedLocationId }) else { return }
+
+        do {
+            _ = try await locationUseCase.delete.execute(locationToDelete)
+
+            if let id = locationList.filter({ $0 != locationToDelete }).first?.id {
+                selectedLocationId = id
+            } else {
+                selectedLocationId = nil
+            }
+
+            locationList.removeAll(where: { $0.id == locationToDelete.id })
         } catch {
             Logger.error(error.localizedDescription)
         }

@@ -40,6 +40,9 @@ enum DSSystemIcon: String {
     case list = "list.bullet"
     case location = "location"
 
+    // MARK: - M
+    case more = "ellipsis"
+
     // MARK: - P
     case passwordShown = "eye"
     case passwordHidden = "eye.slash"

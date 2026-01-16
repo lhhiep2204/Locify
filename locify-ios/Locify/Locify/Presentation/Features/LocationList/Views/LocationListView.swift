@@ -117,8 +117,9 @@ extension LocationListView {
                         shareButtonView(item)
                     }
                     .contextMenu {
-                        editButtonView(item)
                         shareButtonView(item)
+                        editButtonView(item)
+                        Divider()
                         deleteButtonView(item)
                     }
             }
@@ -153,6 +154,17 @@ extension LocationListView {
         }
     }
 
+    private func shareButtonView(_ location: Location) -> some View {
+        ShareLink(item: location.shareMessage) {
+            Label {
+                DSText(.localized(CommonKeys.share))
+            } icon: {
+                Image.appSystemIcon(.share)
+            }
+        }
+        .tint(.blue)
+    }
+
     private func editButtonView(_ location: Location) -> some View {
         Button {
             locationToSave = location
@@ -177,17 +189,6 @@ extension LocationListView {
             }
         }
         .tint(.red)
-    }
-
-    private func shareButtonView(_ location: Location) -> some View {
-        ShareLink(item: location.shareMessage) {
-            Label {
-                DSText(.localized(CommonKeys.share))
-            } icon: {
-                Image.appSystemIcon(.share)
-            }
-        }
-        .tint(.blue)
     }
 }
 

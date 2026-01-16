@@ -115,6 +115,7 @@ extension CategoryListView {
                         }
                         .contextMenu {
                             editButtonView(item)
+                            Divider()
                             deleteButtonView(item)
                         }
                 }

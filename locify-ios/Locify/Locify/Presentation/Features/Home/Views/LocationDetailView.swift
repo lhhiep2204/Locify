@@ -14,6 +14,8 @@ struct LocationDetailView: View {
     let onSelectLocation: (UUID) -> Void
     let onSearchLocation: () -> Void
     let onAddLocation: () -> Void
+    let onEditLocation: () -> Void
+    let onDeleteLocation: () -> Void
     let onCloseSelectedLocation: () -> Void
 
     var body: some View {
@@ -72,18 +74,20 @@ extension LocationDetailView {
             Spacer()
 
             if location.isTemporary {
-                Button {
-                    onAddLocation()
+                addButtonView
+                shareButtonView(location)
+            } else {
+                Menu {
+                    shareButtonMenuView(location)
+                    editButtonMenuView
+                    Divider()
+                    deleteButtonMenuView
                 } label: {
-                    Image.appSystemIcon(.add)
+                    Image.appSystemIcon(.more)
+                        .circularGlassEffect()
                 }
-                .circularGlassEffect()
+                .menuOrder(.fixed)
             }
-
-            ShareLink(item: location.shareMessage) {
-                Image.appSystemIcon(.share)
-            }
-            .circularGlassEffect()
 
             if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
                 Button {
@@ -94,6 +98,61 @@ extension LocationDetailView {
                 .circularGlassEffect()
             }
         }
+    }
+
+    private var addButtonView: some View {
+        Button {
+            onAddLocation()
+        } label: {
+            Image.appSystemIcon(.add)
+        }
+        .circularGlassEffect()
+    }
+
+    private func shareButtonView(_ location: Location) -> some View {
+        ShareLink(item: location.shareMessage) {
+            Image.appSystemIcon(.share)
+        }
+        .circularGlassEffect()
+    }
+
+    private func shareButtonMenuView(_ location: Location) -> some View {
+        ShareLink(item: location.shareMessage) {
+            Label {
+                DSText(.localized(CommonKeys.share))
+            } icon: {
+                Image.appSystemIcon(.share)
+            }
+        }
+        .tint(.blue)
+        .circularGlassEffect()
+    }
+
+    private var editButtonMenuView: some View {
+        Button {
+            onEditLocation()
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.edit))
+            } icon: {
+                Image.appSystemIcon(.edit)
+            }
+        }
+        .circularGlassEffect()
+    }
+
+    private var deleteButtonMenuView: some View {
+        Button {
+            onDeleteLocation()
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.delete))
+            } icon: {
+                Image.appSystemIcon(.delete)
+            }
+        }
+        .tint(.red)
+        .circularGlassEffect()
     }
 
     private func infoView(location: Location) -> some View {
@@ -171,6 +230,7 @@ extension LocationDetailView {
                 Image.appSystemIcon(.copy)
                     .font(.appFont(.regular(.small)))
             }
+            .buttonStyle(.plain)
             .circularGlassEffect()
         }
     }
@@ -249,5 +309,7 @@ extension LocationDetailView {
     ) { _ in }
     onSearchLocation: { }
     onAddLocation: { }
+    onEditLocation: { }
+    onDeleteLocation: { }
     onCloseSelectedLocation: { }
 }
