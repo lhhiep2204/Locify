@@ -1,6 +1,6 @@
 # Locify API Documentation
 
-This document outlines the RESTful API endpoints for the Locify backend, built with Java/Spring Boot and integrated with Firebase Authentication for user management. The API supports user-based location and category management for saving planned or memorable locations, with synchronization for offline use.
+This document outlines the RESTful API endpoints for the Locify backend, built with Java/Spring Boot and integrated with Firebase Authentication for user management. The API supports user-based location and collection management for saving planned or memorable locations, with synchronization for offline use.
 
 ---
 
@@ -9,7 +9,7 @@ This document outlines the RESTful API endpoints for the Locify backend, built w
 - [Authentication](#authentication)
 - [Endpoints](#endpoints)
   - [Users](#users)
-  - [Categories](#categories)
+  - [Collections](#collections)
   - [Locations](#locations)
   - [Images](#images)
 - [Synchronization](#synchronization)
@@ -190,21 +190,21 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
   - Response: Updated user object (same as GET /users/me response).
 
 - **DELETE /users/me**
-  - Description: Delete the authenticated user's account, including all associated categories, locations, category shares, location shares, and images in Firebase Storage.
+  - Description: Delete the authenticated user's account, including all associated collections, locations, collection shares, location shares, and images in Firebase Storage.
   - **Process**:
     - Validates the Firebase token to ensure the request is from the authenticated user.
-    - Queries the `categories` table for all `icon` URLs and the `locations` table for all `image_urls` associated with the `user_id`.
+    - Queries the `collections` table for all `icon` URLs and the `locations` table for all `image_urls` associated with the `user_id`.
     - Deletes all identified images from Firebase Storage using the Firebase Admin SDK, processing deletions in batches for efficiency.
-    - Uses database transactions to delete all records in `categories`, `locations`, `category_shares`, and `location_shares` tables for the `user_id`, ensuring data integrity.
+    - Uses database transactions to delete all records in `collections`, `locations`, `collection_shares`, and `location_shares` tables for the `user_id`, ensuring data integrity.
     - Deletes the user record from the `users` table and removes the user from Firebase Authentication.
   - Response: 204 No Content.
   - **Error Cases**:
     - Returns `E006` (Unauthorized access) if the token does not match the user ID.
     - Returns `S002` (Server error) if image deletion or database operations fail.
 
-### Categories
-- **GET /categories**
-  - Description: List all categories for the authenticated user, including shared categories.
+### Collections
+- **GET /collections**
+  - Description: List all collections for the authenticated user, including shared collections.
   - **Query Parameters**:
     - `page` (optional, default: 1): Page number for pagination.
     - `size` (optional, default: 20, max: 100): Number of records per page.
@@ -216,7 +216,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
           "id": "uuid",
           "user_id": "firebase_uid",
           "name": "Restaurant",
-          "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/categories%2Ffirebase_uid%2Fuuid%2Ficon.png",
+          "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/collections%2Ffirebase_uid%2Fuuid%2Ficon.png",
           "visibility": "private",
           "is_default": false,
           "sync_status": "synced",
@@ -255,10 +255,10 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     - Returns `E002` (Invalid UUID format) for `id` or any `share.permissions[].user_id`.
     - Returns `E004` (Missing required field) if `name` or `id` is missing.
     - Returns `E007` (Resource not found) if any `share.permissions[].user_id` does not exist.
-    - Returns `E003` (Duplicate ID) if a category with the same UUID already exists.
+    - Returns `E003` (Duplicate ID) if a collection with the same UUID already exists.
 
-- **POST /categories**
-  - Description: Create a new category, optionally specifying sharing permissions.
+- **POST /collections**
+  - Description: Create a new collection, optionally specifying sharing permissions.
   - **Constraints**:
     - `id`: Must be a valid UUID.
     - `name`: Maximum 255 characters, must not be empty or null.
@@ -274,7 +274,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     {
       "id": "client-generated-uuid",
       "name": "Cafe",
-      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/categories%2Ffirebase_uid%2Fuuid%2Ficon.png",
+      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/collections%2Ffirebase_uid%2Fuuid%2Ficon.png",
       "visibility": "shared",
       "is_default": false,
       "sync_status": "pendingCreate",
@@ -298,7 +298,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
       "id": "uuid",
       "user_id": "firebase_uid",
       "name": "Cafe",
-      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/categories%2Ffirebase_uid%2Fuuid%2Ficon.png",
+      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/collections%2Ffirebase_uid%2Fuuid%2Ficon.png",
       "visibility": "shared",
       "is_default": false,
       "sync_status": "synced",
@@ -328,25 +328,25 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
   - **Notes**:
     - The authenticated user is automatically assigned the `owner` role in the `share.role` field of the response.
     - If `visibility` is `shared`, the `share.permissions` array must include at least one user; otherwise, the server returns an `E001` error (Invalid input data).
-    - Sharing permissions are stored in the `category_shares` table, with `owner_id` set to the authenticated user’s `user_id`.
-    - To remove sharing, set `visibility` to `private` or provide an empty `share.permissions` array, which deletes all associated `category_shares` records.
+    - Sharing permissions are stored in the `collection_shares` table, with `owner_id` set to the authenticated user’s `user_id`.
+    - To remove sharing, set `visibility` to `private` or provide an empty `share.permissions` array, which deletes all associated `collection_shares` records.
   - **Error Cases**:
     - Returns `E002` (Invalid UUID format) for `id` or `share.permissions[].user_id`.
     - Returns `E004` (Missing required field) if `id` is missing.
-    - Returns `E007` (Resource not found) if the category does not exist.
+    - Returns `E007` (Resource not found) if the collection does not exist.
     - Returns `E006` (Unauthorized access) if the user is not the owner or does not have `edit` role.
     - Returns `E003` (Conflict during synchronization) if the request has an older `updated_at`.
 
-- **PUT /categories**
-  - Description: Update an existing category, including its sharing permissions.
-  - **Constraints**: Same as POST /categories.
-    - `share.permissions`: Optional. If provided, updates the sharing permissions by replacing existing ones (creates new `category_shares` records and deletes outdated ones).
+- **PUT /collections**
+  - Description: Update an existing collection, including its sharing permissions.
+  - **Constraints**: Same as POST /collections.
+    - `share.permissions`: Optional. If provided, updates the sharing permissions by replacing existing ones (creates new `collection_shares` records and deletes outdated ones).
   - Request Body:
     ```json
     {
       "id": "uuid",
       "name": "Coffee Shop",
-      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/categories%2Ffirebase_uid%2Fuuid%2Ficon.png",
+      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/collections%2Ffirebase_uid%2Fuuid%2Ficon.png",
       "visibility": "shared",
       "is_default": false,
       "sync_status": "pendingUpdate",
@@ -370,7 +370,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
       "id": "uuid",
       "user_id": "firebase_uid",
       "name": "Coffee Shop",
-      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/categories%2Ffirebase_uid%2Fuuid%2Ficon.png",
+      "icon": "https://firebasestorage.googleapis.com/v0/b/locify-123.appspot.com/o/collections%2Ffirebase_uid%2Fuuid%2Ficon.png",
       "visibility": "shared",
       "is_default": false,
       "sync_status": "synced",
@@ -398,41 +398,41 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     }
     ```
   - **Notes**:
-    - Only the owner or users with `edit` role can update the category.
-    - If `share.permissions` is provided, it replaces existing permissions in the `category_shares` table for the given `category_id`.
-    - If `visibility` is changed to `private` or `share.permissions` is empty, existing `category_shares` records are deleted.
+    - Only the owner or users with `edit` role can update the collection.
+    - If `share.permissions` is provided, it replaces existing permissions in the `collection_shares` table for the given `collection_id`.
+    - If `visibility` is changed to `private` or `share.permissions` is empty, existing `collection_shares` records are deleted.
   - **Error Cases**:
-    - Returns `E002` (Invalid UUID format) for `category_id` or `reassign_category_id`.
-    - Returns `E004` (Missing required field) if the category contains locations and no `reassign_category_id` provided.
-    - Returns `E007` (Resource not found) if the category does not exist.
+    - Returns `E002` (Invalid UUID format) for `collection_id` or `reassign_collection_id`.
+    - Returns `E004` (Missing required field) if the collection contains locations and no `reassign_collection_id` provided.
+    - Returns `E007` (Resource not found) if the collection does not exist.
     - Returns `E006` (Unauthorized access) if the user is not the owner or does not have `edit` role.
-    - Returns `E007` (Resource not found) if `reassign_category_id` does not exist or user has no access.
-    - Returns `E002` (Invalid UUID format) for `category_id` if provided.
-    - Returns `E007` (Resource not found) if `category_id` does not exist or user has no access.
+    - Returns `E007` (Resource not found) if `reassign_collection_id` does not exist or user has no access.
+    - Returns `E002` (Invalid UUID format) for `collection_id` if provided.
+    - Returns `E007` (Resource not found) if `collection_id` does not exist or user has no access.
 
 
-- **DELETE /categories/{category_id}**
-  - Description: Delete a category by ID, including all associated locations, their images, and category shares.
+- **DELETE /collections/{collection_id}**
+  - Description: Delete a collection by ID, including all associated locations, their images, and collection shares.
   - **Constraints**:
-    - `category_id`: Must be a valid UUID.
-    - If the category contains locations, a `reassign_category_id` (valid UUID) must be provided in the request body to reassign the locations.
+    - `collection_id`: Must be a valid UUID.
+    - If the collection contains locations, a `reassign_collection_id` (valid UUID) must be provided in the request body to reassign the locations.
   - Request Body (if reassigning locations):
     ```json
     {
-      "reassign_category_id": "uuid"
+      "reassign_collection_id": "uuid"
     }
     ```
   - Response: 204 No Content.
   - **Error Cases**:
-    - Returns `E002` (Invalid UUID format) for `id` or `category_id`.
-    - Returns `E004` (Missing required field) if `id`, `category_id`, `name`, or `displayName` is missing.
-    - Returns `E007` (Resource not found) if the category does not exist or user has no edit rights.
+    - Returns `E002` (Invalid UUID format) for `id` or `collection_id`.
+    - Returns `E004` (Missing required field) if `id`, `collection_id`, `name`, or `displayName` is missing.
+    - Returns `E007` (Resource not found) if the collection does not exist or user has no edit rights.
 
 ### Locations
 - **GET /locations**
-  - Description: List all locations for the authenticated user, optionally filtered by category, including shared locations.
+  - Description: List all locations for the authenticated user, optionally filtered by collection, including shared locations.
   - **Query Parameters**:
-    - `category_id` (optional): Filter by category UUID.
+    - `collection_id` (optional): Filter by collection UUID.
     - `page` (optional, default: 1): Page number for pagination.
     - `size` (optional, default: 20, max: 100): Number of records per page.
   - Response:
@@ -442,7 +442,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
         {
           "id": "uuid",
           "user_id": "firebase_uid",
-          "category_id": "uuid",
+          "collection_id": "uuid",
           "name": "Coffee Shop",
           "displayName": "My Favorite Coffee Shop",
           "address": "123 Main St",
@@ -494,7 +494,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
   - Description: Create a new location, optionally specifying sharing permissions.
   - **Constraints**:
     - `id`: Must be a valid UUID.
-    - `category_id`: Must be a valid UUID and exist in `categories`.
+    - `collection_id`: Must be a valid UUID and exist in `collections`.
     - `name`: Maximum 255 characters, must not be empty or null.
     - `displayName`: Maximum 255 characters, must not be empty or null.
     - `address`: Maximum 1000 characters (optional).
@@ -514,7 +514,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     ```json
     {
       "id": "client-generated-uuid",
-      "category_id": "uuid",
+      "collection_id": "uuid",
       "name": "Coffee Shop",
       "displayName": "My Favorite Coffee Shop",
       "address": "123 Main St",
@@ -549,7 +549,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     {
       "id": "uuid",
       "user_id": "firebase_uid",
-      "category_id": "uuid",
+      "collection_id": "uuid",
       "name": "Coffee Shop",
       "displayName": "My Favorite Coffee Shop",
       "address": "123 Main St",
@@ -594,9 +594,9 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     - Sharing permissions are stored in the `location_shares` table, with `owner_id` set to the authenticated user’s `user_id`.
     - To remove sharing, set `visibility` to `private` or provide an empty `share.permissions` array, which deletes all associated `location_shares` records.
   - **Error Cases**:
-    - Returns `E002` (Invalid UUID format) for `id` or `category_id`.
+    - Returns `E002` (Invalid UUID format) for `id` or `collection_id`.
     - Returns `E004` (Missing required field) if `id` is missing.
-    - Returns `E007` (Resource not found) if the location or category does not exist.
+    - Returns `E007` (Resource not found) if the location or collection does not exist.
     - Returns `E006` (Unauthorized access) if the user is not the owner or does not have `edit` role.
     - Returns `E003` (Conflict during synchronization) if the request has an older `updated_at`.
     - Returns `E001` (Invalid input data) if `latitude`/`longitude` out of range or other validation fails.
@@ -609,7 +609,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     ```json
     {
       "id": "uuid",
-      "category_id": "uuid",
+      "collection_id": "uuid",
       "name": "Coffee Shop",
       "displayName": "My Favorite Coffee Shop",
       "address": "123 Main St",
@@ -644,7 +644,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     {
       "id": "uuid",
       "user_id": "firebase_uid",
-      "category_id": "uuid",
+      "collection_id": "uuid",
       "name": "Coffee Shop",
       "displayName": "My Favorite Coffee Shop",
       "address": "123 Main St",
@@ -694,9 +694,9 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
     - `location_id`: Must be a valid UUID.
   - Response: 204 No Content.
   - **Error Cases**:
-    - Returns `E002` (Invalid UUID format) for `id` or `category_id`.
+    - Returns `E002` (Invalid UUID format) for `id` or `collection_id`.
     - Returns `E004` (Missing required field) if `id` is missing.
-    - Returns `E007` (Resource not found) if the location or category does not exist.
+    - Returns `E007` (Resource not found) if the location or collection does not exist.
     - Returns `E006` (Unauthorized access) if the user is not the owner or does not have `edit` role.
     - Returns `E003` (Conflict during synchronization) if the request has an older `updated_at`.
     - Returns `E001` (Invalid input data) if `latitude`/`longitude` out of range or other validation fails.
@@ -704,8 +704,8 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
 ### Images
 - **Firebase Storage Integration**:
   - **Client Operations**: Clients use the Firebase Storage SDK directly for image upload and deletion operations.
-  - **Backend Operations**: The backend deletes images from Firebase Storage during user account deletion (via `DELETE /users/me`), category deletion (via `DELETE /categories/{category_id}`), or location deletion (via `DELETE /locations/{location_id}`) using the Firebase Admin SDK.
-  - Storage path structure: `/locations/{user_id}/{location_id}/{image_name}` for location images, `/categories/{user_id}/{category_id}/{icon_name}` for category icons, and `/users/{user_id}/{image_name}` for user avatars.
+  - **Backend Operations**: The backend deletes images from Firebase Storage during user account deletion (via `DELETE /users/me`), collection deletion (via `DELETE /collections/{collection_id}`), or location deletion (via `DELETE /locations/{location_id}`) using the Firebase Admin SDK.
+  - Storage path structure: `/locations/{user_id}/{location_id}/{image_name}` for location images, `/collections/{user_id}/{collection_id}/{icon_name}` for collection icons, and `/users/{user_id}/{image_name}` for user avatars.
   - **Constraints**:
     - Maximum image size: 5MB per image.
     - Maximum 10 images per location.
@@ -720,7 +720,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
           match /locations/{userId}/{locationId}/{imageName} {
             allow read, write: if request.auth != null && request.auth.uid == userId;
           }
-          match /categories/{userId}/{categoryId}/{iconName} {
+          match /collections/{userId}/{collectionId}/{iconName} {
             allow read, write: if request.auth != null && request.auth.uid == userId;
           }
           match /users/{userId}/{imageName} {
@@ -818,7 +818,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
 
   **Notes**:
   - Clients handle image uploads and individual deletions using Firebase Storage SDK, which supports offline persistence and automatic authentication.
-  - Backend handles bulk image deletion during user, category, or location deletion to clean up Firebase Storage, using batch processing for efficiency and database transactions to ensure data integrity.
+  - Backend handles bulk image deletion during user, collection, or location deletion to clean up Firebase Storage, using batch processing for efficiency and database transactions to ensure data integrity.
   - Provides upload/download progress monitoring, retries, and error handling for client operations.
   - Firebase Storage security rules enforce user-specific access control.
   - Download URLs are generated automatically for client uploads and stored in the database.
@@ -828,7 +828,7 @@ Locify uses **Firebase Authentication** for user authentication. Clients must in
 Locify supports offline functionality, allowing clients to create, update, and delete resources offline, with changes synchronized when connectivity is restored.
 
 - **Client-Side**:
-  - Clients assign a client-generated UUID to the `id` field for `categories` and `locations` when creating resources offline.
+  - Clients assign a client-generated UUID to the `id` field for `collections` and `locations` when creating resources offline.
   - Clients set the `sync_status` field to `pendingCreate`, `pendingUpdate`, or `pendingDelete` to track pending operations.
   - The Firebase SDKs (for Authentication and Storage) support offline persistence, queuing operations until connectivity is restored.
   - Clients maintain a local queue of API requests (POST, PUT, DELETE) with their respective `sync_status` values.
@@ -838,16 +838,16 @@ Locify supports offline functionality, allowing clients to create, update, and d
     - `pendingCreate`: Creates a new record, sets `sync_status` to `synced` in the response.
     - `pendingUpdate`: Updates the existing record, sets `sync_status` to `synced`.
     - `pendingDelete`: Deletes the record (no response body).
-  - The server uses database transactions to ensure atomicity for create, update, and delete operations, including associated `category_shares` and `location_shares` records.
+  - The server uses database transactions to ensure atomicity for create, update, and delete operations, including associated `collection_shares` and `location_shares` records.
   - For offline-created resources, the server validates the client-generated UUID and ensures no conflicts with existing records.
 
 - **Conflict Resolution**:
   - If two clients create resources with the same UUID offline, the server rejects the second request with an `E003` error (Duplicate ID).
   - For updates, the server uses the `updated_at` timestamp to resolve conflicts, applying the most recent change based on client-provided `sync_status` and timestamps.
-  - Clients should fetch the latest data (via `GET /categories` or `GET /locations`) after syncing to resolve any conflicts and update their local state.
+  - Clients should fetch the latest data (via `GET /collections` or `GET /locations`) after syncing to resolve any conflicts and update their local state.
 
 - **Example Flow**:
-  1. Client creates a category offline:
+  1. Client creates a collection offline:
      ```json
      {
        "id": "client-generated-uuid",
@@ -857,9 +857,9 @@ Locify supports offline functionality, allowing clients to create, update, and d
        "sync_status": "pendingCreate"
      }
      ```
-  2. Client queues a `POST /categories` request.
+  2. Client queues a `POST /collections` request.
   3. When online, the client sends the queued request.
-  4. Server creates the category, sets `sync_status` to `synced`, and returns:
+  4. Server creates the collection, sets `sync_status` to `synced`, and returns:
      ```json
      {
        "id": "client-generated-uuid",
@@ -900,7 +900,7 @@ The API uses standard HTTP status codes and includes an error code and message i
 | Error Code | HTTP Status | Description | Example Error Message |
 |------------|-------------|-------------|-----------------------|
 | E001       | 400         | Invalid input data | Field 'name' is empty or null |
-| E002       | 400         | Invalid UUID format | 'category_id' is not a valid UUID |
+| E002       | 400         | Invalid UUID format | 'collection_id' is not a valid UUID |
 | E003       | 400         | Invalid coordinates | 'latitude' must be between -90 and 90 |
 | E004       | 400         | Missing required field | 'user_id' is required |
 | E005       | 401         | Invalid or missing Firebase token | Authentication token is invalid or expired |

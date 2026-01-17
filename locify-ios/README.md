@@ -1,6 +1,6 @@
 # Locify iOS App
 
-Locify is a location-based application designed for iOS, iPadOS, macOS, and visionOS, enabling users to manage and share favorite places, organize them into categories, and synchronize data seamlessly between offline and online modes without requiring login. Built with **Clean Architecture**, Locify ensures a modular, testable, and maintainable codebase, leveraging **SwiftUI**, **Firebase**, **Google Maps SDK**, **MapKit**, and **SwiftData** for a robust user experience across all supported platforms.
+Locify is a location-based application designed for iOS, iPadOS, macOS, and visionOS, enabling users to manage and share favorite places, organize them into collections, and synchronize data seamlessly between offline and online modes without requiring login. Built with **Clean Architecture**, Locify ensures a modular, testable, and maintainable codebase, leveraging **SwiftUI**, **Firebase**, **Google Maps SDK**, **MapKit**, and **SwiftData** for a robust user experience across all supported platforms.
 
 ---
 
@@ -13,10 +13,10 @@ Locify is a location-based application designed for iOS, iPadOS, macOS, and visi
 
 ## Features
 - **Location Management**: Create, edit, and delete favorite locations with details like name, address, coordinates, and images (image management requires login).
-- **Category Management**: Organize locations into custom or default categories (e.g., Restaurant, Cafe, Favorites) for easy access.
+- **Collection Management**: Organize locations into custom or default collections (e.g., Restaurant, Cafe, Favorites) for easy access.
 - **Main Map**: Interactive map supporting Google Maps and Apple Maps, with runtime switching via Settings. Features include searching, navigating, and visualizing locations (online only; offline shows last known location).
 - **Authentication**: Secure user authentication via Firebase Authentication, supporting email/password login and registration.
-- **Offline/Online Sync**: Store and manage locations and categories offline using SwiftData, with automatic synchronization to the server after login when online.
+- **Offline/Online Sync**: Store and manage locations and collections offline using SwiftData, with automatic synchronization to the server after login when online.
 - **Settings**: Manage user account, preferences (language, theme, map provider), and send feedback (online only).
 - **Multi-platform Support**: Optimized for iOS, iPadOS, macOS, and visionOS with a consistent SwiftUI-based UI.
 
@@ -58,14 +58,14 @@ locify-ios
 │   │   │   ├── Requests
 │   │   │   └── Services
 │   │   │       ├── AuthService
-│   │   │       ├── CategoryService
+│   │   │       ├── CollectionService
 │   │   │       ├── LocationService
 │   │   │       ├── MapService
 │   │   │       ├── StorageService
 │   │   │       └── SyncService
 │   │   ├── Repositories
 │   │   │   ├── Authentication
-│   │   │   ├── Category
+│   │   │   ├── Collection
 │   │   │   ├── Location
 │   │   │   └── Sync
 │   │   ├── Storage
@@ -89,11 +89,11 @@ locify-ios
 │   │       │   ├── LoginUseCase
 │   │       │   ├── LogoutUseCase
 │   │       │   └── RegisterUseCase
-│   │       ├── Category
-│   │       │   ├── CreateCategoryUseCase
-│   │       │   ├── DeleteCategoryUseCase
-│   │       │   ├── FetchCategoriesUseCase
-│   │       │   └── UpdateCategoryUseCase
+│   │       ├── Collection
+│   │       │   ├── CreateCollectionUseCase
+│   │       │   ├── DeleteCollectionUseCase
+│   │       │   ├── FetchCollectionsUseCase
+│   │       │   └── UpdateCollectionUseCase
 │   │       ├── Location
 │   │       │   ├── CreateLocationUseCase
 │   │       │   ├── DeleteLocationUseCase
@@ -101,7 +101,7 @@ locify-ios
 │   │       │   └── UpdateLocationUseCase
 │   │       └── Sync
 │   │           ├── ResolveConflictsUseCase
-│   │           ├── SyncCategoriesUseCase
+│   │           ├── SyncCollectionsUseCase
 │   │           └── SyncLocationsUseCase
 │   ├── Presentation
 │   │   ├── DesignSystem
@@ -117,7 +117,7 @@ locify-ios
 │   │   │   ├── Authentication
 │   │   │   │   ├── ViewModels
 │   │   │   │   └── Views
-│   │   │   ├── CategoryList
+│   │   │   ├── CollectionList
 │   │   │   │   ├── ViewModels
 │   │   │   │   └── Views
 │   │   │   ├── LocationList
@@ -143,7 +143,7 @@ locify-ios
 │   │   │   └── Localized
 │   │   │       └── Keys
 │   │   ├── MockData
-│   │   │   ├── Categories
+│   │   │   ├── Collections
 │   │   │   ├── Locations
 │   │   │   └── Users
 │   │   └── PreviewContent
@@ -183,14 +183,14 @@ locify-ios
 ```
 
 ### Key Components
-- **Dependency Injection**: A custom `AppContainer` in `Shared/DI` serves as the composition root, acting as a singleton factory for creating ViewModels (e.g., `HomeViewModel`, `SettingsViewModel`) and their dependencies, including repositories and use cases, using Swift’s modern concurrency model (`actor`) for thread-safe access. Dependencies (e.g., `MapService`, `SyncService`, `FetchCategoriesUseCase`) are initialized on demand in factory methods to optimize resource efficiency. The container supports a configuration option to toggle between mock and production services (e.g., Firebase, Google Maps) and integrates with SwiftUI using `async` methods for ViewModel creation.
+- **Dependency Injection**: A custom `AppContainer` in `Shared/DI` serves as the composition root, acting as a singleton factory for creating ViewModels (e.g., `HomeViewModel`, `SettingsViewModel`) and their dependencies, including repositories and use cases, using Swift’s modern concurrency model (`actor`) for thread-safe access. Dependencies (e.g., `MapService`, `SyncService`, `FetchCollectionsUseCase`) are initialized on demand in factory methods to optimize resource efficiency. The container supports a configuration option to toggle between mock and production services (e.g., Firebase, Google Maps) and integrates with SwiftUI using `async` methods for ViewModel creation.
 - **Navigation**: Managed in `Presentation/Routing` using `NavigationStack` and `NavigationPath`, with a centralized `Router` for consistent navigation across features.
 - **Offline Support**: SwiftData in `Data/Storage/LocalData/SwiftData` handles local storage, with `SyncManager` managing offline/online synchronization using `sync_status` (synced, pendingCreate, pendingUpdate, pendingDelete), as detailed in the [Locify_Data_Sync_Flow.md](./../docs/Locify_Data_Sync_Flow.md). Offline mode displays the last known location on the selected map provider.
-- **Design System**: Reusable UI components (e.g., `Button`, `Map`, `TextField`) in `Presentation/DesignSystem/Components` ensure consistent styling across SwiftUI views, with styles defined in `Styles`. Custom components are stored in `Presentation/DesignSystem/Components/Custom` to organize complex or domain-specific UI elements (e.g., `LocationCardView`, `MapPreviewView`, `CategoryTagView`) separately from core components (e.g., `Button`, `Dialog`).
+- **Design System**: Reusable UI components (e.g., `Button`, `Map`, `TextField`) in `Presentation/DesignSystem/Components` ensure consistent styling across SwiftUI views, with styles defined in `Styles`. Custom components are stored in `Presentation/DesignSystem/Components/Custom` to organize complex or domain-specific UI elements (e.g., `LocationCardView`, `MapPreviewView`, `CollectionTagView`) separately from core components (e.g., `Button`, `Dialog`).
 - **Custom Components**: Stored in `Presentation/DesignSystem/Components/Custom` for reusable, cross-feature UI elements, ensuring they are nested below the top-level components to maintain organization and avoid clutter.
 - **Repository Protocols**: `Domain/Repositories` defines protocols (e.g., `LocationRepositoryProtocol`) for all repository interactions, implemented in `Data/Repositories`, ensuring decoupling and testability.
 - **Service Protocols**: `Data/Network/Services` includes protocols (e.g., `MapServiceProtocol`, `StorageServiceProtocol`) to abstract API requests and map/storage operations. `MapService` supports runtime switching between Google Maps (`Data/ThirdParty/GoogleMaps`) and Apple Maps (`Data/MapKit`) via a factory pattern.
-- **API Request Handling**: Services like `LocationService`, `CategoryService`, and `SyncService` handle API requests for their respective domains, as defined in [Locify_API_Documentation.md](./../docs/Locify_API_Documentation.md), while repositories orchestrate network and local storage operations.
+- **API Request Handling**: Services like `LocationService`, `CollectionService`, and `SyncService` handle API requests for their respective domains, as defined in [Locify_API_Documentation.md](./../docs/Locify_API_Documentation.md), while repositories orchestrate network and local storage operations.
 - **Map Provider Switching**: Users can switch between Google Maps and Apple Maps in the Settings feature, with the selected provider stored in `Shared/Configuration/MapProvider` using `UserDefaults`. The `MapService` dynamically selects the appropriate implementation (`GoogleMaps` or `MapKit`).
 - **Storage Abstraction**: `Data/Network/Services/StorageService` abstracts file storage operations (e.g., image uploads/deletions) via `StorageServiceProtocol`, with the concrete implementation in `Data/ThirdParty/Firebase/Storage` using the Firebase Storage SDK.
 - **Testing**: Comprehensive test suites in `Tests/UnitTests` cover `Data` (Repositories, Network, Storage, MapKit), `Domain` (Entities, UseCases), and `Presentation` (ViewModels, Routing), with `Mocks` for repositories, services (including `MapService` for both Google Maps and Apple Maps), and ViewModels in `Tests/Mocks`. `Tests/UITests` validate UI flows, including map provider switching, offline sync, and error handling scenarios.

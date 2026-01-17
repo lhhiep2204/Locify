@@ -1,15 +1,15 @@
 # Locify Database Schema
 
-This document defines the relational database schema used in the Locify backend, built with PostgreSQL. It supports user-based location management, category grouping for saving planned or memorable locations, and sharing of categories and locations with multiple users. Offline synchronization and cross-device consistency are managed using `sync_status` and `updated_at`.
+This document defines the relational database schema used in the Locify backend, built with PostgreSQL. It supports user-based location management, collection grouping for saving planned or memorable locations, and sharing of collections and locations with multiple users. Offline synchronization and cross-device consistency are managed using `sync_status` and `updated_at`.
 
 ---
 
 ## Table of Contents
 - [Validation Notes](#validation-notes)
 - [Users Table](#users-table)
-- [Categories Table](#categories-table)
+- [Collections Table](#collections-table)
 - [Locations Table](#locations-table)
-- [Category Shares Table](#category-shares-table)
+- [Collection Shares Table](#collection-shares-table)
 - [Location Shares Table](#location-shares-table)
 - [Sync Status Values](#sync-status-values)
 - [Relationship Diagram](#relationship-diagram)
@@ -21,9 +21,9 @@ This document defines the relational database schema used in the Locify backend,
 This schema defines basic database constraints, including data types, `NOT NULL`, `UNIQUE`, maximum lengths, and foreign key relationships. Additional validation rules (e.g., email format, special characters in `name` or `displayName`, valid `sync_status` values, valid `role` values) are enforced at the API layer and documented in the [API Documentation](../docs/Locify_API_Documentation.md).
 
 **Image Cleanup**:
-- During user deletion (via `DELETE /users/me`), the backend queries the `categories` table for `icon` URLs, the `locations` table for `image_urls`, and the `users` table for `avatar_url` associated with the `user_id`. These images are deleted from Firebase Storage using the Firebase Admin SDK before removing database records.
+- During user deletion (via `DELETE /users/me`), the backend queries the `collections` table for `icon` URLs, the `locations` table for `image_urls`, and the `users` table for `avatar_url` associated with the `user_id`. These images are deleted from Firebase Storage using the Firebase Admin SDK before removing database records.
 - The deletion process uses transactions in PostgreSQL to ensure data integrity, with image deletions from Firebase Storage performed first to prevent orphaned data.
-- When a `category` or `location` is deleted, associated records in `category_shares` or `location_shares` are also deleted.
+- When a `collection` or `location` is deleted, associated records in `collection_shares` or `location_shares` are also deleted.
 
 ---
 
@@ -41,28 +41,28 @@ Stores information about registered users, synchronized with Firebase Authentica
 
 ---
 
-## Categories Table
-Stores user-defined or default categories for organizing locations, including a default "Shared Places" category for shared locations.
+## Collections Table
+Stores user-defined or default collections for organizing locations, including a default "Shared Places" collection for shared locations.
 
 | Column Name   | Data Type           | Constraints                                     | Description                                     |
 |---------------|---------------------|-------------------------------------------------|-------------------------------------------------|
-| `id`          | UUID                | PRIMARY KEY                                     | Unique category ID                              |
+| `id`          | UUID                | PRIMARY KEY                                     | Unique collection ID                              |
 | `user_id`     | VARCHAR(128)        | FOREIGN KEY (users.id), NOT NULL                | References `users(id)`                          |
-| `name`        | VARCHAR(255)        | NOT NULL                                        | Name of the category                            |
-| `icon`        | VARCHAR(255)        |                                                 | URL of the category icon                        |
+| `name`        | VARCHAR(255)        | NOT NULL                                        | Name of the collection                            |
+| `icon`        | VARCHAR(255)        |                                                 | URL of the collection icon                        |
 | `visibility`  | ENUM('private', 'shared', 'public') | DEFAULT 'private'                     | Access level: private, shared, public           |
-| `is_default`  | BOOLEAN             | DEFAULT FALSE                                   | Marks default category (e.g., Shared Places)    |
+| `is_default`  | BOOLEAN             | DEFAULT FALSE                                   | Marks default collection (e.g., Shared Places)    |
 | `sync_status` | ENUM('synced', 'pendingCreate', 'pendingUpdate', 'pendingDelete') | NOT NULL | Synchronization status                           |
-| `created_at`  | TIMESTAMP           |                                                 | Time of category creation                       |
-| `updated_at`  | TIMESTAMP           |                                                 | Last time the category was updated              |
+| `created_at`  | TIMESTAMP           |                                                 | Time of collection creation                       |
+| `updated_at`  | TIMESTAMP           |                                                 | Last time the collection was updated              |
 
 **Indexes**:
-- `idx_categories_user_id`: Optimizes queries for user-specific categories, including image cleanup during user deletion.
+- `idx_collections_user_id`: Optimizes queries for user-specific collections, including image cleanup during user deletion.
 
 **Relations**:
 - Belongs to one `user`
 - Has many `locations`
-- Has many `category_shares`
+- Has many `collection_shares`
 
 ---
 
@@ -73,7 +73,7 @@ Stores all location information saved by the user, including shared locations. T
 |---------------|---------------------|-------------------------------------------------|--------------------------------------------------|
 | `id`          | UUID                | PRIMARY KEY                                     | Unique location ID                               |
 | `user_id`     | VARCHAR(128)        | FOREIGN KEY (users.id), NOT NULL                | References `users(id)`                           |
-| `category_id` | UUID                | FOREIGN KEY (categories.id), NOT NULL           | References `categories(id)`                      |
+| `collection_id` | UUID                | FOREIGN KEY (collections.id), NOT NULL           | References `collections(id)`                      |
 | `name`        | VARCHAR(255)        | NOT NULL                                        | Official or resolved name of the location        |
 | `displayName` | VARCHAR(255)        |                                                 | Custom name input by the user                    |
 | `address`     | TEXT                |                                                 | Address of the location (e.g., "123 Main St")    |
@@ -90,24 +90,24 @@ Stores all location information saved by the user, including shared locations. T
 | `updated_at`  | TIMESTAMP           |                                                 | Last time the location was updated               |
 
 **Indexes**:
-- `idx_locations_category_id`: Optimizes queries for category-specific locations.
+- `idx_locations_collection_id`: Optimizes queries for collection-specific locations.
 - `idx_locations_user_id`: Optimizes queries for user-specific locations, including image cleanup during user deletion.
 - `idx_locations_tags`: Optimizes search and filtering by tags.
 
 **Relations**:
 - Belongs to one `user`
-- Belongs to one `category`
+- Belongs to one `collection`
 - Has many `location_shares`
 
 ---
 
-## Category Shares Table
-Stores information about shared categories, including the role of each user.
+## Collection Shares Table
+Stores information about shared collections, including the role of each user.
 
 | Column Name     | Data Type           | Constraints                                     | Description                                      |
 |-----------------|---------------------|-------------------------------------------------|--------------------------------------------------|
 | `id`            | UUID                | PRIMARY KEY                                     | Unique ID for the share record                   |
-| `category_id`   | UUID                | FOREIGN KEY (categories.id), NOT NULL           | References `categories(id)`                      |
+| `collection_id`   | UUID                | FOREIGN KEY (collections.id), NOT NULL           | References `collections(id)`                      |
 | `owner_id`      | VARCHAR(128)        | FOREIGN KEY (users.id), NOT NULL                | ID of the owner (sharer)                         |
 | `shared_with_id`| VARCHAR(128)        | FOREIGN KEY (users.id), NOT NULL                | ID of the user shared with                       |
 | `role`          | ENUM('read', 'edit', 'owner') | NOT NULL                      | Role: read, edit, or owner                       |
@@ -115,11 +115,11 @@ Stores information about shared categories, including the role of each user.
 | `updated_at`    | TIMESTAMP           |                                                 | Last time the share was updated                  |
 
 **Indexes**:
-- `idx_category_shares_category_id`: Optimizes queries for category-specific shares.
-- `idx_category_shares_shared_with_id`: Optimizes queries for shares received by a user.
+- `idx_collection_shares_collection_id`: Optimizes queries for collection-specific shares.
+- `idx_collection_shares_shared_with_id`: Optimizes queries for shares received by a user.
 
 **Relations**:
-- Belongs to one `category`
+- Belongs to one `collection`
 - Belongs to one `user` (owner)
 - Belongs to one `user` (shared_with)
 
@@ -150,7 +150,7 @@ Stores information about shared locations, including the role of each user.
 ---
 
 ## Sync Status Values
-Values for `sync_status` used in `categories` and `locations`:
+Values for `sync_status` used in `collections` and `locations`:
 - `synced`: Synced with the server
 - `pendingCreate`: Created locally, not yet sent to server
 - `pendingUpdate`: Updated locally, not yet synced
@@ -159,11 +159,11 @@ Values for `sync_status` used in `categories` and `locations`:
 ---
 
 ## Relationship Diagram
-The diagram below illustrates the relationships between the `users`, `categories`, `locations`, `category_shares`, and `location_shares` tables:
-- Each `user` **owns multiple** `categories` and `locations`, indicated by the `user_id` foreign key.
-- Each `category` **can include multiple** `locations`, indicated by the `category_id` foreign key.
-- Each `location` **belongs to one** `category` and **one** `user`.
-- Each `category` **can be shared with multiple** `users` via `category_shares`.
+The diagram below illustrates the relationships between the `users`, `collections`, `locations`, `collection_shares`, and `location_shares` tables:
+- Each `user` **owns multiple** `collections` and `locations`, indicated by the `user_id` foreign key.
+- Each `collection` **can include multiple** `locations`, indicated by the `collection_id` foreign key.
+- Each `location` **belongs to one** `collection` and **one** `user`.
+- Each `collection` **can be shared with multiple** `users` via `collection_shares`.
 - Each `location` **can be shared with multiple** `users` via `location_shares`.
 
 ```mermaid
@@ -185,12 +185,12 @@ erDiagram
         varchar name
         varchar displayName
         varchar user_id FK
-        uuid category_id FK
+        uuid collection_id FK
     }
 
     CATEGORY_SHARES {
         uuid id PK
-        uuid category_id FK
+        uuid collection_id FK
         varchar owner_id FK
         varchar shared_with_id FK
     }
@@ -207,7 +207,7 @@ erDiagram
     USERS ||--o{ LOCATIONS : "owns"
     CATEGORIES ||--o{ LOCATIONS : "contains"
 
-    %% Category shares
+    %% Collection shares
     CATEGORIES ||--o{ CATEGORY_SHARES : "shared via"
     USERS ||--o{ CATEGORY_SHARES : "as owner"
     USERS ||--o{ CATEGORY_SHARES : "as recipient"

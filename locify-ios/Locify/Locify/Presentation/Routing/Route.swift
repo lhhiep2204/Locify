@@ -12,8 +12,8 @@ typealias SearchCompleter = (Location) -> Void
 /// An enum representing all possible navigation routes in the app.
 enum Route {
     case home
-    case categoryList
-    case locationList(category: Category)
+    case collectionList
+    case locationList(collection: Collection)
     case search(SearchCompleter)
 }
 
@@ -22,11 +22,11 @@ extension Route: Equatable, Hashable {
         switch self {
         case .home:
             hasher.combine("home")
-        case .categoryList:
-            hasher.combine("categoryList")
-        case .locationList(let category):
+        case .collectionList:
+            hasher.combine("collectionList")
+        case .locationList(let collection):
             hasher.combine("locationList")
-            hasher.combine(category.id)
+            hasher.combine(collection.id)
         case .search:
             hasher.combine("search")
         }
@@ -35,11 +35,11 @@ extension Route: Equatable, Hashable {
     static func == (lhs: Route, rhs: Route) -> Bool {
         switch (lhs, rhs) {
         case (.home, .home),
-            (.categoryList, .categoryList),
+            (.collectionList, .collectionList),
             (.search, .search):
             true
-        case (.locationList(let categoryA), .locationList(let categoryB)):
-            categoryA == categoryB
+        case (.locationList(let collectionA), .locationList(let collectionB)):
+            collectionA == collectionB
         default:
             false
         }
@@ -63,10 +63,10 @@ private struct RouteContentView: View {
         switch route {
         case .home:
             HomeView(container.makeHomeViewModel())
-        case .categoryList:
-            CategoryListView(container.makeCategoryListViewModel())
-        case .locationList(let category):
-            LocationListView(container.makeLocationListViewModel(category: category))
+        case .collectionList:
+            CollectionListView(container.makeCollectionListViewModel())
+        case .locationList(let collection):
+            LocationListView(container.makeLocationListViewModel(collection: collection))
         case .search(let searchCompletion):
             SearchView { searchCompletion($0) }
         }

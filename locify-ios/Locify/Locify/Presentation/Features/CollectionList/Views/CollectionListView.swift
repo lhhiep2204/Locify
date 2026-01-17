@@ -1,5 +1,5 @@
 //
-//  CategoryListView.swift
+//  CollectionListView.swift
 //  Locify
 //
 //  Created by Hoàng Hiệp Lê on 2/8/25.
@@ -7,28 +7,28 @@
 
 import SwiftUI
 
-struct CategoryListView: View {
+struct CollectionListView: View {
     @Environment(\.appContainer) private var container
     @Environment(\.dismissSheet) private var dismissSheet
 
-    @State private var viewModel: CategoryListViewModel
+    @State private var viewModel: CollectionListViewModel
 
     @State private var isFetched: Bool = false
 
-    @State private var showAddCategory: Bool = false
+    @State private var showAddCollection: Bool = false
 
-    @State private var categoryToUpdate: Category?
+    @State private var collectionToUpdate: Collection?
 
     @State private var showDeleteAlert: Bool = false
-    @State private var categoryToDelete: Category?
+    @State private var collectionToDelete: Collection?
 
-    init(_ viewModel: CategoryListViewModel) {
+    init(_ viewModel: CollectionListViewModel) {
         self.viewModel = viewModel
     }
 
     var body: some View {
         listView
-            .navigationTitle(Text(CategoryKeys.title))
+            .navigationTitle(Text(CollectionKeys.title))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -40,7 +40,7 @@ struct CategoryListView: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showAddCategory = true
+                        showAddCollection = true
                     } label: {
                         Text(CommonKeys.add)
                     }
@@ -48,28 +48,28 @@ struct CategoryListView: View {
             }
             .task {
                 if !isFetched {
-                    await viewModel.fetchCategories()
+                    await viewModel.fetchCollections()
                     isFetched.toggle()
                 }
             }
-            .sheet(isPresented: $showAddCategory) {
-                EditCategoryView(
-                    container.makeEditCategoryViewModel(),
+            .sheet(isPresented: $showAddCollection) {
+                EditCollectionView(
+                    container.makeEditCollectionViewModel(),
                     editMode: .add
-                ) { category in
+                ) { collection in
                     Task {
-                        await viewModel.addCategory(category)
+                        await viewModel.addCollection(collection)
                     }
                 }
             }
-            .sheet(item: $categoryToUpdate) { category in
-                EditCategoryView(
-                    container.makeEditCategoryViewModel(),
+            .sheet(item: $collectionToUpdate) { collection in
+                EditCollectionView(
+                    container.makeEditCollectionViewModel(),
                     editMode: .update,
-                    categoryToUpdate: category
-                ) { updatedCategory in
+                    collectionToUpdate: collection
+                ) { updatedCollection in
                     Task {
-                        await viewModel.updateCategory(updatedCategory)
+                        await viewModel.updateCollection(updatedCollection)
                     }
                 }
             }
@@ -77,18 +77,18 @@ struct CategoryListView: View {
                 Text(
                     String(
                         format: .localized(MessageKeys.deleteAlertTitle),
-                        categoryToDelete?.name ?? .empty
+                        collectionToDelete?.name ?? .empty
                     )
                 ),
                 isPresented: $showDeleteAlert,
-                presenting: categoryToDelete
-            ) { category in
+                presenting: collectionToDelete
+            ) { collection in
                 Button(
                     String.localized(CommonKeys.delete),
                     role: .destructive
                 ) {
                     Task {
-                        await viewModel.deleteCategory(category)
+                        await viewModel.deleteCollection(collection)
                     }
                 }
                 Button(
@@ -101,14 +101,14 @@ struct CategoryListView: View {
     }
 }
 
-extension CategoryListView {
+extension CollectionListView {
     private var listView: some View {
         List {
-            ForEach(viewModel.categories) { item in
+            ForEach(viewModel.collections) { item in
                 NavigationLink(
-                    .locationList(category: item)
+                    .locationList(collection: item)
                 ) {
-                    categoryItemView(item)
+                    collectionItemView(item)
                         .swipeActions(edge: .trailing) {
                             deleteButtonView(item)
                             editButtonView(item)
@@ -122,21 +122,21 @@ extension CategoryListView {
             }
         }
         .refreshable {
-            await viewModel.fetchCategories()
+            await viewModel.fetchCollections()
         }
     }
 
-    private func categoryItemView(_ category: Category) -> some View {
+    private func collectionItemView(_ collection: Collection) -> some View {
         HStack(spacing: DSSpacing.small) {
             Image.appSystemIcon(.folder)
-            DSText(category.name, font: .medium(.medium))
+            DSText(collection.name, font: .medium(.medium))
                 .lineLimit(1)
         }
     }
 
-    private func editButtonView(_ category: Category) -> some View {
+    private func editButtonView(_ collection: Collection) -> some View {
         Button {
-            categoryToUpdate = category
+            collectionToUpdate = collection
         } label: {
             Label {
                 DSText(.localized(CommonKeys.edit))
@@ -146,9 +146,9 @@ extension CategoryListView {
         }
     }
 
-    private func deleteButtonView(_ category: Category) -> some View {
+    private func deleteButtonView(_ collection: Collection) -> some View {
         Button {
-            categoryToDelete = category
+            collectionToDelete = collection
             showDeleteAlert = true
         } label: {
             Label {
@@ -163,6 +163,6 @@ extension CategoryListView {
 
 #Preview {
     NavigationStack {
-        CategoryListView(AppContainer.shared.makeCategoryListViewModel())
+        CollectionListView(AppContainer.shared.makeCollectionListViewModel())
     }
 }

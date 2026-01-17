@@ -59,14 +59,14 @@ extension LocationContainer {
         )
     }
 
-    func makeLocationListViewModel(category: Category) -> LocationListViewModel {
-        LocationListViewModel(category: category, locationUseCase: useCases)
+    func makeLocationListViewModel(collection: Collection) -> LocationListViewModel {
+        LocationListViewModel(collection: collection, locationUseCase: useCases)
     }
 
-    func makeEditLocationViewModel(categoryContainer: CategoryContainer) -> EditLocationViewModel {
+    func makeEditLocationViewModel(collectionContainer: CollectionContainer) -> EditLocationViewModel {
         EditLocationViewModel(
-            fetchCategoriesUseCase: categoryContainer.fetchUseCase,
-            addCategoryUseCase: categoryContainer.addUseCase
+            fetchCollectionsUseCase: collectionContainer.fetchUseCase,
+            addCollectionUseCase: collectionContainer.addUseCase
         )
     }
 }

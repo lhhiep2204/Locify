@@ -7,10 +7,10 @@
 
 import Foundation
 
-/// A domain entity representing a user-saved location, associated with a user and category.
+/// A domain entity representing a user-saved location, associated with a user and collection.
 struct Location: Identifiable, Equatable, Hashable {
     let id: UUID
-    let categoryId: UUID
+    let collectionId: UUID
     var placeId: String?
     var displayName: String
     var name: String
@@ -25,7 +25,7 @@ struct Location: Identifiable, Equatable, Hashable {
 
     init(
         id: UUID = UUID(),
-        categoryId: UUID,
+        collectionId: UUID,
         placeId: String? = nil,
         displayName: String,
         name: String,
@@ -39,7 +39,7 @@ struct Location: Identifiable, Equatable, Hashable {
         updatedAt: Date = Date()
     ) {
         self.id = id
-        self.categoryId = categoryId
+        self.collectionId = collectionId
         self.placeId = placeId
         self.displayName = displayName
         self.name = name
@@ -55,7 +55,7 @@ struct Location: Identifiable, Equatable, Hashable {
 
     static func == (lhs: Location, rhs: Location) -> Bool {
         lhs.id == rhs.id &&
-        lhs.categoryId == rhs.categoryId &&
+        lhs.collectionId == rhs.collectionId &&
         lhs.placeId == rhs.placeId &&
         lhs.displayName == rhs.displayName &&
         lhs.name == rhs.name &&
@@ -81,7 +81,7 @@ extension Location {
     /// A mock location with real coordinates
     static let mock: Location = .init(
         id: UUID(uuidString: "223e4567-e89b-12d3-a456-426614174000")!,
-        categoryId: Category.mock.id,
+        collectionId: Collection.mock.id,
         placeId: .empty,
         displayName: "Shake Shack",
         name: "Shake Shack Madison Square Park",
@@ -94,7 +94,7 @@ extension Location {
         updatedAt: Date(timeIntervalSince1970: 1697059200)
     )
 
-    /// A list of mock locations with real coordinates (Apple Maps compatible), aligned with categories.
+    /// A list of mock locations with real coordinates (Apple Maps compatible), aligned with collections.
     static let mockList: [Location] = {
         let realLocations: [[(displayName: String?, name: String, address: String, description: String?, lat: Double, lon: Double, notes: String?)]] = [
             // Food
@@ -130,15 +130,15 @@ extension Location {
                 (nil, "Marina Bay Sands", "10 Bayfront Ave, Singapore 018956", "Business and hotel complex", 1.283964, 103.860527, nil)
             ]
         ]
-        let categories = Category.mockList
+        let collections = Collection.mockList
         var locations: [Location] = []
-        for (catIdx, category) in categories.enumerated() {
+        for (catIdx, collection) in collections.enumerated() {
             let places = realLocations[safe: catIdx] ?? []
             for place in places {
                 locations.append(
                     Location(
                         id: UUID(),
-                        categoryId: category.id,
+                        collectionId: collection.id,
                         placeId: .empty,
                         displayName: place.displayName ?? place.name,
                         name: place.name,
@@ -148,8 +148,8 @@ extension Location {
                         longitude: place.lon,
                         notes: place.notes,
                         syncStatus: .synced,
-                        createdAt: category.createdAt,
-                        updatedAt: category.updatedAt
+                        createdAt: collection.createdAt,
+                        updatedAt: collection.updatedAt
                     )
                 )
             }

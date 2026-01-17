@@ -13,13 +13,13 @@ class LocationListViewModel {
     private let locationUseCase: LocationUseCases
 
     private(set) var locations: [Location] = []
-    let category: Category
+    let collection: Collection
 
     init(
-        category: Category,
+        collection: Collection,
         locationUseCase: LocationUseCases
     ) {
-        self.category = category
+        self.collection = collection
         self.locationUseCase = locationUseCase
     }
 }
@@ -28,7 +28,7 @@ extension LocationListViewModel {
     func fetchLocations() async {
         do {
             try await Task.sleep(for: .seconds(0.5))
-            locations = try await locationUseCase.fetch.execute(for: category.id)
+            locations = try await locationUseCase.fetch.execute(for: collection.id)
         } catch {
             Logger.error(error.localizedDescription)
         }

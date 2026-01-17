@@ -89,7 +89,7 @@ extension AppleMapService {
 
         return .init(
             id: Constants.myLocationId,
-            categoryId: UUID(),
+            collectionId: UUID(),
             placeId: item.identifier?.rawValue,
             displayName: "My location",
             name: name,
@@ -141,7 +141,7 @@ extension AppleMapService {
             return response.mapItems.first.map {
                 .init(
                     id: Constants.searchedLocationId,
-                    categoryId: UUID(),
+                    collectionId: UUID(),
                     placeId: $0.identifier?.rawValue,
                     displayName: .empty,
                     name: $0.name ?? .empty,
@@ -169,7 +169,7 @@ extension AppleMapService: MKLocalSearchCompleterDelegate {
             locations.append(
                 .init(
                     id: id,
-                    categoryId: UUID(),
+                    collectionId: UUID(),
                     displayName: .empty,
                     name: completion.title,
                     address: completion.subtitle,

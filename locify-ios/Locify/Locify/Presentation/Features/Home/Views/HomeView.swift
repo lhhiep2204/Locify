@@ -16,14 +16,14 @@ struct HomeView: View {
     @State private var showLocationDetail: Bool = true
     @State private var locationDetailDetent: PresentationDetent = .small
 
-    @State private var showCategoryListView: Bool = false
+    @State private var showCollectionListView: Bool = false
     @State private var showSearchView: Bool = false
     @State private var showAddLocationView: Bool = false
     @State private var showEditLocationView: Bool = false
 
     @State private var showDeleteAlert: Bool = false
 
-    private var categoryRouter: Router<Route> = .init(root: .categoryList)
+    private var collectionRouter: Router<Route> = .init(root: .collectionList)
 
     private var selectedLocation: Binding<Location?> {
         .init(
@@ -49,12 +49,12 @@ struct HomeView: View {
             }
         }
         .environment(\.dismissSheet) {
-            showCategoryListView = false
+            showCollectionListView = false
         }
-        .environment(\.selectLocation) { category, selectedId, locations in
-            showCategoryListView = false
-            viewModel.selectLocationFromCategoryList(
-                category: category,
+        .environment(\.selectLocation) { collection, selectedId, locations in
+            showCollectionListView = false
+            viewModel.selectLocationFromCollectionList(
+                collection: collection,
                 id: selectedId,
                 locations: locations
             )
@@ -154,7 +154,7 @@ extension HomeView {
     private var topView: some View {
         VStack {
             HStack {
-                showCategoryListButton
+                showCollectionListButton
                 Spacer()
                 showUserLocationButton
             }
@@ -163,9 +163,9 @@ extension HomeView {
         .padding()
     }
 
-    private var showCategoryListButton: some View {
+    private var showCollectionListButton: some View {
         Button {
-            showCategoryListView = true
+            showCollectionListView = true
         } label: {
             Image.appSystemIcon(.list)
         }
@@ -201,11 +201,11 @@ extension HomeView {
             Task {
                 await viewModel.clearSelectedLocation()
             }
-            categoryRouter.popToRoot()
+            collectionRouter.popToRoot()
         }
         .toolbar(.hidden)
-        .sheet(isPresented: $showCategoryListView) {
-            RouterView(categoryRouter)
+        .sheet(isPresented: $showCollectionListView) {
+            RouterView(collectionRouter)
         }
         .sheet(isPresented: $showSearchView) {
             RouterView(
@@ -220,7 +220,7 @@ extension HomeView {
             EditLocationView(
                 container.makeEditLocationViewModel(),
                 editMode: .add,
-                category: viewModel.selectedCategory,
+                collection: viewModel.selectedCollection,
                 locationToSave: viewModel.selectedLocation
             ) { location in
                 Task {
@@ -232,7 +232,7 @@ extension HomeView {
             EditLocationView(
                 container.makeEditLocationViewModel(),
                 editMode: .update,
-                category: viewModel.selectedCategory,
+                collection: viewModel.selectedCollection,
                 locationToSave: viewModel.selectedLocation
             ) { location in
                 Task {

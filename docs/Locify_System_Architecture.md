@@ -20,7 +20,7 @@
 Locify is a cross-platform application (iOS, Android, and backend) designed to allow users to save and manage locations, supporting both online and offline modes. The system uses a client-server architecture with Firebase for authentication and storage, a PostgreSQL database for structured data, and local storage for offline support. The backend is built with Java/Spring Boot, while both the iOS and Android apps use Swift and Kotlin, respectively, with Google Maps SDK for map functionalities.
 
 Key features:
-- **Online/Offline Support**: Users can save, edit, and delete locations and categories offline, with data syncing when online.
+- **Online/Offline Support**: Users can save, edit, and delete locations and collections offline, with data syncing when online.
 - **Authentication**: Firebase Authentication manages user sessions, with offline login support using cached credentials.
 - **Data Synchronization**: Local data syncs with the server upon login or network availability, handling conflicts and batch processing.
 - **Image Handling**: Images are stored in Firebase Storage by the client, with temporary local storage for offline use. The backend deletes images during user account deletion to clean up storage.
@@ -34,9 +34,9 @@ Key features:
    - **Local Storage**: SwiftData (iOS) and Room (Android) for caching data and supporting offline operations.
 2. **Backend Service**:
    - **Java/Spring Boot**: Handles API requests, business logic, database interactions, and image deletion in Firebase Storage during user deletion.
-   - **PostgreSQL**: Stores structured data (users, locations, categories).
+   - **PostgreSQL**: Stores structured data (users, locations, collections).
    - **Firebase Authentication**: Manages user authentication and token verification.
-   - **Firebase Storage**: Stores images and category icons, managed by clients for uploads and by the backend for deletions.
+   - **Firebase Storage**: Stores images and collection icons, managed by clients for uploads and by the backend for deletions.
 3. **External Services**:
    - **Google Maps SDK**: Provides map rendering, search, and navigation for both iOS and Android.
 
@@ -176,12 +176,12 @@ sequenceDiagram
     DB-->>API: Confirm update
     API-->>Client: Return updated records
     Client->>LocalDB: Update records with server data
-    Note over API: Category deletion
+    Note over API: Collection deletion
     API->>DB: Query icon URL and location image URLs
     DB-->>API: Return icon/image URLs
     API->>Storage: Delete icon and location images
     Storage-->>API: Confirm deletion
-    API->>DB: Delete category and locations
+    API->>DB: Delete collection and locations
     DB-->>API: Confirm deletion
     API-->>Client: Return 204 No Content
     Note over API: User deletion
@@ -198,18 +198,18 @@ sequenceDiagram
 - When logged in, images are uploaded to Firebase Storage by the client when online or stored locally (e.g., `file://`) when offline.
 - Image URLs are updated in local storage and synced with the server.
 - Offline images are marked as pending upload and processed when online.
-- For individual image deletions (e.g., editing location/category) or location deletions, the client deletes images from Firebase Storage using the Firebase SDK. Offline, local image files (e.g., `file://`) are deleted immediately to free device storage.
-- For category deletions, the backend queries the database for the category’s icon URL and all image URLs of associated locations, then deletes them from Firebase Storage before removing database records.
+- For individual image deletions (e.g., editing location/collection) or location deletions, the client deletes images from Firebase Storage using the Firebase SDK. Offline, local image files (e.g., `file://`) are deleted immediately to free device storage.
+- For collection deletions, the backend queries the database for the collection’s icon URL and all image URLs of associated locations, then deletes them from Firebase Storage before removing database records.
 - During user deletion, the backend queries the database for all image URLs associated with the user (including `avatar_url` for the user profile) and deletes them from Firebase Storage before removing database records.
 
 **Additional Details**:
 - See [Locify_API_Documentation.md](./Locify_API_Documentation.md) for image constraints (e.g., 5MB max size, 10 images per location) and user deletion endpoint.
 - Image storage paths:
   - Location images: `/locations/{user_id}/{location_id}/{image_id}`
-  - Category icons: `/categories/{user_id}/{category_id}/icon`
+  - Collection icons: `/collections/{user_id}/{collection_id}/icon`
   - User profile images: `/users/{user_id}/profile`
 - Firebase Storage security rules ensure user-specific access control.
-- The backend uses batch processing for image deletions during category or user deletion to optimize performance.
+- The backend uses batch processing for image deletions during collection or user deletion to optimize performance.
 
 ---
 
@@ -217,7 +217,7 @@ sequenceDiagram
 
 ### System Architecture Diagram
 ```mermaid
-%% System Architecture Diagram for Locify: Client-Backend interactions for managing categories and locations with offline support and image storage %%
+%% System Architecture Diagram for Locify: Client-Backend interactions for managing collections and locations with offline support and image storage %%
 
 graph LR
     subgraph Client
@@ -241,23 +241,23 @@ graph LR
     B -->|Image Upload/Delete| G
     D -->|Query| E
     D -->|Verify Token| F
-    D -->|"Delete Images (Category/User)"| G
+    D -->|"Delete Images (Collection/User)"| G
     A -->|Cache| C
     B -->|Cache| C
 ```
 
 **Key Points**:
 - **Client Interaction**:
-  - iOS and Android clients send HTTP requests to the **API Server** for CRUD operations on categories and locations.
+  - iOS and Android clients send HTTP requests to the **API Server** for CRUD operations on collections and locations.
   - Clients authenticate using **Firebase Authentication**, obtaining tokens for secure API requests.
-  - Clients upload and delete images/icons directly to/from **Firebase Storage** using the Firebase Storage SDK for individual location updates, location deletions, or category icon updates (excluding category deletions), but only when logged in.
+  - Clients upload and delete images/icons directly to/from **Firebase Storage** using the Firebase Storage SDK for individual location updates, location deletions, or collection icon updates (excluding collection deletions), but only when logged in.
   - Offline data is cached in **Local Storage** (SwiftData for iOS, Room for Android), with local image/icon files (e.g., `file://`) deleted immediately upon marking `pendingDelete` or `pendingUpdate` to free device storage.
 - **Backend Interaction**:
   - The **API Server** processes requests, queries the **PostgreSQL** database, and verifies tokens via **Firebase Authentication**.
-  - For category deletions (including associated locations) or user account deletions, the **API Server** deletes images/icons from **Firebase Storage** using the Firebase Admin SDK in batches, ensuring data integrity with database transactions.
+  - For collection deletions (including associated locations) or user account deletions, the **API Server** deletes images/icons from **Firebase Storage** using the Firebase Admin SDK in batches, ensuring data integrity with database transactions.
 - **Data Flow**:
   - Data is synchronized between client and server when online, with offline changes marked as `pendingCreate`, `pendingUpdate`, or `pendingDelete` in **Local Storage**.
-  - Images/icons are stored in **Firebase Storage** with paths organized by `user_id` (e.g., `/locations/{user_id}/{location_id}/{image_id}`, `/categories/{user_id}/{category_id}/icon`, `/users/{user_id}/profile`).
+  - Images/icons are stored in **Firebase Storage** with paths organized by `user_id` (e.g., `/locations/{user_id}/{location_id}/{image_id}`, `/collections/{user_id}/{collection_id}/icon`, `/users/{user_id}/profile`).
 
 ---
 

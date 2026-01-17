@@ -30,7 +30,7 @@ struct LocationListView: View {
 
     var body: some View {
         listView
-            .navigationTitle(Text(viewModel.category.name))
+            .navigationTitle(Text(viewModel.collection.name))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -58,7 +58,7 @@ struct LocationListView: View {
                 EditLocationView(
                     container.makeEditLocationViewModel(),
                     editMode: .add,
-                    category: viewModel.category
+                    collection: viewModel.collection
                 ) { location in
                     Task {
                         await viewModel.addLocation(location)
@@ -69,7 +69,7 @@ struct LocationListView: View {
                 EditLocationView(
                     container.makeEditLocationViewModel(),
                     editMode: .update,
-                    category: viewModel.category,
+                    collection: viewModel.collection,
                     locationToSave: location
                 ) { updatedLocation in
                     Task {
@@ -147,7 +147,7 @@ extension LocationListView {
         .contentShape(Rectangle())
         .onTapGesture {
             selectLocation(
-                viewModel.category,
+                viewModel.collection,
                 location.id,
                 viewModel.locations
             )
@@ -193,10 +193,10 @@ extension LocationListView {
 }
 
 #Preview {
-    if let category = Category.mockList.first {
+    if let collection = Collection.mockList.first {
         NavigationStack {
             LocationListView(
-                AppContainer.shared.makeLocationListViewModel(category: category)
+                AppContainer.shared.makeLocationListViewModel(collection: collection)
             )
         }
     }

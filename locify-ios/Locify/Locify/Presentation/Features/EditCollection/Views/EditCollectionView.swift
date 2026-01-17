@@ -1,5 +1,5 @@
 //
-//  EditCategoryView.swift
+//  EditCollectionView.swift
 //  Locify
 //
 //  Created by Hoàng Hiệp Lê on 20/8/25.
@@ -11,7 +11,7 @@ enum EditMode {
     case add, update
 }
 
-struct EditCategoryView: View {
+struct EditCollectionView: View {
     enum FocusField {
         case name
     }
@@ -20,25 +20,25 @@ struct EditCategoryView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @State private var viewModel: EditCategoryViewModel
+    @State private var viewModel: EditCollectionViewModel
 
     let editMode: EditMode
-    let categoryToUpdate: Category?
-    let onSave: (Category) -> Void
+    let collectionToUpdate: Collection?
+    let onSave: (Collection) -> Void
 
     init(
-        _ viewModel: EditCategoryViewModel,
+        _ viewModel: EditCollectionViewModel,
         editMode: EditMode,
-        categoryToUpdate: Category? = nil,
-        onSave: @escaping (Category) -> Void
+        collectionToUpdate: Collection? = nil,
+        onSave: @escaping (Collection) -> Void
     ) {
         self.viewModel = viewModel
         self.editMode = editMode
-        self.categoryToUpdate = categoryToUpdate
+        self.collectionToUpdate = collectionToUpdate
         self.onSave = onSave
 
-        if let categoryToUpdate {
-            viewModel.updateCategoryName(categoryToUpdate.name)
+        if let collectionToUpdate {
+            viewModel.updateCollectionName(collectionToUpdate.name)
         }
     }
 
@@ -59,7 +59,7 @@ struct EditCategoryView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             focusField = .none
-                            saveCategory()
+                            saveCollection()
                         } label: {
                             Text(CommonKeys.save)
                         }
@@ -74,7 +74,7 @@ struct EditCategoryView: View {
     }
 }
 
-extension EditCategoryView {
+extension EditCollectionView {
     private var contentView: some View {
         ScrollView {
             VStack(alignment: .leading) {
@@ -82,7 +82,7 @@ extension EditCategoryView {
                     text: $viewModel.name,
                     state: viewModel.errorMessage.isEmpty ? .normal : .error
                 )
-                .label(.localized(CategoryKeys.categoryName))
+                .label(.localized(CollectionKeys.collectionName))
                 .description(viewModel.errorMessage)
                 .focused($focusField, equals: .name)
             }
@@ -104,27 +104,27 @@ extension EditCategoryView {
     private var navigationTitle: Text {
         switch editMode {
         case .add:
-            Text(CategoryKeys.addCategory)
+            Text(CollectionKeys.addCollection)
         case .update:
-            Text(CategoryKeys.updateCategory)
+            Text(CollectionKeys.updateCollection)
         }
     }
 }
 
-extension EditCategoryView {
-    private func saveCategory() {
-        viewModel.createCategory(categoryToUpdate: categoryToUpdate) { category in
-            guard let category else { return }
+extension EditCollectionView {
+    private func saveCollection() {
+        viewModel.createCollection(collectionToUpdate: collectionToUpdate) { collection in
+            guard let collection else { return }
 
-            onSave(category)
+            onSave(collection)
             dismiss()
         }
     }
 }
 
 #Preview {
-    EditCategoryView(
-        AppContainer.shared.makeEditCategoryViewModel(),
+    EditCollectionView(
+        AppContainer.shared.makeEditCollectionViewModel(),
         editMode: .add
     ) { _ in }
 }

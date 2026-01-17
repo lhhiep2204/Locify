@@ -19,11 +19,11 @@ struct EditLocationView: View {
     @State private var viewModel: EditLocationViewModel
 
     @State private var textSearch: String = .empty
-    @State private var categoryName: String
+    @State private var collectionName: String
 
     @State private var showSearchView: Bool = false
-    @State private var showCategoryList: Bool = false
-    @State private var showAddCategory: Bool = false
+    @State private var showCollectionList: Bool = false
+    @State private var showAddCollection: Bool = false
     @State private var showErrorAlert: Bool = false
 
     let editMode: EditMode
@@ -33,7 +33,7 @@ struct EditLocationView: View {
     init(
         _ viewModel: EditLocationViewModel,
         editMode: EditMode,
-        category: Category? = nil,
+        collection: Collection? = nil,
         locationToSave: Location? = nil,
         onSave: @escaping (Location) -> Void
     ) {
@@ -42,12 +42,12 @@ struct EditLocationView: View {
         self.locationToSave = locationToSave
         self.onSave = onSave
 
-        viewModel.category = category
+        viewModel.collection = collection
 
-        if let category {
-            _categoryName = State(initialValue: category.name)
+        if let collection {
+            _collectionName = State(initialValue: collection.name)
         } else {
-            _categoryName = State(initialValue: .empty)
+            _collectionName = State(initialValue: .empty)
         }
 
         if let locationToSave {
@@ -85,10 +85,10 @@ struct EditLocationView: View {
                 }
                 .interactiveDismissDisabled()
                 .task {
-                    await viewModel.fetchCategories()
+                    await viewModel.fetchCollections()
                 }
-                .onChange(of: viewModel.category) {
-                    categoryName = viewModel.category?.name ?? .empty
+                .onChange(of: viewModel.collection) {
+                    collectionName = viewModel.collection?.name ?? .empty
                 }
                 .sheet(isPresented: $showSearchView) {
                     RouterView(
@@ -99,16 +99,16 @@ struct EditLocationView: View {
                         )
                     )
                 }
-                .sheet(isPresented: $showCategoryList) {
-                    selectCategoryView
+                .sheet(isPresented: $showCollectionList) {
+                    selectCollectionView
                         .presentationDetents([.medium])
-                        .sheet(isPresented: $showAddCategory) {
-                            EditCategoryView(
-                                EditCategoryViewModel(),
+                        .sheet(isPresented: $showAddCollection) {
+                            EditCollectionView(
+                                EditCollectionViewModel(),
                                 editMode: .add
-                            ) { category in
+                            ) { collection in
                                 Task {
-                                    await viewModel.addCategory(category)
+                                    await viewModel.addCollection(collection)
                                 }
                             }
                         }
@@ -132,7 +132,7 @@ extension EditLocationView {
                 if locationToSave == nil {
                     searchView
                 }
-                categoryView
+                collectionView
                 locationInfoView
             }
             .padding(DSSpacing.large)
@@ -168,18 +168,18 @@ extension EditLocationView {
         }
     }
 
-    private var categoryView: some View {
+    private var collectionView: some View {
         Group {
             DSTextField(
-                .constant(.localized(CategoryKeys.selectCategory)),
-                text: $categoryName
+                .constant(.localized(CollectionKeys.selectCollection)),
+                text: $collectionName
             )
-            .label(.localized(CategoryKeys.category))
+            .label(.localized(CollectionKeys.collection))
             .image(.appSystemIcon(.folder))
             .trailingImage(.appSystemIcon(.chevronDown))
             .disabled(true)
             .onTapGesture {
-                showCategoryList = true
+                showCollectionList = true
             }
 
             Divider()
@@ -218,24 +218,24 @@ extension EditLocationView {
         }
     }
 
-    private var selectCategoryView: some View {
+    private var selectCollectionView: some View {
         NavigationStack {
             List {
-                ForEach(viewModel.categories) { item in
+                ForEach(viewModel.collections) { item in
                     DSText(item.name)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            viewModel.category = item
-                            showCategoryList = false
+                            viewModel.collection = item
+                            showCollectionList = false
                         }
                 }
             }
-            .navigationTitle(Text(CategoryKeys.title))
+            .navigationTitle(Text(CollectionKeys.title))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        showCategoryList = false
+                        showCollectionList = false
                     } label: {
                         Image.appSystemIcon(.close)
                     }
@@ -243,7 +243,7 @@ extension EditLocationView {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showAddCategory = true
+                        showAddCollection = true
                     } label: {
                         Text(CommonKeys.add)
                     }

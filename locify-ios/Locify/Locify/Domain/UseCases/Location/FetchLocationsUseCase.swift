@@ -8,7 +8,7 @@
 import Foundation
 
 protocol FetchLocationsUseCaseProtocol {
-    func execute(for categoryId: UUID) async throws -> [Location]
+    func execute(for collectionId: UUID) async throws -> [Location]
 }
 
 struct FetchLocationsUseCase: FetchLocationsUseCaseProtocol {
@@ -18,7 +18,7 @@ struct FetchLocationsUseCase: FetchLocationsUseCaseProtocol {
         self.repository = repository
     }
 
-    func execute(for categoryId: UUID) async throws -> [Location] {
-        try await repository.fetchLocations(for: categoryId)
+    func execute(for collectionId: UUID) async throws -> [Location] {
+        try await repository.fetchLocations(for: collectionId)
     }
 }

@@ -16,7 +16,7 @@ class HomeViewModel {
     private let locationUseCase: LocationUseCases
     private let locationManager: LocationManagerProtocol
 
-    private(set) var selectedCategory: Category?
+    private(set) var selectedCollection: Collection?
     private(set) var selectedLocationId: UUID?
     private(set) var locationList: [Location] = []
     var permissionDenied: Bool = false
@@ -79,8 +79,8 @@ extension HomeViewModel {
         selectedLocationId = location?.id
     }
 
-    func selectLocationFromCategoryList(category: Category, id: UUID, locations: [Location]) {
-        selectedCategory = category
+    func selectLocationFromCollectionList(collection: Collection, id: UUID, locations: [Location]) {
+        selectedCollection = collection
         selectedLocationId = id
         locationList = locations
     }
@@ -107,7 +107,7 @@ extension HomeViewModel {
             selectedLocationId = locationList.first?.id
         } else {
             locationList.removeAll()
-            selectedCategory = nil
+            selectedCollection = nil
             await getUserLocation()
         }
     }

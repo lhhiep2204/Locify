@@ -1,5 +1,5 @@
 //
-//  Category.swift
+//  Collection.swift
 //  Locify
 //
 //  Created by Hoàng Hiệp Lê on 22/7/25.
@@ -7,8 +7,8 @@
 
 import Foundation
 
-/// A domain entity representing a category for grouping locations, owned by a user.
-struct Category: Identifiable, Equatable, Hashable {
+/// A domain entity representing a collection for grouping locations, owned by a user.
+struct Collection: Identifiable, Equatable, Hashable {
     let id: UUID
     var name: String
     var syncStatus: SyncStatus
@@ -29,7 +29,7 @@ struct Category: Identifiable, Equatable, Hashable {
         self.updatedAt = updatedAt
     }
 
-    static func == (lhs: Category, rhs: Category) -> Bool {
+    static func == (lhs: Collection, rhs: Collection) -> Bool {
         lhs.id == rhs.id &&
         lhs.name == rhs.name &&
         lhs.syncStatus == rhs.syncStatus &&
@@ -38,17 +38,17 @@ struct Category: Identifiable, Equatable, Hashable {
     }
 }
 
-extension Category {
-    /// A mock category for testing, previews, or development.
-    static let mock: Category = .init(
+extension Collection {
+    /// A mock collection for testing, previews, or development.
+    static let mock: Collection = .init(
         id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!,
         name: "Food",
         createdAt: Date(timeIntervalSince1970: 1697059200),
         updatedAt: Date(timeIntervalSince1970: 1697059200)
     )
 
-    /// A list of mock categories for testing, previews, or development.
-    static let mockList: [Category] = [
+    /// A list of mock collections for testing, previews, or development.
+    static let mockList: [Collection] = [
         .init(
             id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!,
             name: "Food",

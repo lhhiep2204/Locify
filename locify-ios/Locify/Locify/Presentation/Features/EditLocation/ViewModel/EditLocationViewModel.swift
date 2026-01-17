@@ -10,12 +10,12 @@ import Foundation
 @MainActor
 @Observable
 class EditLocationViewModel {
-    private let fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol
-    private let addCategoryUseCase: AddCategoryUseCaseProtocol
+    private let fetchCollectionsUseCase: FetchCollectionsUseCaseProtocol
+    private let addCollectionUseCase: AddCollectionUseCaseProtocol
 
-    private(set) var categories: [Category] = []
+    private(set) var collections: [Collection] = []
 
-    var category: Category?
+    var collection: Collection?
 
     var placeId: String?
     var displayName: String = .empty
@@ -28,28 +28,28 @@ class EditLocationViewModel {
     private(set) var errorMessage: String = .empty
 
     init(
-        fetchCategoriesUseCase: FetchCategoriesUseCaseProtocol,
-        addCategoryUseCase: AddCategoryUseCaseProtocol
+        fetchCollectionsUseCase: FetchCollectionsUseCaseProtocol,
+        addCollectionUseCase: AddCollectionUseCaseProtocol
     ) {
-        self.fetchCategoriesUseCase = fetchCategoriesUseCase
-        self.addCategoryUseCase = addCategoryUseCase
+        self.fetchCollectionsUseCase = fetchCollectionsUseCase
+        self.addCollectionUseCase = addCollectionUseCase
     }
 }
 
 extension EditLocationViewModel {
-    func fetchCategories() async {
+    func fetchCollections() async {
         do {
             try await Task.sleep(for: .seconds(0.5))
-            categories = try await fetchCategoriesUseCase.execute()
+            collections = try await fetchCollectionsUseCase.execute()
         } catch {
             Logger.error(error.localizedDescription)
         }
     }
 
-    func addCategory(_ category: Category) async {
+    func addCollection(_ collection: Collection) async {
         do {
-            _ = try await addCategoryUseCase.execute(category)
-            categories.append(category)
+            _ = try await addCollectionUseCase.execute(collection)
+            collections.append(collection)
         } catch {
             Logger.error(error.localizedDescription)
         }
@@ -65,7 +65,7 @@ extension EditLocationViewModel {
 
     func createLocation(completion: (Location?) -> Void) {
         let location: Location = .init(
-            categoryId: category?.id ?? UUID(),
+            collectionId: collection?.id ?? UUID(),
             placeId: placeId,
             displayName: displayName,
             name: name,
@@ -112,7 +112,7 @@ extension EditLocationViewModel {
 
 extension EditLocationViewModel {
     private var isValid: Bool {
-        if category == nil {
+        if collection == nil {
             errorMessage = "Please select a list."
             return false
         }

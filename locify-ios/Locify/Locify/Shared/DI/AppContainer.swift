@@ -21,7 +21,7 @@ final class AppContainer {
     private lazy var locationManager: LocationManagerProtocol = LocationManager.shared
 
     // MARK: - Feature Containers
-    private lazy var categoryContainer = CategoryContainer()
+    private lazy var collectionContainer = CollectionContainer()
     private lazy var locationContainer = LocationContainer(
         appleMapService: appleMapService,
         locationManager: locationManager
@@ -37,19 +37,19 @@ extension AppContainer {
         locationContainer.makeHomeViewModel()
     }
 
-    func makeCategoryListViewModel() -> CategoryListViewModel {
-        categoryContainer.makeCategoryListViewModel()
+    func makeCollectionListViewModel() -> CollectionListViewModel {
+        collectionContainer.makeCollectionListViewModel()
     }
 
-    func makeLocationListViewModel(category: Category) -> LocationListViewModel {
-        locationContainer.makeLocationListViewModel(category: category)
+    func makeLocationListViewModel(collection: Collection) -> LocationListViewModel {
+        locationContainer.makeLocationListViewModel(collection: collection)
     }
 
-    func makeEditCategoryViewModel() -> EditCategoryViewModel {
-        categoryContainer.makeEditCategoryViewModel()
+    func makeEditCollectionViewModel() -> EditCollectionViewModel {
+        collectionContainer.makeEditCollectionViewModel()
     }
 
     func makeEditLocationViewModel() -> EditLocationViewModel {
-        locationContainer.makeEditLocationViewModel(categoryContainer: categoryContainer)
+        locationContainer.makeEditLocationViewModel(collectionContainer: collectionContainer)
     }
 }
