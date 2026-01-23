@@ -28,6 +28,6 @@ struct GetUserLocationUseCase: GetUserLocationUseCaseProtocol {
         guard granted else { throw LocationError.permissionNotGranted }
 
         try await locationManager.startUpdatingLocation()
-        return try await appleMapService.getLocationInfo(for: locationManager.getLastKnownLocation())
+        return try await appleMapService.getUserLocationInfo(for: locationManager.getLastKnownLocation())
     }
 }

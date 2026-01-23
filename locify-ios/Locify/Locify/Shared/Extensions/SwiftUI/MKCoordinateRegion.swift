@@ -11,32 +11,60 @@ extension MKCoordinateRegion {
     /// Calculate a dynamic map region for a single location based on its address depth (number of components)
     static func region(for location: Location) -> MKCoordinateRegion {
         // Clamp latitude to [-90, 90] and longitude to [-180, 180], ignoring NaN/infinite
-        let lat = location.latitude.isFinite ? min(max(location.latitude, -90), 90) : 0
-        let lon = location.longitude.isFinite ? min(max(location.longitude, -180), 180) : 0
+        let coordinate = CLLocationCoordinate2D(
+            latitude: location.latitude.clamped(to: -90...90),
+            longitude: location.longitude.clamped(to: -180...180)
+        )
 
-        let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-        let span = calculateMapRegionSpan(for: location)
+        let zoomLevel = MapZoomLevel.from(addressDepth: location.addressComponents.count)
+        let span = MKCoordinateSpan(
+            latitudeDelta: zoomLevel.span,
+            longitudeDelta: zoomLevel.span
+        )
 
         return .init(center: coordinate, span: span)
     }
+}
 
-    /// Compute a dynamic span based on address components
-    static func calculateMapRegionSpan(for location: Location) -> MKCoordinateSpan {
-        // Safely split the address into components
-        let addressParts = location.address
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
+private extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double {
+        guard isFinite else { return range.lowerBound }
 
-        let count = addressParts.count
+        return min(max(self, range.lowerBound), range.upperBound)
+    }
+}
 
-        let spanValue: Double = {
-            switch count {
-            case 0...2: 0.1 // Country or large area → zoom out
-            case 3...4: 0.01 // City or neighborhood → medium zoom
-            default: 0.005 // Street / building → zoom in
-            }
-        }()
+private extension Location {
+    var addressComponents: [String] {
+        address
+            .components(separatedBy: CharacterSet(charactersIn: "\n,"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+}
 
-        return .init(latitudeDelta: spanValue, longitudeDelta: spanValue)
+private enum MapZoomLevel {
+    case country, state, city, district, place
+
+    /// Latitude / longitude delta (degrees). Chosen empirically for acceptable UX, not geographic precision.
+    var span: Double {
+        switch self {
+        case .country: 8.0 // ~900km
+        case .state: 2.0 // ~200km
+        case .city: 0.3 // ~30km
+        case .district: 0.05 // ~5km
+        case .place: 0.003 // ~300m
+        }
+    }
+
+    /// Heuristic mapping from address depth. Address depth is locale & format dependent.
+    static func from(addressDepth: Int) -> MapZoomLevel {
+        switch addressDepth {
+        case 0, 1: .country
+        case 2: .state
+        case 3: .city
+        case 4: .district
+        default: .place
+        }
     }
 }

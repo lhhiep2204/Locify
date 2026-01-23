@@ -11,20 +11,29 @@ import Combine
 /// Protocol defining the interface for map and location-related services,
 /// such as reverse geocoding, place search, and autocomplete suggestions.
 protocol AppleMapServiceProtocol: AnyObject {
-    /// Reverse-geocodes the given Core Location coordinate into a `Location` value.
-    /// - Parameter location: The `CLLocation` to reverse-geocode.
-    /// - Returns: A populated `Location` describing the provided coordinates.
+    /// Reverse-geocodes the user's current Core Location into a `Location` value.
+    /// - Parameter location: The user's `CLLocation`.
+    /// - Returns: A populated `Location` describing the user's location.
     /// - Throws: `LocationError.geocodingFailed` if no address is found or data is invalid.
-    func getLocationInfo(for location: CLLocation) async throws -> Location
+    func getUserLocationInfo(for location: CLLocation) async throws -> Location
+
+    /// Reverse-geocodes a coordinate selected directly on the map into a `Location`.
+    /// - Parameters:
+    ///   - name: An optional display name to prefer over the reverse-geocoded name.
+    ///   - coordinate: The coordinate selected on the map.
+    /// - Returns: A populated `Location` representing the selected map position.
+    /// - Throws: `LocationError.geocodingFailed` if no address is found.
+    func getSelectedMapLocationInfo(name: String?, for coordinate: CLLocationCoordinate2D) async throws -> Location
+
+    /// Creates an `MKMapItem` from a domain `Location`.
+    /// - Parameter location: The domain `Location` to convert.
+    /// - Returns: An `MKMapItem` representing the location.
+    func makeMapItem(from location: Location) -> MKMapItem
 
     /// Returns debounced autocomplete suggestions for a user-entered query.
-    /// - Parameter query: The text to search for.
-    /// - Returns: A list of `Location` suggestions (coordinates are zero for suggestions).
     func suggestions(for query: String) async -> [Location]
 
     /// Performs a detailed place search to resolve a suggested location to a precise coordinate.
-    /// - Parameter location: A `Location` previously returned from `suggestions(for:)`.
-    /// - Returns: A more precise `Location` with coordinates, or `nil` if none found.
     func search(for location: Location) async -> Location?
 }
 
@@ -61,44 +70,96 @@ final class AppleMapService: NSObject, AppleMapServiceProtocol {
 }
 
 extension AppleMapService {
-    /// Reverse-geocodes the given Core Location coordinate into a `Location` value.
+    /// Reverse-geocodes the user's current Core Location into a `Location` value.
     ///
-    /// This method performs an async reverse-geocoding request using MapKit and maps the
-    /// first resulting `MKMapItem` into your app's `Location` model. If no address can be
-    /// resolved, it throws a `LocationError.geocodingFailed` with a descriptive message.
+    /// This method resolves the user's physical location into a human-readable
+    /// address using MapKit reverse geocoding.
     ///
-    /// - Parameter location: The `CLLocation` to reverse-geocode.
-    /// - Returns: A populated `Location` describing the provided coordinates.
-    /// - Throws: `LocationError.geocodingFailed` if no address is found or address data is invalid.
-    func getLocationInfo(for location: CLLocation) async throws -> Location {
-        guard let request = MKReverseGeocodingRequest(location: location) else {
+    /// - Parameter location: The user's `CLLocation`.
+    /// - Returns: A populated `Location` representing the user's location.
+    /// - Throws: `LocationError.geocodingFailed` if no address is found.
+    func getUserLocationInfo(for location: CLLocation) async throws -> Location {
+        guard let request = MKReverseGeocodingRequest(location: location),
+              let item = try await request.mapItems.first else {
             throw LocationError.geocodingFailed("No address found.")
         }
-
-        let mapItems = try await request.mapItems
-
-        guard let item = mapItems.first else {
-            throw LocationError.geocodingFailed("No address found.")
-        }
-
-        guard let address = item.address?.fullAddress else {
-            throw LocationError.geocodingFailed("Invalid address data.")
-        }
-
-        let name = item.name ?? "My location"
 
         return .init(
             id: Constants.myLocationId,
             collectionId: UUID(),
             placeId: item.identifier?.rawValue,
-            displayName: "My location",
-            name: name,
-            address: address,
-            latitude: location.coordinate.latitude,
-            longitude: location.coordinate.longitude,
-            createdAt: Date(),
-            updatedAt: Date()
+            displayName: "My Location",
+            name: item.name ?? "My Location",
+            address: item.address?.fullAddress ?? .empty,
+            latitude: item.location.coordinate.latitude,
+            longitude: item.location.coordinate.longitude
         )
+    }
+
+    /// Reverse-geocodes a coordinate selected directly on the map into a `Location`.
+    ///
+    /// This method is typically used when handling `MapSelection`, where only
+    /// a coordinate is available. If a custom `name` is provided, it will be
+    /// used in preference to the reverse-geocoded place name.
+    ///
+    /// - Parameters:
+    ///   - name: An optional display name to prefer over the reverse-geocoded name.
+    ///   - coordinate: The coordinate selected on the map.
+    /// - Returns: A populated `Location` representing the selected map position.
+    /// - Throws: `LocationError.geocodingFailed` if no address is found.
+    func getSelectedMapLocationInfo(
+        name: String?,
+        for coordinate: CLLocationCoordinate2D
+    ) async throws -> Location {
+        let location = CLLocation(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+
+        guard let request = MKReverseGeocodingRequest(location: location),
+              let item = try await request.mapItems.first else {
+            throw LocationError.geocodingFailed("No address found.")
+        }
+
+        return .init(
+            id: Constants.mapSelectionId,
+            collectionId: UUID(),
+            placeId: item.identifier?.rawValue,
+            displayName: .empty,
+            name: name ?? item.name ?? .empty,
+            address: item.address?.fullAddress ?? .empty,
+            latitude: item.location.coordinate.latitude,
+            longitude: item.location.coordinate.longitude
+        )
+    }
+}
+
+extension AppleMapService {
+    /// Creates an `MKMapItem` from a domain `Location`.
+    ///
+    /// This method converts a saved or temporary `Location` into a MapKit
+    /// representation, allowing it to be used for map camera positioning,
+    /// routing, or system interactions.
+    ///
+    /// - Parameter location: The domain `Location` to convert.
+    /// - Returns: An `MKMapItem` representing the location.
+    func makeMapItem(from location: Location) -> MKMapItem {
+        let clLocation = CLLocation(
+            latitude: location.latitude,
+            longitude: location.longitude
+        )
+
+        let mapItem = MKMapItem(
+            location: clLocation,
+            address: .init(
+                fullAddress: location.address,
+                shortAddress: nil
+            )
+        )
+
+        mapItem.name = location.name
+
+        return mapItem
     }
 }
 
@@ -145,7 +206,7 @@ extension AppleMapService {
                     placeId: $0.identifier?.rawValue,
                     displayName: .empty,
                     name: $0.name ?? .empty,
-                    address: $0.addressRepresentations?.fullAddress(includingRegion: true, singleLine: true) ?? .empty,
+                    address: $0.address?.fullAddress ?? .empty,
                     latitude: $0.location.coordinate.latitude,
                     longitude: $0.location.coordinate.longitude
                 )

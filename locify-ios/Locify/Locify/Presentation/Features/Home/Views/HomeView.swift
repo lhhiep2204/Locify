@@ -145,8 +145,12 @@ extension HomeView {
         ZStack {
             MapView(
                 selectedLocation: selectedLocation,
-                locations: viewModel.locationList.filter { $0.id != Constants.myLocationId }
-            )
+                locations: viewModel.locationList.filter {
+                    $0.id != Constants.myLocationId && $0.id != Constants.mapSelectionId
+                }
+            ) { location in
+                viewModel.selectLocation(location)
+            }
             topView
         }
     }

@@ -76,7 +76,13 @@ extension HomeViewModel {
     }
 
     func selectLocation(_ location: Location?) {
-        selectedLocationId = location?.id
+        guard let location else { return }
+
+        selectedLocationId = location.id
+        locationList.removeAll(where: \.isTemporary)
+        if !locationList.contains(location) {
+            locationList.insert(location, at: 0)
+        }
     }
 
     func selectLocationFromCollectionList(collection: Collection, id: UUID, locations: [Location]) {
@@ -99,7 +105,8 @@ extension HomeViewModel {
     func clearSelectedLocation() async {
         let isTemporaryLocation: Bool = {
             selectedLocationId == Constants.myLocationId ||
-            selectedLocationId == Constants.searchedLocationId
+            selectedLocationId == Constants.searchedLocationId ||
+            selectedLocationId == Constants.mapSelectionId
         }()
 
         if locationList.count > 2 && isTemporaryLocation {

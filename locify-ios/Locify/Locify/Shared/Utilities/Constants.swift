@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct Constants {
+enum Constants {
     static let myLocationId: UUID = .init()
     static let searchedLocationId: UUID = .init()
+    static let mapSelectionId: UUID = .init()
 }

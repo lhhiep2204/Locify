@@ -30,11 +30,11 @@ struct Collection: Identifiable, Equatable, Hashable {
     }
 
     static func == (lhs: Collection, rhs: Collection) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.name == rhs.name &&
-        lhs.syncStatus == rhs.syncStatus &&
-        lhs.createdAt == rhs.createdAt &&
-        lhs.updatedAt == rhs.updatedAt
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
@@ -49,6 +49,12 @@ extension Collection {
 
     /// A list of mock collections for testing, previews, or development.
     static let mockList: [Collection] = [
+        .init(
+            id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174004")!,
+            name: "Football Stadium",
+            createdAt: Date(timeIntervalSince1970: 1697404800),
+            updatedAt: Date(timeIntervalSince1970: 1697404800)
+        ),
         .init(
             id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!,
             name: "Food",

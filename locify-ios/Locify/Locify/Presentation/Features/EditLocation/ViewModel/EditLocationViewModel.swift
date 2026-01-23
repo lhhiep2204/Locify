@@ -91,11 +91,8 @@ extension EditLocationViewModel {
 
         var location = locationToUpdate
         location.displayName = displayName
-        location.name = name
-        location.address = address
-        location.latitude = latitude.asDouble
-        location.longitude = longitude.asDouble
         location.notes = notes.trimmed.isEmpty ? nil : notes
+        location.updatedAt = Date()
 
         guard isValid else {
             completion(nil)

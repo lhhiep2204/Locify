@@ -15,14 +15,13 @@ extension Location {
 
         lines.append("Name: \(name)")
         lines.append("Address: \(address)")
-        lines.append("Latitude: \(latitude)")
-        lines.append("Longitude: \(longitude)")
+        lines.append("Coordinates: \(latitude), \(longitude)")
 
         if let notes, !notes.trimmed.isEmpty {
             lines.append("Notes: \(notes)")
         }
 
-        lines.append("Apple Maps: \(appleMapsURL)")
+        lines.append("View in Apple Maps: \(appleMapsURL)")
 
         return lines.joined(separator: "\n")
     }

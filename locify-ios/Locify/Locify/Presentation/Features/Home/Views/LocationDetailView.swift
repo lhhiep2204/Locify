@@ -29,12 +29,17 @@ struct LocationDetailView: View {
                         List {
                             infoView(location: location)
 
+                            if let notes = location.notes {
+                                notesView(notes: notes)
+                            }
+
                             if !relatedLocations.isEmpty {
                                 relatedLocationSection
                             }
                         }
                         .id(location.id)
                         .scrollContentBackground(.hidden)
+                        .listSectionSpacing(.compact)
                     }
                 } else {
                     VStack(alignment: .center, spacing: DSSpacing.medium) {
@@ -55,48 +60,48 @@ struct LocationDetailView: View {
 
 extension LocationDetailView {
     private func topView(location: Location) -> some View {
-        HStack(alignment: .top, spacing: DSSpacing.small) {
-            VStack(alignment: .leading) {
+        VStack(alignment: .leading) {
+            HStack(spacing: DSSpacing.small) {
                 DSText(
                     location.displayName.isEmpty ? location.name : location.displayName,
                     font: .bold(.xLarge)
                 )
-                .lineLimit(2)
-                .minimumScaleFactor(0.7)
+                .lineLimit(3)
+                .minimumScaleFactor(0.8)
                 .padding(.top, DSSpacing.xSmall)
 
-                DSText(
-                    location.address,
-                    font: .regular(.small)
-                )
-            }
+                Spacer()
 
-            Spacer()
-
-            if location.isTemporary {
-                addButtonView
-                shareButtonView(location)
-            } else {
-                Menu {
-                    shareButtonMenuView(location)
-                    editButtonMenuView
-                    Divider()
-                    deleteButtonMenuView
-                } label: {
-                    Image.appSystemIcon(.more)
-                        .circularGlassEffect()
+                if location.isTemporary {
+                    addButtonView
+                    shareButtonView(location)
+                } else {
+                    Menu {
+                        shareButtonMenuView(location)
+                        editButtonMenuView
+                        Divider()
+                        deleteButtonMenuView
+                    } label: {
+                        Image.appSystemIcon(.more)
+                            .circularGlassEffect()
+                    }
+                    .menuOrder(.fixed)
                 }
-                .menuOrder(.fixed)
+
+                if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
+                    Button {
+                        onCloseSelectedLocation()
+                    } label: {
+                        Image.appSystemIcon(.close)
+                    }
+                    .circularGlassEffect()
+                }
             }
 
-            if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
-                Button {
-                    onCloseSelectedLocation()
-                } label: {
-                    Image.appSystemIcon(.close)
-                }
-                .circularGlassEffect()
-            }
+            DSText(
+                location.address,
+                font: .regular(.small)
+            )
         }
     }
 
@@ -158,21 +163,21 @@ extension LocationDetailView {
     private func infoView(location: Location) -> some View {
         Section {
             Group {
-                nameView(name: location.name)
+                if !location.name.isEmpty && !location.displayName.isEmpty {
+                    nameView(name: location.name)
+                }
+
                 coordinatesView(
                     latitude: location.latitude,
                     longitude: location.longitude
                 )
-
-                if let notes = location.notes {
-                    notesView(notes: notes)
-                }
             }
         } header: {
             DSText(
-                .localized(HomeKeys.locationInfo),
+                .localized(HomeKeys.details),
                 font: .regular(.small)
             )
+            .padding(.bottom, -DSSpacing.small)
         }
     }
 
@@ -220,12 +225,7 @@ extension LocationDetailView {
             Spacer()
 
             Button {
-                CommonHelper.Clipboard.copy(
-                """
-                \(String.localized(LocationKeys.latitude)): \(latitude)
-                \(String.localized(LocationKeys.longitude)): \(longitude)
-                """
-                )
+                CommonHelper.Clipboard.copy("\(latitude), \(longitude)")
             } label: {
                 Image.appSystemIcon(.copy)
                     .font(.appFont(.regular(.small)))
@@ -236,11 +236,17 @@ extension LocationDetailView {
     }
 
     private func notesView(notes: String) -> some View {
-        VStack(alignment: .leading) {
-            infoItemView(
-                title: .localized(LocationKeys.notes),
-                value: notes
+        Section {
+            DSText(
+                notes,
+                font: .regular(.medium)
             )
+        } header: {
+            DSText(
+                .localized(HomeKeys.notes),
+                font: .regular(.small)
+            )
+            .padding(.bottom, -DSSpacing.small)
         }
     }
 
@@ -280,10 +286,16 @@ extension LocationDetailView {
                 }
             }
         } header: {
-            DSText(
-                .localized(HomeKeys.relatedLocations),
-                font: .regular(.small)
-            )
+            VStack(alignment: .leading, spacing: DSSpacing.medium) {
+                Divider()
+                    .background(.backgroundSecondaryInverted)
+
+                DSText(
+                    .localized(HomeKeys.relatedLocations),
+                    font: .regular(.small)
+                )
+                .padding(.bottom, -DSSpacing.small)
+            }
         }
     }
 
