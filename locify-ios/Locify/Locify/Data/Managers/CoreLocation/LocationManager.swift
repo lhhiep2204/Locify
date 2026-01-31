@@ -247,6 +247,7 @@ extension LocationManager: CLLocationManagerDelegate {
 
         lastKnownLocationStorage = location
         locationSubject.send(location)
+        stopUpdatingLocation()
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {

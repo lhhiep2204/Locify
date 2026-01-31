@@ -26,7 +26,7 @@ extension Location {
         return lines.joined(separator: "\n")
     }
 
-    private var appleMapsURL: String {
+    var appleMapsURL: String {
         let encodedName = name.urlEncoded
         let encodedAddress = address.urlEncoded
 

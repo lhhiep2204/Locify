@@ -19,6 +19,7 @@ struct EditLocationView: View {
     @State private var viewModel: EditLocationViewModel
 
     @State private var textSearch: String = .empty
+    @State private var searchedLocation: Location?
     @State private var collectionName: String
 
     @State private var showSearchView: Bool = false
@@ -94,6 +95,7 @@ struct EditLocationView: View {
                     RouterView(
                         Router<Route>(
                             root: .search { location in
+                                searchedLocation = location
                                 viewModel.selectSearchedLocation(location)
                             }
                         )
@@ -133,6 +135,7 @@ extension EditLocationView {
                     searchView
                 }
                 collectionView
+                mapView
                 locationInfoView
             }
             .padding(DSSpacing.large)
@@ -164,7 +167,21 @@ extension EditLocationView {
             }
 
             Divider()
+                .background(.backgroundSecondaryInverted)
                 .padding(.vertical, DSSpacing.small)
+        }
+    }
+
+    @ViewBuilder
+    private var mapView: some View {
+        if let location = locationToSave ?? searchedLocation {
+            MapView(
+                selectedLocation: .constant(location),
+                locations: [location]
+            ) { _ in }
+                .allowsHitTesting(false)
+                .aspectRatio(2/1, contentMode: .fit)
+                .cornerRadius(DSRadius.xxLarge)
         }
     }
 
@@ -183,6 +200,7 @@ extension EditLocationView {
             }
 
             Divider()
+                .background(.backgroundSecondaryInverted)
                 .padding(.vertical, DSSpacing.small)
         }
     }
@@ -280,6 +298,7 @@ extension EditLocationView {
 #Preview {
     EditLocationView(
         AppContainer.shared.makeEditLocationViewModel(),
-        editMode: .add
+        editMode: .add,
+        locationToSave: .mock
     ) { _ in }
 }

@@ -18,6 +18,7 @@ enum CommonKeys: String, LocalizedKey {
     case cancel = "Cancel"
     case close = "Close"
     case confirm = "Confirm"
+    case copy = "Copy"
 
     // MARK: - D
     case delete = "Delete"
@@ -29,6 +30,9 @@ enum CommonKeys: String, LocalizedKey {
 
     // MARK: - N
     case next = "Next"
+
+    // MARK: - O
+    case openInMaps = "Open in Maps"
 
     // MARK: - S
     case save = "Save"

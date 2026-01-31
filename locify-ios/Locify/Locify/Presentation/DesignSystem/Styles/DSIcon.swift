@@ -41,6 +41,7 @@ enum DSSystemIcon: String {
     case location = "location"
 
     // MARK: - M
+    case map = "map"
     case more = "ellipsis"
 
     // MARK: - P

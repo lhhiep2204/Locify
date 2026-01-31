@@ -72,29 +72,28 @@ extension LocationDetailView {
 
                 Spacer()
 
-                if location.isTemporary {
-                    addButtonView
-                    shareButtonView(location)
-                } else {
-                    Menu {
-                        shareButtonMenuView(location)
-                        editButtonMenuView
+                Menu {
+                    if location.isTemporary {
+                        addButtonView
+                        openInMapsButtonView(location)
+                        copyButtonView(location)
+                        shareButtonView(location)
+                    } else {
+                        editButtonView
+                        openInMapsButtonView(location)
+                        copyButtonView(location)
+                        shareButtonView(location)
                         Divider()
-                        deleteButtonMenuView
-                    } label: {
-                        Image.appSystemIcon(.more)
-                            .circularGlassEffect()
+                        deleteButtonView
                     }
-                    .menuOrder(.fixed)
+                } label: {
+                    Image.appSystemIcon(.more)
+                        .circularGlassEffect()
                 }
+                .menuOrder(.fixed)
 
                 if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
-                    Button {
-                        onCloseSelectedLocation()
-                    } label: {
-                        Image.appSystemIcon(.close)
-                    }
-                    .circularGlassEffect()
+                    closeButtonView
                 }
             }
 
@@ -109,20 +108,33 @@ extension LocationDetailView {
         Button {
             onAddLocation()
         } label: {
-            Image.appSystemIcon(.add)
+            Label {
+                DSText(.localized(CommonKeys.add))
+            } icon: {
+                Image.appSystemIcon(.add)
+            }
+        }
+        .circularGlassEffect()
+    }
+
+    private func copyButtonView(_ location: Location) -> some View {
+        Button {
+            CommonHelper.Clipboard.copy(location.shareMessage)
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.copy))
+            } icon: {
+                Image.appSystemIcon(.copy)
+            }
         }
         .circularGlassEffect()
     }
 
     private func shareButtonView(_ location: Location) -> some View {
-        ShareLink(item: location.shareMessage) {
-            Image.appSystemIcon(.share)
-        }
-        .circularGlassEffect()
-    }
-
-    private func shareButtonMenuView(_ location: Location) -> some View {
-        ShareLink(item: location.shareMessage) {
+        ShareLink(
+            item: location.shareMessage,
+            preview: SharePreview(location.displayName.isEmpty ? location.name : location.displayName)
+        ) {
             Label {
                 DSText(.localized(CommonKeys.share))
             } icon: {
@@ -133,7 +145,22 @@ extension LocationDetailView {
         .circularGlassEffect()
     }
 
-    private var editButtonMenuView: some View {
+    private func openInMapsButtonView(_ location: Location) -> some View {
+        Button {
+            guard let url = URL(string: location.appleMapsURL) else { return }
+
+            UIApplication.shared.open(url)
+        } label: {
+            Label {
+                DSText(.localized(CommonKeys.openInMaps))
+            } icon: {
+                Image.appSystemIcon(.map)
+            }
+        }
+        .circularGlassEffect()
+    }
+
+    private var editButtonView: some View {
         Button {
             onEditLocation()
         } label: {
@@ -146,7 +173,7 @@ extension LocationDetailView {
         .circularGlassEffect()
     }
 
-    private var deleteButtonMenuView: some View {
+    private var deleteButtonView: some View {
         Button {
             onDeleteLocation()
         } label: {
@@ -157,6 +184,15 @@ extension LocationDetailView {
             }
         }
         .tint(.red)
+        .circularGlassEffect()
+    }
+
+    private var closeButtonView: some View {
+        Button {
+            onCloseSelectedLocation()
+        } label: {
+            Image.appSystemIcon(.close)
+        }
         .circularGlassEffect()
     }
 
