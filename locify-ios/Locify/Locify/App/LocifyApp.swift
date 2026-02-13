@@ -25,6 +25,12 @@ struct LocifyApp: App {
         }
     }()
 
+    init() {
+#if DEBUG
+        DebugService.shared.configure()
+#endif
+    }
+
     var body: some Scene {
         WindowGroup {
             RouterView(router)
