@@ -11,30 +11,31 @@ import Foundation
 struct Collection: Identifiable, Equatable, Hashable {
     let id: UUID
     var name: String
-    var syncStatus: SyncStatus
+    var icon: String?
+    var isDefault: Bool
+    var visibility: Visibility
+    var share: Share?
     let createdAt: Date
     var updatedAt: Date
 
     init(
         id: UUID = UUID(),
         name: String,
-        syncStatus: SyncStatus = .pendingCreate,
+        icon: String? = nil,
+        isDefault: Bool = false,
+        visibility: Visibility = .private,
+        share: Share? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
         self.id = id
         self.name = name
-        self.syncStatus = syncStatus
+        self.icon = icon
+        self.isDefault = isDefault
+        self.visibility = visibility
+        self.share = share
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-    }
-
-    static func == (lhs: Collection, rhs: Collection) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }
 

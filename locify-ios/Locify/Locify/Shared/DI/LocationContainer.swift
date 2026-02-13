@@ -7,14 +7,16 @@
 
 import Foundation
 
-/// Dependency container for Location-related logic.
-///
-/// Provides location repositories, use cases, and ViewModels.
-/// It depends on shared AppleMapService and LocationManager instances.
 final class LocationContainer {
     // MARK: - Core Services
     private let appleMapService: AppleMapServiceProtocol
     private let locationManager: LocationManagerProtocol
+
+    // MARK: - Data Source
+    private let localDataSource: LocationLocalDataSourceProtocol
+
+    // MARK: - Mapper
+    private let locationMapper: LocationMapping
 
     // MARK: - Repository
     private let repository: LocationRepositoryProtocol
@@ -37,20 +39,31 @@ final class LocationContainer {
         delete: deleteUseCase
     )
 
-    // MARK: - Initialization
     init(
         appleMapService: AppleMapServiceProtocol,
         locationManager: LocationManagerProtocol,
-        repository: LocationRepositoryProtocol = LocationRepository()
+        localDataSource: LocationLocalDataSourceProtocol? = nil,
+        locationMapper: LocationMapping = LocationMapper(),
+        repository: LocationRepositoryProtocol? = nil
     ) {
         self.appleMapService = appleMapService
         self.locationManager = locationManager
-        self.repository = repository
-    }
-}
 
-// MARK: - ViewModel Factories
-extension LocationContainer {
+        let swiftDataManager = SwiftDataContainer.shared.makeMainManager()
+
+        self.localDataSource = localDataSource ?? LocationLocalDataSource(
+            swiftDataManager: swiftDataManager
+        )
+
+        self.locationMapper = locationMapper
+
+        self.repository = repository ?? LocationRepository(
+            localDataSource: self.localDataSource,
+            locationMapper: locationMapper
+        )
+    }
+
+    // MARK: - ViewModel Factories
     func makeHomeViewModel() -> HomeViewModel {
         HomeViewModel(
             getUserLocationUseCase: getUserLocationUseCase,

@@ -32,6 +32,7 @@ enum DSSystemIcon: String {
 
     // MARK: - E
     case edit = "square.and.pencil"
+    case emptyList = "folder.badge.plus"
 
     // MARK: - F
     case folder = "folder"

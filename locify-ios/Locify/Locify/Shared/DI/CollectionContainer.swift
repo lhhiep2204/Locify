@@ -7,10 +7,13 @@
 
 import Foundation
 
-/// Dependency container responsible for Collection feature setup.
-///
-/// Provides repositories, use cases, and ViewModel factories related to Collection operations.
 final class CollectionContainer {
+    // MARK: - Data Source
+    private let localDataSource: CollectionLocalDataSourceProtocol
+
+    // MARK: - Mapper
+    private let collectionMapper: CollectionMapping
+
     // MARK: - Repository
     private let repository: CollectionRepositoryProtocol
 
@@ -27,14 +30,26 @@ final class CollectionContainer {
         delete: deleteUseCase
     )
 
-    // MARK: - Initialization
-    init(repository: CollectionRepositoryProtocol = CollectionRepository()) {
-        self.repository = repository
-    }
-}
+    init(
+        localDataSource: CollectionLocalDataSourceProtocol? = nil,
+        collectionMapper: CollectionMapping = CollectionMapper(),
+        repository: CollectionRepositoryProtocol? = nil
+    ) {
+        let swiftDataManager = SwiftDataContainer.shared.makeMainManager()
 
-// MARK: - ViewModel Factories
-extension CollectionContainer {
+        self.localDataSource = localDataSource ?? CollectionLocalDataSource(
+            swiftDataManager: swiftDataManager
+        )
+
+        self.collectionMapper = collectionMapper
+
+        self.repository = repository ?? CollectionRepository(
+            localDataSource: self.localDataSource,
+            collectionMapper: collectionMapper
+        )
+    }
+
+    // MARK: - ViewModel Factories
     func makeCollectionListViewModel() -> CollectionListViewModel {
         CollectionListViewModel(collectionUseCases: useCases)
     }

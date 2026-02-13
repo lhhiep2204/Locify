@@ -88,8 +88,8 @@ extension AppleMapService {
             id: Constants.myLocationId,
             collectionId: UUID(),
             placeId: item.identifier?.rawValue,
-            displayName: "My Location",
             name: item.name ?? "My Location",
+            displayName: "My Location",
             address: item.address?.fullAddress ?? .empty,
             latitude: item.location.coordinate.latitude,
             longitude: item.location.coordinate.longitude
@@ -125,8 +125,8 @@ extension AppleMapService {
             id: Constants.mapSelectionId,
             collectionId: UUID(),
             placeId: item.identifier?.rawValue,
-            displayName: .empty,
             name: name ?? item.name ?? .empty,
+            displayName: .empty,
             address: item.address?.fullAddress ?? .empty,
             latitude: item.location.coordinate.latitude,
             longitude: item.location.coordinate.longitude
@@ -204,8 +204,8 @@ extension AppleMapService {
                     id: Constants.searchedLocationId,
                     collectionId: UUID(),
                     placeId: $0.identifier?.rawValue,
-                    displayName: .empty,
                     name: $0.name ?? .empty,
+                    displayName: .empty,
                     address: $0.address?.fullAddress ?? .empty,
                     latitude: $0.location.coordinate.latitude,
                     longitude: $0.location.coordinate.longitude
@@ -231,8 +231,8 @@ extension AppleMapService: MKLocalSearchCompleterDelegate {
                 .init(
                     id: id,
                     collectionId: UUID(),
-                    displayName: .empty,
                     name: completion.title,
+                    displayName: .empty,
                     address: completion.subtitle,
                     latitude: .zero,
                     longitude: .zero

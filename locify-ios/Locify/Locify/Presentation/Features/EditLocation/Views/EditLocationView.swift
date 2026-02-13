@@ -238,15 +238,23 @@ extension EditLocationView {
 
     private var selectCollectionView: some View {
         NavigationStack {
-            List {
-                ForEach(viewModel.collections) { item in
-                    DSText(item.name)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            viewModel.collection = item
-                            showCollectionList = false
+            Group {
+                if viewModel.collections.isEmpty {
+                    EmptyCollectionView {
+                        showAddCollection = true
+                    }
+                } else {
+                    List {
+                        ForEach(viewModel.collections) { item in
+                            DSText(item.name)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    viewModel.collection = item
+                                    showCollectionList = false
+                                }
                         }
+                    }
                 }
             }
             .navigationTitle(Text(CollectionKeys.title))

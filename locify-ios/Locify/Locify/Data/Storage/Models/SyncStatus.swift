@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represents the synchronization state of an entity for offline/online data management.
-enum SyncStatus: String, Codable {
+enum SyncStatus: String, Codable, Equatable {
     /// The entity is fully synchronized with the server.
     case synced
     /// The entity was created locally and awaits server synchronization.

@@ -29,78 +29,92 @@ struct LocationListView: View {
     }
 
     var body: some View {
-        listView
-            .navigationTitle(Text(viewModel.collection.name))
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismissSheet()
-                    } label: {
-                        Image.appSystemIcon(.close)
-                    }
+        Group {
+            if viewModel.locations.isEmpty {
+                EmptyLocationView(collectionName: viewModel.collection.name) {
+                    showAddLocation = true
                 }
+            } else {
+                listView
+            }
+        }
+        .navigationTitle(Text(viewModel.collection.name))
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismissSheet()
+                } label: {
+                    Image.appSystemIcon(.close)
+                }
+            }
 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showAddLocation = true
-                    } label: {
-                        Text(CommonKeys.add)
-                    }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showAddLocation = true
+                } label: {
+                    Text(CommonKeys.add)
                 }
             }
-            .task {
-                if !isFetched {
-                    await viewModel.fetchLocations()
-                    isFetched.toggle()
+        }
+        .task {
+            if !isFetched {
+                await viewModel.fetchLocations()
+                isFetched.toggle()
+            }
+        }
+        .sheet(isPresented: $showAddLocation) {
+            EditLocationView(
+                container.makeEditLocationViewModel(),
+                editMode: .add,
+                collection: viewModel.collection
+            ) { [weak viewModel] location in
+                guard let viewModel else { return }
+
+                Task { @MainActor in
+                    await viewModel.addLocation(location)
                 }
             }
-            .sheet(isPresented: $showAddLocation) {
-                EditLocationView(
-                    container.makeEditLocationViewModel(),
-                    editMode: .add,
-                    collection: viewModel.collection
-                ) { location in
-                    Task {
-                        await viewModel.addLocation(location)
-                    }
+        }
+        .sheet(item: $locationToSave) { location in
+            EditLocationView(
+                container.makeEditLocationViewModel(),
+                editMode: .update,
+                collection: viewModel.collection,
+                locationToSave: location
+            ) { [weak viewModel] updatedLocation in
+
+                guard let viewModel else { return }
+                Task { @MainActor in
+                    await viewModel.updateLocation(updatedLocation)
                 }
             }
-            .sheet(item: $locationToSave) { location in
-                EditLocationView(
-                    container.makeEditLocationViewModel(),
-                    editMode: .update,
-                    collection: viewModel.collection,
-                    locationToSave: location
-                ) { updatedLocation in
-                    Task {
-                        await viewModel.updateLocation(updatedLocation)
-                    }
+        }
+        .alert(
+            Text(
+                String(
+                    format: MessageKeys.deleteAlertTitle.rawValue, locationToDelete?.name ?? .empty
+                )
+            ),
+            isPresented: $showDeleteAlert,
+            presenting: locationToDelete
+        ) { location in
+            Button(
+                String.localized(CommonKeys.delete),
+                role: .destructive
+            ) {
+                Task { @MainActor [weak viewModel] in
+                    guard let viewModel else { return }
+
+                    await viewModel.deleteLocation(location)
                 }
             }
-            .alert(
-                Text(
-                    String(
-                        format: MessageKeys.deleteAlertTitle.rawValue, locationToDelete?.name ?? .empty
-                    )
-                ),
-                isPresented: $showDeleteAlert,
-                presenting: locationToDelete
-            ) { location in
-                Button(
-                    String.localized(CommonKeys.delete),
-                    role: .destructive
-                ) {
-                    Task {
-                        await viewModel.deleteLocation(location)
-                    }
-                }
-                Button(
-                    String.localized(CommonKeys.cancel),
-                    role: .cancel
-                ) {}
-            } message: { _ in
-                Text(MessageKeys.deleteAlertMessage.rawValue)
-            }
+            Button(
+                String.localized(CommonKeys.cancel),
+                role: .cancel
+            ) {}
+        } message: { _ in
+            Text(MessageKeys.deleteAlertMessage.rawValue)
+        }
     }
 }
 
@@ -130,28 +144,16 @@ extension LocationListView {
     }
 
     private func locationItemView(_ location: Location) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
-            DSText(
-                location.displayName.isEmpty ? location.name : location.displayName,
-                font: .medium(.medium)
-            )
-            .lineLimit(1)
-
-            DSText(
-                location.address,
-                font: .regular(.small)
-            )
-            .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            selectLocation(
-                viewModel.collection,
-                location.id,
-                viewModel.locations
-            )
-        }
+        LocationItemView(location: location)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                selectLocation(
+                    viewModel.collection,
+                    location.id,
+                    viewModel.locations
+                )
+            }
     }
 
     private func shareButtonView(_ location: Location) -> some View {
@@ -193,11 +195,9 @@ extension LocationListView {
 }
 
 #Preview {
-    if let collection = Collection.mockList.first {
-        NavigationStack {
-            LocationListView(
-                AppContainer.shared.makeLocationListViewModel(collection: collection)
-            )
-        }
+    NavigationStack {
+        LocationListView(
+            AppContainer.shared.makeLocationListViewModel(collection: .mock)
+        )
     }
 }

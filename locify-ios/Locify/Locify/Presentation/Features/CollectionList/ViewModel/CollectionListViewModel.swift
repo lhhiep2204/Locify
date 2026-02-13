@@ -31,7 +31,7 @@ extension CollectionListViewModel {
 
     func addCollection(_ collection: Collection) async {
         do {
-            _ = try await collectionUseCases.add.execute(collection)
+            try await collectionUseCases.add.execute(collection)
             collections.append(collection)
         } catch {
             Logger.error(error.localizedDescription)
@@ -43,7 +43,7 @@ extension CollectionListViewModel {
               collections[index] != collection else { return }
 
         do {
-            _ = try await collectionUseCases.update.execute(collection)
+            try await collectionUseCases.update.execute(collection)
             collections[index] = collection
         } catch {
             Logger.error(error.localizedDescription)
@@ -52,7 +52,7 @@ extension CollectionListViewModel {
 
     func deleteCollection(_ collection: Collection) async {
         do {
-            _ = try await collectionUseCases.delete.execute(collection)
+            try await collectionUseCases.delete.execute(collection)
             collections.removeAll { $0.id == collection.id }
         } catch {
             Logger.error(error.localizedDescription)

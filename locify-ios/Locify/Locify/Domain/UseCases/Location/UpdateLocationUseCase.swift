@@ -8,7 +8,7 @@
 import Foundation
 
 protocol UpdateLocationUseCaseProtocol {
-    func execute(_ location: Location) async throws -> Location
+    func execute(_ location: Location) async throws
 }
 
 struct UpdateLocationUseCase: UpdateLocationUseCaseProtocol {
@@ -18,7 +18,7 @@ struct UpdateLocationUseCase: UpdateLocationUseCaseProtocol {
         self.repository = repository
     }
 
-    func execute(_ location: Location) async throws -> Location {
+    func execute(_ location: Location) async throws {
         try await repository.updateLocation(location)
     }
 }

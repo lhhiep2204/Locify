@@ -8,7 +8,7 @@
 import Foundation
 
 protocol UpdateCollectionUseCaseProtocol {
-    func execute(_ collection: Collection) async throws -> Collection
+    func execute(_ collection: Collection) async throws
 }
 
 struct UpdateCollectionUseCase: UpdateCollectionUseCaseProtocol {
@@ -18,7 +18,7 @@ struct UpdateCollectionUseCase: UpdateCollectionUseCaseProtocol {
         self.repository = repository
     }
 
-    func execute(_ collection: Collection) async throws -> Collection {
+    func execute(_ collection: Collection) async throws {
         try await repository.updateCollection(collection)
     }
 }

@@ -8,7 +8,7 @@
 import Foundation
 
 protocol DeleteCollectionUseCaseProtocol {
-    func execute(_ collection: Collection) async throws -> Collection
+    func execute(_ collection: Collection) async throws
 }
 
 struct DeleteCollectionUseCase: DeleteCollectionUseCaseProtocol {
@@ -18,7 +18,7 @@ struct DeleteCollectionUseCase: DeleteCollectionUseCaseProtocol {
         self.repository = repository
     }
 
-    func execute(_ collection: Collection) async throws -> Collection {
+    func execute(_ collection: Collection) async throws {
         try await repository.deleteCollection(collection)
     }
 }

@@ -67,8 +67,8 @@ extension EditLocationViewModel {
         let location: Location = .init(
             collectionId: collection?.id ?? UUID(),
             placeId: placeId,
-            displayName: displayName,
             name: name,
+            displayName: displayName,
             address: address,
             latitude: latitude.asDouble,
             longitude: longitude.asDouble,
@@ -84,12 +84,13 @@ extension EditLocationViewModel {
     }
 
     func updateLocation(locationToUpdate: Location?, completion: (Location?) -> Void) {
-        guard let locationToUpdate else {
+        guard let locationToUpdate, let collection else {
             completion(nil)
             return
         }
 
         var location = locationToUpdate
+        location.collectionId = collection.id
         location.displayName = displayName
         location.notes = notes.trimmed.isEmpty ? nil : notes
         location.updatedAt = Date()

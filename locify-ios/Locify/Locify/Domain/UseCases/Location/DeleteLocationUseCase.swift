@@ -8,7 +8,7 @@
 import Foundation
 
 protocol DeleteLocationUseCaseProtocol {
-    func execute(_ location: Location) async throws -> Location
+    func execute(_ location: Location) async throws
 }
 
 struct DeleteLocationUseCase: DeleteLocationUseCaseProtocol {
@@ -18,7 +18,7 @@ struct DeleteLocationUseCase: DeleteLocationUseCaseProtocol {
         self.repository = repository
     }
 
-    func execute(_ location: Location) async throws -> Location {
+    func execute(_ location: Location) async throws {
         try await repository.deleteLocation(location)
     }
 }

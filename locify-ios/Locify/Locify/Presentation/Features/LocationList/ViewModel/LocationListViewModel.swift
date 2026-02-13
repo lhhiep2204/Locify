@@ -36,7 +36,7 @@ extension LocationListViewModel {
 
     func addLocation(_ location: Location) async {
         do {
-            _ = try await locationUseCase.add.execute(location)
+            try await locationUseCase.add.execute(location)
             locations.append(location)
         } catch {
             Logger.error(error.localizedDescription)
@@ -48,8 +48,13 @@ extension LocationListViewModel {
               locations[index] != location else { return }
 
         do {
-            _ = try await locationUseCase.update.execute(location)
-            locations[index] = location
+            try await locationUseCase.update.execute(location)
+
+            if location.id == collection.id {
+                locations[index] = location
+            } else {
+                locations.removeAll { $0.id == location.id }
+            }
         } catch {
             Logger.error(error.localizedDescription)
         }
@@ -57,7 +62,7 @@ extension LocationListViewModel {
 
     func deleteLocation(_ location: Location) async {
         do {
-            _ = try await locationUseCase.delete.execute(location)
+            try await locationUseCase.delete.execute(location)
             locations.removeAll { $0.id == location.id }
         } catch {
             Logger.error(error.localizedDescription)
