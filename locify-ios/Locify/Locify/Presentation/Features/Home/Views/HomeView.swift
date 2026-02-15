@@ -127,7 +127,7 @@ extension HomeView {
                 }
                 .if(viewModel.selectedLocationId != nil) {
                     $0.presentationDetents(
-                        [.small, .fraction(0.90)],
+                        [.small, .medium],
                         selection: $locationDetailDetent
                     )
                 } else: {

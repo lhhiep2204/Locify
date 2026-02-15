@@ -28,12 +28,16 @@ struct CollectionListView: View {
 
     var body: some View {
         Group {
-            if viewModel.collections.isEmpty {
-                EmptyCollectionView {
-                    showAddCollection = true
+            if let collections = viewModel.collections {
+                if collections.isEmpty {
+                    EmptyCollectionView {
+                        showAddCollection = true
+                    }
+                } else {
+                    listView(collections)
                 }
             } else {
-                listView
+                listView([])
             }
         }
         .navigationTitle(Text(CollectionKeys.title))
@@ -116,9 +120,9 @@ struct CollectionListView: View {
 }
 
 extension CollectionListView {
-    private var listView: some View {
+    private func listView(_ collections: [Collection]) -> some View {
         List {
-            ForEach(viewModel.collections) { item in
+            ForEach(collections) { item in
                 NavigationLink(
                     .locationList(collection: item)
                 ) {

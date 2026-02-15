@@ -12,7 +12,7 @@ import Foundation
 class LocationListViewModel {
     private let locationUseCase: LocationUseCases
 
-    private(set) var locations: [Location] = []
+    private(set) var locations: [Location]?
     let collection: Collection
 
     init(
@@ -37,23 +37,23 @@ extension LocationListViewModel {
     func addLocation(_ location: Location) async {
         do {
             try await locationUseCase.add.execute(location)
-            locations.append(location)
+            locations?.append(location)
         } catch {
             Logger.error(error.localizedDescription)
         }
     }
 
     func updateLocation(_ location: Location) async {
-        guard let index = locations.firstIndex(where: { $0.id == location.id }),
-              locations[index] != location else { return }
+        guard let index = locations?.firstIndex(where: { $0.id == location.id }),
+              locations?[index] != location else { return }
 
         do {
             try await locationUseCase.update.execute(location)
 
             if location.id == collection.id {
-                locations[index] = location
+                locations?[index] = location
             } else {
-                locations.removeAll { $0.id == location.id }
+                locations?.removeAll { $0.id == location.id }
             }
         } catch {
             Logger.error(error.localizedDescription)
@@ -63,7 +63,7 @@ extension LocationListViewModel {
     func deleteLocation(_ location: Location) async {
         do {
             try await locationUseCase.delete.execute(location)
-            locations.removeAll { $0.id == location.id }
+            locations?.removeAll { $0.id == location.id }
         } catch {
             Logger.error(error.localizedDescription)
         }

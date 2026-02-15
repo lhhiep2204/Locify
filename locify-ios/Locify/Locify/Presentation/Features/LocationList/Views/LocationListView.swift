@@ -30,12 +30,16 @@ struct LocationListView: View {
 
     var body: some View {
         Group {
-            if viewModel.locations.isEmpty {
-                EmptyLocationView(collectionName: viewModel.collection.name) {
-                    showAddLocation = true
+            if let locations = viewModel.locations {
+                if locations.isEmpty {
+                    EmptyLocationView(collectionName: viewModel.collection.name) {
+                        showAddLocation = true
+                    }
+                } else {
+                    listView(locations)
                 }
             } else {
-                listView
+                listView([])
             }
         }
         .navigationTitle(Text(viewModel.collection.name))
@@ -119,9 +123,9 @@ struct LocationListView: View {
 }
 
 extension LocationListView {
-    private var listView: some View {
+    private func listView(_ locations: [Location]) -> some View {
         List {
-            ForEach(viewModel.locations) { item in
+            ForEach(locations) { item in
                 locationItemView(item)
                     .swipeActions(edge: .trailing) {
                         deleteButtonView(item)
@@ -151,7 +155,7 @@ extension LocationListView {
                 selectLocation(
                     viewModel.collection,
                     location.id,
-                    viewModel.locations
+                    viewModel.locations ?? []
                 )
             }
     }

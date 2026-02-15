@@ -41,26 +41,22 @@ protocol AppleMapServiceProtocol: AnyObject {
 final class AppleMapService: NSObject, AppleMapServiceProtocol {
     static let shared = AppleMapService()
 
-    private let completer: MKLocalSearchCompleter
+    private lazy var completer = MKLocalSearchCompleter()
     private var search: MKLocalSearch?
-    private var completionByLocationID: [String: MKLocalSearchCompletion] = [:]
+    private var completionByLocationID: [UUID: MKLocalSearchCompletion] = [:]
 
     private let querySubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
 
     private var suggestions: CheckedContinuation<[Location], Never>?
 
-    var locationId = [String]()
-
     override init() {
-        completer = MKLocalSearchCompleter()
         super.init()
         completer.delegate = self
         completer.resultTypes = [.address, .pointOfInterest, .physicalFeature]
 
         querySubject
-            .removeDuplicates()
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .sink { [weak self] text in
                 guard let self else { return }
                 completer.queryFragment = text
@@ -111,10 +107,83 @@ extension AppleMapService {
         name: String?,
         for coordinate: CLLocationCoordinate2D
     ) async throws -> Location {
-        let location = CLLocation(
+        guard CLLocationCoordinate2DIsValid(coordinate) else {
+            throw LocationError.geocodingFailed("Invalid coordinate.")
+        }
+
+        var metadata: LocationMetadata
+
+        // Strategy 1: If MapFeature has a name, try MKLocalSearch for richer metadata
+        if let name = name, !name.isEmpty {
+            let searchRequest = MKLocalSearch.Request()
+            searchRequest.naturalLanguageQuery = name
+            searchRequest.region = MKCoordinateRegion(
+                center: coordinate,
+                span: .init(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            )
+
+            let search = MKLocalSearch(request: searchRequest)
+
+            if let response = try? await search.start(),
+               let firstItem = response.mapItems.first {
+
+                // Validate: Is this result near the user's tap? (within 500m)
+                let resultLocation = firstItem.location
+                let distance = CLLocation(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                ).distance(from: resultLocation)
+
+                if distance < 500 {
+                    metadata = .init(
+                        name: firstItem.name ?? name,
+                        address: firstItem.address?.fullAddress ?? .empty,
+                        placeId: firstItem.identifier?.rawValue
+                    )
+                } else {
+                    Logger.debug("MKLocalSearch result too far (\(distance)m), using reverse geocoding")
+                    metadata = try await reverseGeocodeMetadata(for: coordinate, fallbackName: name)
+                }
+            } else {
+                // Search failed - fall back to reverse geocoding
+                metadata = try await reverseGeocodeMetadata(for: coordinate, fallbackName: name)
+            }
+        } else {
+            // No name provided - use reverse geocoding
+            metadata = try await reverseGeocodeMetadata(for: coordinate, fallbackName: nil)
+        }
+
+        return .init(
+            id: Constants.mapSelectionId,
+            collectionId: UUID(),
+            placeId: metadata.placeId,
+            name: metadata.name,
+            displayName: .empty,
+            address: metadata.address,
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
+    }
+
+    /// Performs reverse geocoding to extract metadata from a coordinate without replacing it.
+    ///
+    /// This helper method converts a coordinate into human-readable metadata (name, address, place ID)
+    /// using MapKit's reverse geocoding service. Unlike the full `getSelectedMapLocationInfo`,
+    /// this method is specifically designed to extract **metadata only**, ensuring the original
+    /// coordinate is never replaced by the geocoding service's snapped coordinate.
+    ///
+    /// - Parameters:
+    ///   - coordinate: The coordinate to reverse geocode. Must be a valid CLLocationCoordinate2D
+    ///                 (validated by caller using `CLLocationCoordinate2DIsValid`).
+    ///   - fallbackName: An optional name to use if reverse geocoding returns no name.
+    ///                   Typically provided from `MapFeature.title` when available.
+    /// - Returns: A `LocationMetadata` struct containing the place name, address, and place ID.
+    /// - Throws: `LocationError.geocodingFailed` if the geocoding request fails or returns no results.
+    private func reverseGeocodeMetadata(
+        for coordinate: CLLocationCoordinate2D,
+        fallbackName: String?
+    ) async throws -> LocationMetadata {
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
 
         guard let request = MKReverseGeocodingRequest(location: location),
               let item = try await request.mapItems.first else {
@@ -122,14 +191,9 @@ extension AppleMapService {
         }
 
         return .init(
-            id: Constants.mapSelectionId,
-            collectionId: UUID(),
-            placeId: item.identifier?.rawValue,
-            name: name ?? item.name ?? .empty,
-            displayName: .empty,
+            name: fallbackName ?? item.name ?? .empty,
             address: item.address?.fullAddress ?? .empty,
-            latitude: item.location.coordinate.latitude,
-            longitude: item.location.coordinate.longitude
+            placeId: item.identifier?.rawValue
         )
     }
 }
@@ -175,9 +239,11 @@ extension AppleMapService {
         suggestions?.resume(returning: [])
         suggestions = nil
 
+        completer.queryFragment = .empty
+
         querySubject.send(query)
 
-        return await withCheckedContinuation { (continuation: CheckedContinuation<[Location], Never>) in
+        return await withCheckedContinuation { continuation in
             suggestions = continuation
         }
     }
@@ -191,7 +257,7 @@ extension AppleMapService {
     /// - Returns: The first resolved `Location` with coordinates, or `nil` if none found.
     func search(for location: Location) async -> Location? {
         do {
-            guard let completion = completionByLocationID[location.id.uuidString] else {
+            guard let completion = completionByLocationID[location.id] else {
                 return nil
             }
 
@@ -222,7 +288,6 @@ extension AppleMapService: MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         var locations = [Location]()
         completionByLocationID = [:]
-        locationId = []
 
         for completion in completer.results {
             let id = UUID()
@@ -238,8 +303,7 @@ extension AppleMapService: MKLocalSearchCompleterDelegate {
                     longitude: .zero
                 )
             )
-            locationId.append(id.uuidString)
-            completionByLocationID[id.uuidString] = completion
+            completionByLocationID[id] = completion
         }
 
         if let continuation = suggestions {
