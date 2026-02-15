@@ -14,8 +14,7 @@ struct HomeView: View {
     @State private var viewModel: HomeViewModel
 
     @State private var showLocationDetail: Bool = true
-    @State private var locationDetailDetent: PresentationDetent = .small
-    @State private var locationDetailHeight: CGFloat = locationDetailMinHeight
+    @State private var locationDetailHeight: CGFloat = .zero
 
     @State private var showCollectionListView: Bool = false
     @State private var showSearchView: Bool = false
@@ -33,7 +32,8 @@ struct HomeView: View {
         )
     }
 
-    private static let locationDetailMinHeight: CGFloat = 300
+    private let locationDetailMinHeight: CGFloat = 350
+    private let locationDetailMaxHeight: CGFloat = 350
 
     init(_ viewModel: HomeViewModel) {
         self.viewModel = viewModel
@@ -131,7 +131,7 @@ extension HomeView {
                 locationDetailContainerView
                     .onChange(of: viewModel.selectedLocationId) {
                         withAnimation(.spring) {
-                            locationDetailHeight = HomeView.locationDetailMinHeight
+                            locationDetailHeight = locationDetailMinHeight
                         }
                     }
             }
@@ -186,11 +186,15 @@ extension HomeView {
 
     private var locationDetailContainerView: some View {
         ConcentricRectangle(corners: .concentric, isUniform: true)
-            .fill(.backgroundPrimary.opacity(0.8))
+            .fill(.backgroundPrimary.opacity(0.7))
             .frame(height: locationDetailHeight)
             .overlay {
                 locationDetailView
             }
+            .glassEffect(
+                .clear,
+                in: ConcentricRectangle(corners: .concentric, isUniform: true)
+            )
             .clipShape(ConcentricRectangle(corners: .concentric, isUniform: true))
             .padding(DSSpacing.large)
             .gesture(
@@ -198,16 +202,16 @@ extension HomeView {
                     .onChanged {
                         let height = $0.translation.height
 
-                        if height < 0 {
-                            locationDetailHeight = min(locationDetailHeight + abs(height), 550)
+                        if height < .zero {
+                            locationDetailHeight = min(locationDetailHeight + abs(height), locationDetailMaxHeight + 50)
                         } else {
-                            locationDetailHeight = max(locationDetailHeight - abs(height), 200)
+                            locationDetailHeight = max(locationDetailHeight - abs(height), locationDetailMinHeight - 50)
                         }
                     }
                     .onEnded {
                         let height = $0.translation.height
                         withAnimation(.spring) {
-                            locationDetailHeight = height > 0 ? 250 : 500
+                            locationDetailHeight = height > .zero ? locationDetailMinHeight : locationDetailMaxHeight
                         }
                     }
             )
