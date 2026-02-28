@@ -54,7 +54,7 @@ Locify allows users to manage locations and collections in both online and offli
 - **Description**: Create a new collection or location for the authenticated user (after login). If not logged in, store locally.
 - **Process**:
   1. If the user is logged in:
-     - Client generates a UUID for the new record and sends a POST request (e.g., `POST /collections` or `POST /collections/:collectionId/locations`) with the Firebase `Authorization` token.
+     - Client generates a UUID for the new record and sends a POST request (e.g., `POST /collections` or `POST /locations`) with the Firebase `Authorization` token.
      - For locations, image selection is enabled, and images are uploaded to Firebase Storage, with URLs included in the request.
      - Server validates the token, processes the request, and stores the record in the database with `sync_status: synced`.
      - Server returns the created record with server-generated timestamps.
@@ -67,7 +67,7 @@ Locify allows users to manage locations and collections in both online and offli
 - **Description**: Update an existing collection or location for the authenticated user (after login). If not logged in, store locally.
 - **Process**:
   1. If the user is logged in:
-     - Client sends a PATCH request (e.g., `PATCH /collections/:id` or `PATCH /locations/:id`) with the Firebase `Authorization` token, including updated fields and `sync_status: pendingUpdate`.
+     - Client sends a PUT request (e.g., PUT /collections or PUT /locations) with the Firebase Authorization token, including the full resource payload and `sync_status: pendingUpdate` (idempotent update).
      - For locations, image selection is enabled, and new images are uploaded to Firebase Storage, with updated URLs included in the request.
      - Server validates the token, checks `updated_at` for conflicts, and updates the record with `sync_status: synced`.
      - Server returns the updated record.
@@ -133,19 +133,19 @@ Locify allows users to manage locations and collections in both online and offli
   3. The user manually triggers synchronization via the Settings screen (online).
 - **Process**:
   1. **Login**:
-     - After login, the client sends all local records with `sync_status: pendingCreate`, `pendingUpdate`, or `pendingDelete` to the server using batch requests (up to 50 records per request).
+     - After login, the client sends all local records sequentially, processing up to 50 records per sync session, using individual API requests (POST, PUT, DELETE) per record with exponential backoff on failure (initial delay 1s, max delay 60s).
      - If logged in with a different account from the previous session, the client shows a dialog: “Do you want to sync local data (X collections, Y locations) to the new account or discard it?” with “Sync” and “Discard” options.
      - If “Sync” is selected, local data is sent to the server with the new `user_id`. If “Discard” is selected, local data is cleared, and the client fetches server data for the new `user_id`.
      - For images/icons, the client uploads local files (e.g., `file://`) to Firebase Storage and updates records with the new URLs before sending to the server.
      - Server processes the requests, updates `sync_status` to `synced`, and returns updated records.
      - Client updates local storage with the returned records.
   2. **Network Available**:
-     - When the app detects network connectivity, it sends all pending changes to the server using batch requests.
+     - When the app detects network connectivity, it sends all pending changes to the server sequentially, processing up to 50 records per sync session, using individual API requests (POST, PUT, DELETE) per record with exponential backoff on failure (initial delay: 1s, max delay: 60s).
      - If the user is logged out (`isLoggedOut: true`), the app completes the logout by calling `FirebaseAuth.signOut()`, clearing the Firebase token, and updating `isLoggedOut: false`.
      - For images/icons, the client uploads local files and updates records with Firebase Storage URLs.
   3. **Manual Sync**:
-     - Users trigger synchronization via the Settings screen, sending all pending changes to the server.
-     - If sync fails, the app displays a notification: “Sync failed (X collections, Y locations). Please try again.” with a “Retry” button.
+      - Users trigger synchronization via the Settings screen, sending all pending changes to the server sequentially, processing up to 50 records per sync session, using individual API requests (POST, PUT, DELETE) per record with exponential backoff on failure (initial delay: 1s, max delay: 60s).
+      - If sync fails, the app displays a notification: "Sync failed (X collections, Y locations). Please try again." with a "Retry" button.
   4. **Logout**:
      - **Online**: The client attempts to sync unsynced data before logging out. If sync fails, the app displays: “You have unsynced data (X collections, Y locations). Please sync before logging out to avoid data loss.” with options “Sync and Logout” or “Cancel”.
      - **Offline**: The app displays: “You are offline. Logout will be completed when you reconnect. Data will remain saved locally and sync when you log in again.” When the app detects internet connectivity, it calls `FirebaseAuth.signOut()`, removes the Firebase token, updates `isLoggedOut: false`, and shows a notification: “Reconnected. Logout completed.”
@@ -175,9 +175,9 @@ Locify allows users to manage locations and collections in both online and offli
      - Displays a confirmation: “Your account and all associated data have been deleted.”
   2. **Server**:
      - Validates the Firebase token to ensure the request is from the authenticated user.
-     - Queries the `collections` table for all `icon` URLs and the `locations` table for all `image_urls` associated with the `user_id`.
-     - Deletes all identified images from Firebase Storage using the Firebase Admin SDK.
-     - Deletes all records in `collections` and `locations` tables for the `user_id`.
+     - Queries the `collections` table for all `icon` URLs, the `locations` table for all `image_urls`, and the `users` table for `avatar_url` associated with the `user_id`.
+     - Deletes all identified images from Firebase Storage using the Firebase Admin SDK, processing deletions in batches for efficiency.
+     - Uses database transactions to delete all records in `collections`, `locations`, `collection_shares`, and `location_shares` tables for the `user_id`, ensuring data integrity.
      - Deletes the user record from the `users` table and removes the user from Firebase Authentication.
      - Returns a 204 No Content response.
   3. **Error Handling**:

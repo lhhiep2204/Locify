@@ -29,12 +29,12 @@
 ### 1. Main Screen (Map)
 **Purpose**: Default screen displayed on app startup, allowing users to explore, search, save, and share locations.
 **Features**:
-- **Display user location** (Online/Offline): The app determines and displays the current location (requires location permission). Uses Google Maps SDK on both iOS and Android. In offline mode, displays the last known GPS location (if available).
+- **Display user location** (Online/Offline): The app determines and displays the current location (requires location permission). Uses Google Maps SDK (Android) / MapKit or Google Maps SDK (iOS). In offline mode, displays the last known GPS location (if available).
 - **Search for locations** (Online): Users enter a name or address to search for locations, available whether logged in or not. Uses Google Maps SDK search functionality on both iOS and Android. Not available offline.
 - **Location Information Display** (Online/Offline): Shows official name (resolved from Google Maps), custom name (displayName), address, and coordinates of a location. Details are stored locally after being fetched to support offline viewing. Images are displayed if available locally; otherwise, a placeholder image ("Image unavailable offline") is shown.
 - **Save location** (Online/Offline): Users save a location to the list, required to select a collection (from default collections like Restaurant, Cafe, Tourist Attraction, Favorites, or user-created collections). Data is stored locally for offline access and synced with the server after login if not logged in.
 - **Share location** (Online): Users share location details (custom name, official name, address, coordinates) via the system sharing mechanism (iOS or Android), available whether logged in or not. Not available offline.
-- **Navigate** (Online): Provides in-app navigation to the selected location using Google Maps SDK on both iOS and Android, available whether logged in or not. In offline mode, displays a message: "Navigation unavailable offline."
+- **Navigate** (Online): Provides in-app navigation to the selected location using Google Maps SDK (Android) / MapKit or Google Maps SDK (iOS), available whether logged in or not. In offline mode, displays a message: "Navigation unavailable offline."
 
 ### 2. Saved Locations List (Collections)
 **Purpose**: Display a list of location collections, allowing users to manage collections and select a collection to view its location list.
@@ -49,7 +49,7 @@
 **Purpose**: Display all locations within a selected collection, allowing users to view, edit, delete, or share locations.
 **Features**:
 - **Display location list** (Online/Offline): Shows locations with their custom name (displayName), official name, address, and favorite status. Data is stored locally to support offline access. Images are displayed if available locally; otherwise, a placeholder is shown.
-- **Edit location** (Online/Offline): Users edit location details (custom name (displayName), official name, address, coordinates, description, notes, tags, favorite status, collection). Changes are stored locally and synced with the server after login if not logged in. Image selection is only available when logged in; otherwise, a message is displayed: "Please log in to add or remove images."
+- **Edit location** (Online/Offline): Users edit location details (custom name (displayName), official name, address, coordinates, category, notes, tags, favorite status, collection). Changes are stored locally and synced with the server after login if not logged in. Image selection is only available when logged in; otherwise, a message is displayed: "Please log in to add or remove images."
 - **Delete location** (Online/Offline): Users delete a location, with changes stored locally as `pendingDelete`. Local images (e.g., `file://`) are deleted immediately to free device storage. The changes are synced with the server after login if not logged in.
 - **Mark/unmark favorite** (Online/Offline): Users toggle the favorite status, stored locally and synced after login if not logged in.
 - **Share location** (Online): Users share location details (custom name, official name, address, coordinates) via the system sharing mechanism (iOS or Android), available whether logged in or not. Not available offline.
@@ -60,7 +60,7 @@
 **Features**:
 - **Search or manual entry** (Online): Users search for a location by name/address or manually enter coordinates (Google Maps SDK). In offline mode, users can only manually enter details, and a message is displayed: "Search unavailable offline."
 - **Select collection** (Online/Offline): Users select a collection (default or user-created) or create a new one.
-- **Enter details** (Online/Offline): Users enter custom name (displayName), official name (required), address, description, notes, tags, and favorite status. Image selection is only available when logged in; otherwise, a message is displayed: "Please log in to add or remove images."
+- **Enter details** (Online/Offline): Users enter custom name (displayName), official name (required), address, category, notes, tags, and favorite status. Image selection is only available when logged in; otherwise, a message is displayed: "Please log in to add or remove images."
 - **Save location** (Online/Offline): The location is saved to local storage with `sync_status: pendingCreate` and synced with the server after login if not logged in. Offline images, when logged in, are stored in temporary storage (e.g., `file://`).
 
 ### 5. Settings Screen
@@ -98,19 +98,19 @@
 - Users access the Add Location Screen from the Main Screen or Saved Locations List.
 - Users search for a location (online) or manually enter details (online/offline).
 - Users select a collection or create a new one.
-- Users enter details (custom name (displayName), official name (required), address, description, notes, tags, favorite status). Image selection is only available when logged in.
+- Users enter details (custom name (displayName), official name (required), address, category, notes, tags, favorite status). Image selection is only available when logged in.
 - The location is saved, stored locally for offline access and synced with the server after login if not logged in.
 
 ### 4. Manage Collections and Locations
 - Users view the collection list with the number of locations per collection, retrieved from local storage (online/offline when not logged in; online synced data when logged in).
-- Users create, edit, or delete collections (online/offline). When deleting a collection with locations, the app prompts to select a replacement collection. Changes are stored locally and synced with the server after login if not logged in. Offline icons are stored in temporary storage.
+- Users create, edit, or delete collections (online/offline). When deleting a collection with locations, the app shows a confirmation dialog: 'This will also delete all X locations inside. This action cannot be undone. Continue?' with Delete and Cancel options. Changes are stored locally and synced with the server after login if not logged in. Offline icons are stored in temporary storage.
 - Select a collection to view its location list, retrieved from local storage (online/offline when not logged in; online synced data when logged in).
-- In the location list, users view, edit (including changing custom name (displayName), official name, address, coordinates, description, notes, tags, favorite status, collection; image selection only available when logged in), delete, mark/unmark as favorite, or share locations via the system sharing mechanism (iOS or Android; sharing online only, available whether logged in or not). When not logged in, the image selection option is disabled, and a message is displayed: "Please log in to add or remove images." Changes to collections or locations are stored locally and synced after login if not logged in. Offline images, when logged in, are stored in temporary storage.
-- Select a location to view on the map (online: dynamic map, available whether logged in or not; offline: displays a message "Map unavailable offline" and shows only location details; Google Maps SDK on both iOS and Android). Images are displayed if available locally; otherwise, a placeholder is shown.
+- In the location list, users view, edit (including changing custom name (displayName), official name, address, coordinates, category, notes, tags, favorite status, collection; image selection only available when logged in), delete, mark/unmark as favorite, or share locations via the system sharing mechanism (iOS or Android; sharing online only, available whether logged in or not). When not logged in, the image selection option is disabled, and a message is displayed: "Please log in to add or remove images." Changes to collections or locations are stored locally and synced after login if not logged in. Offline images, when logged in, are stored in temporary storage.
+- Select a location to view on the map (online: dynamic map, available whether logged in or not; offline: displays a message "Map unavailable offline" and shows only location details; Google Maps SDK (Android) / MapKit or Google Maps SDK (iOS)). Images are displayed if available locally; otherwise, a placeholder is shown.
 
 ### 5. Navigation
 - Users select a location from the map or list.
-- The app provides in-app navigation to the location using Google Maps SDK on both iOS and Android (online only, available whether logged in or not). In offline mode, displays a message: "Navigation unavailable offline."
+- The app provides in-app navigation to the location using Google Maps SDK (Android) / MapKit or Google Maps SDK (iOS) (online only, available whether logged in or not). In offline mode, displays a message: "Navigation unavailable offline."
 
 ### 6. Login/Registration and Data Sync
 - Users access the Login/Registration screen from the Settings screen.

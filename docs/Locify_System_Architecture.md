@@ -17,7 +17,7 @@
 ---
 
 ## System Overview
-Locify is a cross-platform application (iOS, Android, and backend) designed to allow users to save and manage locations, supporting both online and offline modes. The system uses a client-server architecture with Firebase for authentication and storage, a PostgreSQL database for structured data, and local storage for offline support. The backend is built with Java/Spring Boot, while both the iOS and Android apps use Swift and Kotlin, respectively, with Google Maps SDK for map functionalities.
+Locify is a cross-platform application (iOS, Android, and backend) designed to allow users to save and manage locations, supporting both online and offline modes. The system uses a client-server architecture with Firebase for authentication and storage, a PostgreSQL database for structured data, and local storage for offline support. The backend is built with Java/Spring Boot, while both the iOS and Android apps use Swift and Kotlin, respectively, with MapKit or Google Maps SDK for maps functionalities.
 
 Key features:
 - **Online/Offline Support**: Users can save, edit, and delete locations and collections offline, with data syncing when online.
@@ -29,7 +29,7 @@ Key features:
 
 ## Components
 1. **Client Applications**:
-   - **iOS App**: Built with Swift, using Google Maps SDK for maps and Firebase SDK for authentication/storage.
+   - **iOS App**: Built with Swift, using MapKit or Google Maps SDK for maps and Firebase SDK for authentication/storage.
    - **Android App**: Built with Kotlin, using Google Maps SDK and Firebase SDK.
    - **Local Storage**: SwiftData (iOS) and Room (Android) for caching data and supporting offline operations.
 2. **Backend Service**:
@@ -38,7 +38,8 @@ Key features:
    - **Firebase Authentication**: Manages user authentication and token verification.
    - **Firebase Storage**: Stores images and collection icons, managed by clients for uploads and by the backend for deletions.
 3. **External Services**:
-   - **Google Maps SDK**: Provides map rendering, search, and navigation for both iOS and Android.
+   - **Google Maps SDK**: Map rendering, search, navigation for Android and as an option for iOS.
+   - **MapKit**: Default map provider for iOS, switchable to Google Maps SDK via Settings.
 
 ---
 
@@ -103,7 +104,7 @@ sequenceDiagram
     Note over Client: User logs in or network available
     Client->>LocalDB: Query unsynced records
     LocalDB-->>Client: Return records with sync_status
-    Note over Client: Send batch requests
+    Note over Client: Send sequential individual requests
     Client->>API: Send pendingCreate, pendingUpdate, pendingDelete
     API->>DB: Validate and process changes
     DB-->>API: Update records, set sync_status: synced
@@ -119,7 +120,7 @@ sequenceDiagram
 
 **Key Points**:
 - Synchronization occurs after login, when network connectivity is restored, or manually triggered by the user.
-- The client sends batch requests (up to 50 records) with `sync_status: pendingCreate`, `pendingUpdate`, or `pendingDelete`.
+- The client sends individual API requests **sequentially** (up to 50 records per sync session) with `sync_status`: `pendingCreate`, `pendingUpdate`, or `pendingDelete`, using exponential backoff on failure (initial delay: 1s, max delay: 60s).
 - The server uses `updated_at` to resolve conflicts, rejecting older changes with an `E008` error.
 - Synced records are updated in local storage with `sync_status: synced`.
 
@@ -198,7 +199,8 @@ sequenceDiagram
 - When logged in, images are uploaded to Firebase Storage by the client when online or stored locally (e.g., `file://`) when offline.
 - Image URLs are updated in local storage and synced with the server.
 - Offline images are marked as pending upload and processed when online.
-- For individual image deletions (e.g., editing location/collection) or location deletions, the client deletes images from Firebase Storage using the Firebase SDK. Offline, local image files (e.g., `file://`) are deleted immediately to free device storage.
+- For individual image deletions during editing (e.g., updating a location's images or a collection's icon), the **client** deletes images from Firebase Storage using the Firebase SDK. Offline, local image files (e.g., `file://`) are deleted immediately to free device storage.
+- For **location deletions** and **collection deletions**, the **backend** queries the database for associated image URLs and deletes them from Firebase Storage using the Firebase Admin SDK before removing database records.
 - For collection deletions, the backend queries the database for the collection’s icon URL and all image URLs of associated locations, then deletes them from Firebase Storage before removing database records.
 - During user deletion, the backend queries the database for all image URLs associated with the user (including `avatar_url` for the user profile) and deletes them from Firebase Storage before removing database records.
 
@@ -250,7 +252,7 @@ graph LR
 - **Client Interaction**:
   - iOS and Android clients send HTTP requests to the **API Server** for CRUD operations on collections and locations.
   - Clients authenticate using **Firebase Authentication**, obtaining tokens for secure API requests.
-  - Clients upload and delete images/icons directly to/from **Firebase Storage** using the Firebase Storage SDK for individual location updates, location deletions, or collection icon updates (excluding collection deletions), but only when logged in.
+  - Clients upload and delete images/icons directly to/from Firebase Storage using the Firebase Storage SDK for **individual location/collection edits** (e.g., adding, replacing, or removing specific images during an update), but only when logged in.
   - Offline data is cached in **Local Storage** (SwiftData for iOS, Room for Android), with local image/icon files (e.g., `file://`) deleted immediately upon marking `pendingDelete` or `pendingUpdate` to free device storage.
 - **Backend Interaction**:
   - The **API Server** processes requests, queries the **PostgreSQL** database, and verifies tokens via **Firebase Authentication**.
