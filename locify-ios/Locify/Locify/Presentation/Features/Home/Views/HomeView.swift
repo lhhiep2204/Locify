@@ -148,8 +148,8 @@ extension HomeView {
                 locations: viewModel.locationList.filter {
                     $0.id != Constants.myLocationId && $0.id != Constants.mapSelectionId
                 }
-            ) { location in
-                viewModel.selectLocation(location)
+            ) { name, coordinate in
+                viewModel.handleMapFeatureSelected(name: name, coordinate: coordinate)
             }
             topView
         }
@@ -248,5 +248,5 @@ extension HomeView {
 }
 
 #Preview {
-    HomeView(AppContainer.shared.makeHomeViewModel())
+    HomeView(AppContainer().makeHomeViewModel())
 }

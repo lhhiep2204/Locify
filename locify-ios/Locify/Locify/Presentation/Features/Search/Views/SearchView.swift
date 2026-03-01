@@ -12,10 +12,18 @@ struct SearchView: View {
 
     @FocusState private var editing: Bool
 
+    @State private var viewModel: SearchViewModel
     @State private var textSearch: String = .empty
-    @State private var searchResults: [Location] = []
 
-    var onSelect: (Location) -> Void
+    private let onSelect: (Location) -> Void
+
+    init(
+        _ viewModel: SearchViewModel,
+        onSelect: @escaping (Location) -> Void
+    ) {
+        self.viewModel = viewModel
+        self.onSelect = onSelect
+    }
 
     var body: some View {
         NavigationStack {
@@ -48,9 +56,7 @@ extension SearchView {
             .image(.appSystemIcon(.search))
             .focused($editing)
             .onChange(of: textSearch) {
-                Task {
-                    searchResults = await AppleMapService.shared.suggestions(for: textSearch)
-                }
+                Task { await viewModel.search(query: textSearch) }
             }
 
             searchResultView
@@ -60,7 +66,7 @@ extension SearchView {
 
     private var searchResultView: some View {
         List {
-            ForEach(searchResults) { item in
+            ForEach(viewModel.searchResults) { item in
                 VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
                     DSText(
                         item.name,
@@ -78,8 +84,7 @@ extension SearchView {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     Task {
-                        let location = await AppleMapService.shared.search(for: item)
-                        guard let location else { return }
+                        guard let location = await viewModel.selectLocation(item) else { return }
 
                         onSelect(location)
                         dismiss()
@@ -92,5 +97,5 @@ extension SearchView {
 }
 
 #Preview {
-    SearchView { _ in }
+    SearchView(AppContainer().makeSearchViewModel()) { _ in }
 }

@@ -42,6 +42,7 @@ final class LocationContainer {
     init(
         appleMapService: AppleMapServiceProtocol,
         locationManager: LocationManagerProtocol,
+        swiftDataContainer: SwiftDataContainer,
         localDataSource: LocationLocalDataSourceProtocol? = nil,
         locationMapper: LocationMapping = LocationMapper(),
         repository: LocationRepositoryProtocol? = nil
@@ -49,10 +50,8 @@ final class LocationContainer {
         self.appleMapService = appleMapService
         self.locationManager = locationManager
 
-        let swiftDataManager = SwiftDataContainer.shared.makeMainManager()
-
         self.localDataSource = localDataSource ?? LocationLocalDataSource(
-            swiftDataManager: swiftDataManager
+            swiftDataManager: swiftDataContainer.makeMainManager()
         )
 
         self.locationMapper = locationMapper
@@ -68,6 +67,7 @@ final class LocationContainer {
         HomeViewModel(
             getUserLocationUseCase: getUserLocationUseCase,
             locationUseCase: useCases,
+            appleMapService: appleMapService,
             locationManager: locationManager
         )
     }
@@ -81,5 +81,9 @@ final class LocationContainer {
             fetchCollectionsUseCase: collectionContainer.fetchUseCase,
             addCollectionUseCase: collectionContainer.addUseCase
         )
+    }
+
+    func makeSearchViewModel() -> SearchViewModel {
+        SearchViewModel(mapService: appleMapService)
     }
 }

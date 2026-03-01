@@ -178,7 +178,7 @@ extension EditLocationView {
             MapView(
                 selectedLocation: .constant(location),
                 locations: [location]
-            ) { _ in }
+            ) { _, _ in }
                 .allowsHitTesting(false)
                 .aspectRatio(2/1, contentMode: .fit)
                 .cornerRadius(DSRadius.xxLarge)
@@ -305,7 +305,7 @@ extension EditLocationView {
 
 #Preview {
     EditLocationView(
-        AppContainer.shared.makeEditLocationViewModel(),
+        AppContainer().makeEditLocationViewModel(),
         editMode: .add,
         locationToSave: .mock
     ) { _ in }

@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 /// Protocol for SwiftData operations to enable testing and abstraction.
-protocol SwiftDataManaging {
+protocol SwiftDataManagerProtocol {
     func fetch<T: PersistentModel>(_ descriptor: FetchDescriptor<T>) throws -> [T]
     func fetchOne<T: PersistentModel>(_ descriptor: FetchDescriptor<T>) throws -> T?
     func insert<T: PersistentModel>(_ item: T) throws
@@ -19,7 +19,7 @@ protocol SwiftDataManaging {
 
 /// Manager for handling SwiftData operations.
 /// Centralizes all SwiftData CRUD operations to reduce duplication across data sources.
-final class SwiftDataManager: SwiftDataManaging {
+final class SwiftDataManager: SwiftDataManagerProtocol {
     private let modelContext: ModelContext
 
     init(modelContext: ModelContext) {

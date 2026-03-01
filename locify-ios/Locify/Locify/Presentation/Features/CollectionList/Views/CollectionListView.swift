@@ -173,6 +173,6 @@ extension CollectionListView {
 
 #Preview {
     NavigationStack {
-        CollectionListView(AppContainer.shared.makeCollectionListViewModel())
+        CollectionListView(AppContainer().makeCollectionListViewModel())
     }
 }

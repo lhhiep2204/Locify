@@ -68,7 +68,9 @@ private struct RouteContentView: View {
         case .locationList(let collection):
             LocationListView(container.makeLocationListViewModel(collection: collection))
         case .search(let searchCompletion):
-            SearchView { searchCompletion($0) }
+            SearchView(container.makeSearchViewModel()) {
+                searchCompletion($0)
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 /// An `EnvironmentKey` for injecting the `AppContainer` singleton into the SwiftUI environment.
 struct AppContainerKey: EnvironmentKey {
-    static let defaultValue: AppContainer = .shared
+    static let defaultValue: AppContainer = .init()
 }
 
 /// An `EnvironmentKey` for injecting a dismiss callback for sheets into the SwiftUI environment.

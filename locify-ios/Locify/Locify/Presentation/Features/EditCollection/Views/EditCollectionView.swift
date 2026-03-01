@@ -124,7 +124,7 @@ extension EditCollectionView {
 
 #Preview {
     EditCollectionView(
-        AppContainer.shared.makeEditCollectionViewModel(),
+        AppContainer().makeEditCollectionViewModel(),
         editMode: .add
     ) { _ in }
 }

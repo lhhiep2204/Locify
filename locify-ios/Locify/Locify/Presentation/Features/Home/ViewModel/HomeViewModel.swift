@@ -14,6 +14,7 @@ import Foundation
 class HomeViewModel {
     private let getUserLocationUseCase: GetUserLocationUseCaseProtocol
     private let locationUseCase: LocationUseCases
+    private let appleMapService: AppleMapServiceProtocol
     private let locationManager: LocationManagerProtocol
 
     private(set) var selectedCollection: Collection?
@@ -34,10 +35,12 @@ class HomeViewModel {
     init(
         getUserLocationUseCase: GetUserLocationUseCaseProtocol,
         locationUseCase: LocationUseCases,
+        appleMapService: AppleMapServiceProtocol,
         locationManager: LocationManagerProtocol
     ) {
         self.getUserLocationUseCase = getUserLocationUseCase
         self.locationUseCase = locationUseCase
+        self.appleMapService = appleMapService
         self.locationManager = locationManager
 
         Task {
@@ -100,6 +103,20 @@ extension HomeViewModel {
         selectedLocationId = location.id
         locationList.removeAll(where: \.isTemporary)
         locationList.insert(location, at: 0)
+    }
+
+    func handleMapFeatureSelected(name: String?, coordinate: CLLocationCoordinate2D) {
+        Task {
+            do {
+                let location = try await appleMapService.getSelectedMapLocationInfo(
+                    name: name,
+                    for: coordinate
+                )
+                selectLocation(location)
+            } catch {
+                Logger.error(error.localizedDescription)
+            }
+        }
     }
 
     func clearSelectedLocation() async {

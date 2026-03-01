@@ -21,9 +21,9 @@ protocol LocationLocalDataSourceProtocol {
 
 /// SwiftData implementation of LocationLocalDataSourceProtocol.
 final class LocationLocalDataSource: LocationLocalDataSourceProtocol {
-    private let swiftDataManager: SwiftDataManaging
+    private let swiftDataManager: SwiftDataManagerProtocol
 
-    init(swiftDataManager: SwiftDataManaging) {
+    init(swiftDataManager: SwiftDataManagerProtocol) {
         self.swiftDataManager = swiftDataManager
     }
 

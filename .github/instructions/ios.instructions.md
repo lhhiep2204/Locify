@@ -1,8 +1,8 @@
-# Locify iOS — Instructions (Local-only Phase)
-
 ---
 applyTo: "locify-ios/**"
 ---
+
+# Locify iOS — Instructions (Local-only Phase)
 
 ## 1) Current phase constraints (MUST FOLLOW)
 - Current phase is **Local-only**.
@@ -30,7 +30,10 @@ Use the existing layers: Presentation / Domain / Data / Shared, with dependencie
 ### Presentation
 - SwiftUI Views + ViewModels.
 - Views/ViewModels MUST NOT access SwiftData directly; they call Domain UseCases only.
-- ViewModels update UI state on the main thread (`@MainActor` when appropriate).
+- ViewModels MUST be annotated `@MainActor` at the class level (not per-method). This is required for Swift 6 strict concurrency.
+- ViewModels MUST use `@Observable` (NOT `ObservableObject`/`@Published`). This is the standard for iOS 17+ and required for this project.
+- Error/loading state pattern: expose `var isLoading: Bool = false` and `var errorMessage: String? = nil`; set them inside `do/catch` blocks in Task bodies.
+- In Views, reference the ViewModel as `@State private var viewModel = ...` (NOT `@StateObject` or `@ObservedObject`).
 
 ### Domain
 - Entities + Repository protocols + UseCases (full CRUD).
@@ -46,15 +49,25 @@ Use the existing layers: Presentation / Domain / Data / Shared, with dependencie
 - Do not introduce a new DI framework/pattern.
 
 ## 5) Dependency Injection (follow the repo)
+- `AppContainer` is a `final class`; it uses `lazy var` for feature containers.
 - Composition root is `AppContainer.shared`.
 - `AppContainer` wires feature containers (e.g., collection/location containers) and core services.
 - ViewModels must be created via `AppContainer` / feature container builders (do not instantiate ViewModels directly in Views).
 - When adding a new dependency: wire it into the relevant feature container and expose a builder via `AppContainer` (keep the current synchronous factory style).
+- Naming reference (follow exactly):
+  - Repository protocol: `CollectionRepositoryProtocol`, `LocationRepositoryProtocol`
+  - Repository impl: `LocalCollectionRepository`, `LocalLocationRepository`
+  - UseCase: `FetchCollectionsUseCase`, `CreateCollectionUseCase`, `UpdateCollectionUseCase`, `DeleteCollectionUseCase`
+  - ViewModel: `CollectionListViewModel`, `EditCollectionViewModel`, `LocationListViewModel`, `EditLocationViewModel`
+  - DataSource: `CollectionLocalDataSource`, `LocationLocalDataSource`
+  - Feature container: `CollectionContainer`, `LocationContainer`
 
 ## 6) Swift Concurrency (MANDATORY)
 - Use `async/await` end-to-end (UseCase -> Repository -> LocalDataSource).
 - Never block the main thread; avoid sync-wait.
 - From Views: call ViewModel work using `Task { await ... }`; keep state mutations on MainActor.
+- For data loading on appear: use `.task { await viewModel.load() }` modifier (NOT `.onAppear`).
+- For user actions (button tap): use `Task { await viewModel.doAction() }` inside the action closure.
 
 ## 7) CRUD baseline (Domain contracts)
 When adding a new CRUD feature, provide at least these UseCases:
@@ -83,6 +96,7 @@ Notes:
 - Prefer existing LocalDataSources rather than writing SwiftData queries directly inside repositories.
 - Prefer existing SwiftData managers/containers; do not create a second persistence mechanism in parallel.
 - Keep SwiftData model updates consistent with `@Attribute(.unique) id` behavior.
+- SwiftData `@Model` classes MUST use a `Local` suffix (e.g., `CollectionLocal`, `LocationLocal`) to avoid redeclaration conflicts with identically-named Domain entities.
 
 ## 9) SwiftLint (MUST PASS)
 SwiftLint config is `locify-ios/.swiftlint.yml` and it only includes the `Locify/` path.

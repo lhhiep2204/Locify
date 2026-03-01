@@ -59,10 +59,19 @@ locify-ios
 └── Tests
 ```
 
+### Data layer conventions
+
+`Data/` is split into two sub-folders based on responsibility:
+
+| Folder | Responsibility | Characteristics | Examples |
+|---|---|---|---|
+| `Managers/` | Wrap system resources that manage **ongoing state or lifecycle** | Stateful, long-lived, exposes Combine publishers or AsyncStreams | `LocationManager` (CLLocationManager + auth state), `SwiftDataManager` (ModelContainer lifecycle) |
+| `Services/` | Wrap external APIs for **discrete operations** (request → response) | Stateless interface, async/await, no persistent publishers | `AppleMapService` (geocoding, search), `NotificationService` |
+
 ---
 
 ## Key Components
-- Dependency Injection: `AppContainer` (actor) acts as the composition root and creates ViewModels and their dependencies.
+- Dependency Injection: `AppContainer` acts as the composition root and creates ViewModels and their dependencies.
 - UseCase-driven domain: Presentation calls Domain UseCases; Data implements Domain repository protocols.
 - Offline-first storage: SwiftData stores collections/locations locally; sync logic (when enabled) coordinates local/remote consistency.
 - Map provider abstraction: map interactions are behind protocols/services; provider can be switched in Settings.

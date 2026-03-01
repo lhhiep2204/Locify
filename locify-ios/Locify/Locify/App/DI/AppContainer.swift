@@ -13,22 +13,28 @@ import Foundation
 /// It follows Clean Architecture principles and acts as the single source of truth
 /// for constructing ViewModels and use cases throughout the app.
 final class AppContainer {
-    /// Shared singleton instance.
-    static let shared = AppContainer()
-
     // MARK: - Core Services
-    private lazy var appleMapService: AppleMapServiceProtocol = AppleMapService.shared
-    private lazy var locationManager: LocationManagerProtocol = LocationManager.shared
+    private let appleMapService: AppleMapServiceProtocol
+    private let locationManager: LocationManagerProtocol
+    private let swiftDataContainer = SwiftDataContainer()
 
     // MARK: - Feature Containers
-    private lazy var collectionContainer = CollectionContainer()
+    private lazy var collectionContainer = CollectionContainer(
+        swiftDataContainer: swiftDataContainer
+    )
     private lazy var locationContainer = LocationContainer(
         appleMapService: appleMapService,
-        locationManager: locationManager
+        locationManager: locationManager,
+        swiftDataContainer: swiftDataContainer
     )
 
-    /// Private initializer to enforce singleton usage.
-    private init() {}
+    init(
+        appleMapService: AppleMapServiceProtocol = AppleMapService(),
+        locationManager: LocationManagerProtocol = LocationManager()
+    ) {
+        self.appleMapService = appleMapService
+        self.locationManager = locationManager
+    }
 }
 
 // MARK: - ViewModel Builders
@@ -51,5 +57,9 @@ extension AppContainer {
 
     func makeEditLocationViewModel() -> EditLocationViewModel {
         locationContainer.makeEditLocationViewModel(collectionContainer: collectionContainer)
+    }
+
+    func makeSearchViewModel() -> SearchViewModel {
+        locationContainer.makeSearchViewModel()
     }
 }

@@ -19,9 +19,9 @@ protocol CollectionLocalDataSourceProtocol {
 
 /// SwiftData implementation of CollectionLocalDataSourceProtocol.
 final class CollectionLocalDataSource: CollectionLocalDataSourceProtocol {
-    private let swiftDataManager: SwiftDataManaging
+    private let swiftDataManager: SwiftDataManagerProtocol
 
-    init(swiftDataManager: SwiftDataManaging) {
+    init(swiftDataManager: SwiftDataManagerProtocol) {
         self.swiftDataManager = swiftDataManager
     }
 

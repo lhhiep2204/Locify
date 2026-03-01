@@ -5,18 +5,14 @@
 //  Created by Hoàng Hiệp Lê on 13/2/26.
 //
 
-import Foundation
 import SwiftData
 
 /// Singleton container for SwiftData setup. Used ONLY in the Data layer.
 /// Presentation/Domain layers should never access this directly.
 final class SwiftDataContainer {
-    static let shared = SwiftDataContainer()
+    private let modelContainer: ModelContainer
 
-    let modelContainer: ModelContainer
-    let mainContext: ModelContext
-
-    private init() {
+    init() {
         do {
             let schema = Schema(
                 [
@@ -34,25 +30,18 @@ final class SwiftDataContainer {
                 for: schema,
                 configurations: [modelConfiguration]
             )
-
-            mainContext = ModelContext(modelContainer)
         } catch {
             fatalError("Failed to initialize SwiftData container: \(error)")
         }
     }
 
     /// Create a SwiftDataManager from the main context.
-    func makeMainManager() -> SwiftDataManaging {
-        SwiftDataManager(modelContext: mainContext)
-    }
-
-    /// Create a new background context for background operations.
-    func makeBackgroundContext() -> ModelContext {
-        ModelContext(modelContainer)
+    func makeMainManager() -> SwiftDataManagerProtocol {
+        SwiftDataManager(modelContext: ModelContext(modelContainer))
     }
 
     /// Create a SwiftDataManager for background operations.
-    func makeBackgroundManager() -> SwiftDataManaging {
-        SwiftDataManager(modelContext: makeBackgroundContext())
+    func makeBackgroundManager() -> SwiftDataManagerProtocol {
+        SwiftDataManager(modelContext: ModelContext(modelContainer))
     }
 }

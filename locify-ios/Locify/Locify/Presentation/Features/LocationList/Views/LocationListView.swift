@@ -201,7 +201,7 @@ extension LocationListView {
 #Preview {
     NavigationStack {
         LocationListView(
-            AppContainer.shared.makeLocationListViewModel(collection: .mock)
+            AppContainer().makeLocationListViewModel(collection: .mock)
         )
     }
 }

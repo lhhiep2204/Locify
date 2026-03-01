@@ -9,11 +9,13 @@ import SwiftUI
 
 @main
 struct LocifyApp: App {
+    private let appContainer = AppContainer()
     private var router: Router<Route> = .init(root: .home)
 
     var body: some Scene {
         WindowGroup {
             RouterView(router)
+                .environment(\.appContainer, appContainer)
         }
     }
 }

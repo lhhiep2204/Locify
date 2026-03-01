@@ -25,11 +25,6 @@ protocol AppleMapServiceProtocol: AnyObject {
     /// - Throws: `LocationError.geocodingFailed` if no address is found.
     func getSelectedMapLocationInfo(name: String?, for coordinate: CLLocationCoordinate2D) async throws -> Location
 
-    /// Creates an `MKMapItem` from a domain `Location`.
-    /// - Parameter location: The domain `Location` to convert.
-    /// - Returns: An `MKMapItem` representing the location.
-    func makeMapItem(from location: Location) -> MKMapItem
-
     /// Returns debounced autocomplete suggestions for a user-entered query.
     func suggestions(for query: String) async -> [Location]
 
@@ -39,8 +34,6 @@ protocol AppleMapServiceProtocol: AnyObject {
 
 @MainActor
 final class AppleMapService: NSObject, AppleMapServiceProtocol {
-    static let shared = AppleMapService()
-
     private lazy var completer = MKLocalSearchCompleter()
     private var search: MKLocalSearch?
     private var completionByLocationID: [UUID: MKLocalSearchCompletion] = [:]
@@ -113,7 +106,7 @@ extension AppleMapService {
 
         var metadata: LocationMetadata
 
-        // Strategy 1: If MapFeature has a name, try MKLocalSearch for richer metadata
+        // If MapFeature has a name, try MKLocalSearch for richer metadata
         if let name = name, !name.isEmpty {
             let searchRequest = MKLocalSearch.Request()
             searchRequest.naturalLanguageQuery = name
@@ -199,35 +192,6 @@ extension AppleMapService {
 }
 
 extension AppleMapService {
-    /// Creates an `MKMapItem` from a domain `Location`.
-    ///
-    /// This method converts a saved or temporary `Location` into a MapKit
-    /// representation, allowing it to be used for map camera positioning,
-    /// routing, or system interactions.
-    ///
-    /// - Parameter location: The domain `Location` to convert.
-    /// - Returns: An `MKMapItem` representing the location.
-    func makeMapItem(from location: Location) -> MKMapItem {
-        let clLocation = CLLocation(
-            latitude: location.latitude,
-            longitude: location.longitude
-        )
-
-        let mapItem = MKMapItem(
-            location: clLocation,
-            address: .init(
-                fullAddress: location.address,
-                shortAddress: nil
-            )
-        )
-
-        mapItem.name = location.name
-
-        return mapItem
-    }
-}
-
-extension AppleMapService {
     /// Returns debounced autocomplete suggestions for a natural-language query.
     ///
     /// This function routes the query through a Combine-based debounce pipeline to
@@ -238,8 +202,6 @@ extension AppleMapService {
     func suggestions(for query: String) async -> [Location] {
         suggestions?.resume(returning: [])
         suggestions = nil
-
-        completer.queryFragment = .empty
 
         querySubject.send(query)
 

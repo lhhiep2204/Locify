@@ -31,14 +31,13 @@ final class CollectionContainer {
     )
 
     init(
+        swiftDataContainer: SwiftDataContainer,
         localDataSource: CollectionLocalDataSourceProtocol? = nil,
         collectionMapper: CollectionMapping = CollectionMapper(),
         repository: CollectionRepositoryProtocol? = nil
     ) {
-        let swiftDataManager = SwiftDataContainer.shared.makeMainManager()
-
         self.localDataSource = localDataSource ?? CollectionLocalDataSource(
-            swiftDataManager: swiftDataManager
+            swiftDataManager: swiftDataContainer.makeMainManager()
         )
 
         self.collectionMapper = collectionMapper

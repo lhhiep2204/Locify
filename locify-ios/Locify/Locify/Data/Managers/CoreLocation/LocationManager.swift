@@ -77,9 +77,6 @@ enum LocationError: Error, LocalizedError {
 final class LocationManager: NSObject, LocationManagerProtocol {
     // MARK: - Properties
 
-    /// Singleton instance for accessing the location manager.
-    static let shared = LocationManager()
-
     private let locationManager: CLLocationManager
     private let locationSubject = PassthroughSubject<CLLocation, Never>()
     private let authorizationSubject = PassthroughSubject<CLAuthorizationStatus, Never>()
