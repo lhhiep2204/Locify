@@ -42,6 +42,8 @@ final class AppleMapService: NSObject, AppleMapServiceProtocol {
     private var cancellables = Set<AnyCancellable>()
 
     private var suggestions: CheckedContinuation<[Location], Never>?
+    private var lastQuery: String = .empty
+    private var lastSuggestion: [Location] = []
 
     override init() {
         super.init()
@@ -52,7 +54,14 @@ final class AppleMapService: NSObject, AppleMapServiceProtocol {
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .sink { [weak self] text in
                 guard let self else { return }
-                completer.queryFragment = text
+
+                if text == lastQuery {
+                    suggestions?.resume(returning: lastSuggestion)
+                    suggestions = nil
+                } else {
+                    lastQuery = text
+                    completer.queryFragment = text
+                }
             }
             .store(in: &cancellables)
     }
@@ -275,6 +284,7 @@ extension AppleMapService: MKLocalSearchCompleterDelegate {
         }
 
         suggestions = nil
+        lastSuggestion = locations
         continuation.resume(returning: locations)
     }
 
