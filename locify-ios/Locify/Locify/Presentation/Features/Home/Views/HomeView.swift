@@ -23,7 +23,7 @@ struct HomeView: View {
 
     @State private var showDeleteAlert: Bool = false
 
-    private var collectionRouter: Router<Route> = .init(root: .collectionList)
+    @State private var collectionRouter: Router<Route> = .init(root: .collectionList)
 
     private var selectedLocation: Binding<Location?> {
         .init(
@@ -145,9 +145,7 @@ extension HomeView {
         ZStack {
             MapView(
                 selectedLocation: selectedLocation,
-                locations: viewModel.locationList.filter {
-                    $0.id != Constants.myLocationId && $0.id != Constants.mapSelectionId
-                }
+                locations: viewModel.mapLocations
             ) { name, coordinate in
                 viewModel.handleMapFeatureSelected(name: name, coordinate: coordinate)
             }
@@ -208,9 +206,17 @@ extension HomeView {
             collectionRouter.popToRoot()
         }
         .toolbar(.hidden)
-        .sheet(isPresented: $showCollectionListView) {
-            RouterView(collectionRouter)
-        }
+        .sheet(
+            isPresented: $showCollectionListView,
+            onDismiss: {
+                Task {
+                    await viewModel.refreshFromCollectionListDismissed()
+                }
+            },
+            content: {
+                RouterView(collectionRouter)
+            }
+        )
         .sheet(isPresented: $showSearchView) {
             RouterView(
                 Router<Route>(

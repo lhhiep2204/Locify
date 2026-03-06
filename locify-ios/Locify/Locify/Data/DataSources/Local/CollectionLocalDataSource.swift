@@ -27,7 +27,7 @@ final class CollectionLocalDataSource: CollectionLocalDataSourceProtocol {
 
     func fetchAll() async throws -> [CollectionLocal] {
         let descriptor = FetchDescriptor<CollectionLocal>(
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+            sortBy: [SortDescriptor(\.createdAt, order: .forward)]
         )
         return try swiftDataManager.fetch(descriptor)
     }

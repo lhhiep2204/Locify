@@ -22,24 +22,21 @@ struct LocationDetailView: View {
         ZStack(alignment: .bottomTrailing) {
             Group {
                 if let location {
-                    VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                        topView(location: location)
-                            .padding(.horizontal, DSSpacing.xLarge)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: DSSpacing.large) {
+                            topView(location: location)
+                                .padding(.horizontal, DSSpacing.xLarge)
 
-                        List {
                             infoView(location: location)
-
-                            if let notes = location.notes {
-                                notesView(notes: notes)
-                            }
+                                .padding(.horizontal, DSSpacing.xLarge)
 
                             if !relatedLocations.isEmpty {
+                                Divider()
+                                    .padding(.horizontal, DSSpacing.xLarge)
                                 relatedLocationSection
                             }
                         }
-                        .id(location.id)
-                        .scrollContentBackground(.hidden)
-                        .listSectionSpacing(.compact)
+                        .padding(.top, DSSpacing.xLarge)
                     }
                 } else {
                     VStack(alignment: .center, spacing: DSSpacing.medium) {
@@ -47,10 +44,9 @@ struct LocationDetailView: View {
                             .padding(DSSpacing.large)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .padding(.horizontal, DSSpacing.xLarge)
+                    .padding(.horizontal, DSSpacing.large)
                 }
             }
-            .padding(.top, DSSpacing.xLarge)
 
             bottomView
                 .padding(.horizontal, DSSpacing.large)
@@ -60,15 +56,24 @@ struct LocationDetailView: View {
 
 extension LocationDetailView {
     private func topView(location: Location) -> some View {
-        VStack(alignment: .leading) {
-            HStack(spacing: DSSpacing.small) {
+        VStack(alignment: .leading, spacing: .zero) {
+            HStack(alignment: .top, spacing: DSSpacing.small) {
+                let style = POIStyleHelper.style(for: location.category)
+
+                Image(systemName: style.icon)
+                    .font(.appFont(.medium(.small)))
+                    .frame(width: DSSize.large, height: DSSize.large)
+                    .background(
+                        style.color.opacity(0.15),
+                        in: RoundedRectangle(cornerRadius: DSRadius.large)
+                    )
+
                 DSText(
                     location.displayName.isEmpty ? location.name : location.displayName,
-                    font: .bold(.xLarge)
+                    font: .bold(.large)
                 )
                 .lineLimit(3)
                 .minimumScaleFactor(0.8)
-                .padding(.top, DSSpacing.xSmall)
 
                 Spacer()
 
@@ -91,16 +96,20 @@ extension LocationDetailView {
                         .circularGlassEffect()
                 }
                 .menuOrder(.fixed)
+                .padding(.top, -DSSpacing.small)
 
                 if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
                     closeButtonView
+                        .padding(.top, -DSSpacing.small)
                 }
             }
 
-            DSText(
-                location.address,
-                font: .regular(.small)
-            )
+            if !location.name.isEmpty && !location.displayName.isEmpty {
+                DSText(
+                    location.name,
+                    font: .regular(.small)
+                )
+            }
         }
     }
 
@@ -197,33 +206,26 @@ extension LocationDetailView {
     }
 
     private func infoView(location: Location) -> some View {
-        Section {
-            Group {
-                if !location.name.isEmpty && !location.displayName.isEmpty {
-                    nameView(name: location.name)
-                }
+        VStack(alignment: .leading, spacing: DSSpacing.small) {
+            addressView(address: location.address)
 
-                coordinatesView(
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                )
-            }
-        } header: {
-            DSText(
-                .localized(HomeKeys.details),
-                font: .regular(.small)
+            coordinatesView(
+                latitude: location.latitude,
+                longitude: location.longitude
             )
-            .padding(.bottom, -DSSpacing.small)
+
+            if let notes = location.notes {
+                notesView(notes: notes)
+            }
         }
     }
 
-    private func nameView(name: String) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
-            infoItemView(
-                title: .localized(LocationKeys.name),
-                value: name
-            )
-        }
+    private func addressView(address: String) -> some View {
+        infoItemView(
+            icon: .address,
+            title: .localized(LocationKeys.address),
+            value: address
+        )
     }
 
     private func coordinatesView(
@@ -232,30 +234,11 @@ extension LocationDetailView {
     ) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
-                DSText(
-                    .localized(LocationKeys.coordinates),
-                    font: .bold(.small)
+                infoItemView(
+                    icon: .coordinates,
+                    title: .localized(LocationKeys.coordinates),
+                    value: "\(latitude), \(longitude)"
                 )
-                HStack {
-                    DSText(
-                        .localized(LocationKeys.latitude),
-                        font: .medium(.small)
-                    )
-                    DSText(
-                        String(latitude),
-                        font: .regular(.small)
-                    )
-                }
-                HStack {
-                    DSText(
-                        .localized(LocationKeys.longitude),
-                        font: .medium(.small)
-                    )
-                    DSText(
-                        String(longitude),
-                        font: .regular(.small)
-                    )
-                }
             }
 
             Spacer()
@@ -267,71 +250,93 @@ extension LocationDetailView {
                     .font(.appFont(.regular(.small)))
             }
             .buttonStyle(.plain)
-            .circularGlassEffect()
+            .circularGlassEffect(size: DSSize.xLarge)
         }
     }
 
     private func notesView(notes: String) -> some View {
-        Section {
-            DSText(
-                notes,
-                font: .regular(.medium)
-            )
-        } header: {
-            DSText(
-                .localized(HomeKeys.notes),
-                font: .regular(.small)
-            )
-            .padding(.bottom, -DSSpacing.small)
-        }
+        infoItemView(
+            icon: .note,
+            title: .localized(LocationKeys.notes),
+            value: notes
+        )
     }
 
-    private func infoItemView(title: String, value: String) -> some View {
-        Group {
-            DSText(
-                title,
-                font: .bold(.small)
-            )
-            DSText(
-                value,
-                font: .regular(.medium)
-            )
+    private func infoItemView(
+        icon: DSSystemIcon,
+        title: String,
+        value: String
+    ) -> some View {
+        HStack(alignment: .top, spacing: DSSpacing.medium) {
+            Image.appSystemIcon(icon)
+                .font(.appFont(.medium(.small)))
+            VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
+                DSText(
+                    title,
+                    systemFont: .caption
+                )
+                DSText(
+                    value,
+                    systemFont: .subheadline.bold()
+                )
+            }
         }
     }
 
     private var relatedLocationSection: some View {
-        Section {
-            ForEach(relatedLocations) { item in
+        VStack(alignment: .leading, spacing: DSSpacing.medium) {
+            DSText(
+                .localized(HomeKeys.relatedLocations),
+                font: .regular(.small)
+            )
+            .padding(.bottom, -DSSpacing.small)
+            .padding(.horizontal, DSSpacing.xLarge)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: DSSpacing.medium) {
+                    ForEach(relatedLocations) { item in
+                        relatedLocationItem(item)
+                    }
+                }
+                .padding(.horizontal, DSSpacing.xLarge)
+            }
+        }
+    }
+
+    private func relatedLocationItem(_ location: Location) -> some View {
+        Button {
+            onSelectLocation(location.id)
+        } label: {
+            VStack(alignment: .center, spacing: DSSpacing.medium) {
+                let style = POIStyleHelper.style(for: location.category)
+                Image(systemName: style.icon)
+                    .font(.appFont(.medium(.medium)))
+                    .frame(width: DSSize.huge, height: DSSize.huge)
+                    .background(
+                        style.color.opacity(0.15),
+                        in: RoundedRectangle(cornerRadius: DSRadius.xxLarge)
+                    )
+
                 VStack(alignment: .leading, spacing: DSSpacing.xSmall) {
                     DSText(
-                        item.displayName.isEmpty ? item.name : item.displayName,
-                        font: .medium(.medium)
+                        location.displayName.isEmpty ? location.name : location.displayName,
+                        systemFont: .caption.weight(.semibold)
                     )
                     .lineLimit(1)
 
                     DSText(
-                        item.address,
-                        font: .regular(.small)
+                        location.address,
+                        systemFont: .caption2
                     )
                     .lineLimit(1)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    onSelectLocation(item.id)
-                }
             }
-        } header: {
-            VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                Divider()
-                    .background(.backgroundSecondaryInverted)
-
-                DSText(
-                    .localized(HomeKeys.relatedLocations),
-                    font: .regular(.small)
-                )
-                .padding(.bottom, -DSSpacing.small)
-            }
+            .frame(width: 150)
+            .padding(DSSpacing.medium)
+            .background(
+                .backgroundPrimaryInverted.opacity(0.1),
+                in: RoundedRectangle(cornerRadius: DSRadius.xLarge)
+            )
         }
     }
 

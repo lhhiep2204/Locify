@@ -58,6 +58,7 @@ struct EditLocationView: View {
             viewModel.address = locationToSave.address
             viewModel.latitude = String(locationToSave.latitude)
             viewModel.longitude = String(locationToSave.longitude)
+            viewModel.category = locationToSave.category
             viewModel.notes = locationToSave.notes ?? .empty
         }
     }

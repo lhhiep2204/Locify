@@ -19,7 +19,7 @@ final class LocationLocal {
     var address: String
     var latitude: Double
     var longitude: Double
-    var category: String?
+    var category: String
     var notes: String?
     var imageUrls: [String]?
     var tags: [String]?
@@ -37,7 +37,7 @@ final class LocationLocal {
         address: String,
         latitude: Double,
         longitude: Double,
-        category: String? = nil,
+        category: String,
         notes: String? = nil,
         imageUrls: [String]? = nil,
         tags: [String]? = nil,

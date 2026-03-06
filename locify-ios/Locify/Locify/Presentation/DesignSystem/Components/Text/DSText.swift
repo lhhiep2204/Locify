@@ -13,10 +13,26 @@ struct DSText: View {
     private let title: String
 
     /// The font style used for displaying text.
-    private let font: DSFont
+    private let font: Font
 
     /// The text color.
     private let color: Color
+
+    /// Creates a `DSText` instance with the specified content and styling.
+    ///
+    /// - Parameters:
+    ///   - title: The text content to be displayed.
+    ///   - font: The system font style.
+    ///   - color: The text color. Defaults to `.appColor(.textPrimary)`.
+    init(
+        _ title: String,
+        systemFont font: Font,
+        color: Color = .appColor(.textPrimary)
+    ) {
+        self.title = title
+        self.font = font
+        self.color = color
+    }
 
     /// Creates a `DSText` instance with the specified content and styling.
     ///
@@ -30,13 +46,13 @@ struct DSText: View {
         color: Color = .appColor(.textPrimary)
     ) {
         self.title = title
-        self.font = font
+        self.font = .appFont(font)
         self.color = color
     }
 
     var body: some View {
         Text(title)
-            .font(.appFont(font))
+            .font(font)
             .foregroundStyle(color)
     }
 }

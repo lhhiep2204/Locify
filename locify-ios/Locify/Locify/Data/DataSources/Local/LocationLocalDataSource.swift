@@ -44,7 +44,7 @@ final class LocationLocalDataSource: LocationLocalDataSourceProtocol {
     func fetchByCollectionId(_ collectionId: UUID) async throws -> [LocationLocal] {
         let descriptor = FetchDescriptor<LocationLocal>(
             predicate: #Predicate { $0.collectionId == collectionId },
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+            sortBy: [SortDescriptor(\.createdAt, order: .forward)]
         )
         return try swiftDataManager.fetch(descriptor)
     }
@@ -64,7 +64,7 @@ final class LocationLocalDataSource: LocationLocalDataSourceProtocol {
     func fetchFavorites() async throws -> [LocationLocal] {
         let descriptor = FetchDescriptor<LocationLocal>(
             predicate: #Predicate { $0.isFavorite == true },
-            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+            sortBy: [SortDescriptor(\.updatedAt, order: .forward)]
         )
         return try swiftDataManager.fetch(descriptor)
     }

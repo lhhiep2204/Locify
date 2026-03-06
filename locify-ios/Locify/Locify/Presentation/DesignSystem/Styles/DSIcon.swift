@@ -17,6 +17,7 @@ enum DSIcon: String {
 enum DSSystemIcon: String {
     // MARK: - A
     case add = "plus"
+    case address = "mappin.and.ellipse"
 
     // MARK: - B
     case back = "chevron.backward"
@@ -26,6 +27,7 @@ enum DSSystemIcon: String {
     case chevronDown = "chevron.down"
     case clearText = "multiply.circle.fill"
     case close = "xmark"
+    case coordinates = "location.north.circle.fill"
 
     // MARK: - D
     case delete = "trash"
@@ -44,6 +46,9 @@ enum DSSystemIcon: String {
     // MARK: - M
     case map = "map"
     case more = "ellipsis"
+
+    // MARK: - N
+    case note = "note.text"
 
     // MARK: - P
     case passwordShown = "eye"

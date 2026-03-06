@@ -18,4 +18,6 @@ struct LocationMetadata {
     let address: String
     /// Unique place identifier, if available
     let placeId: String?
+    /// The category or type of the place,
+    let category: String
 }

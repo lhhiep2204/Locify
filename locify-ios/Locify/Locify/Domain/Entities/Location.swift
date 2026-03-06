@@ -17,7 +17,7 @@ struct Location: Identifiable, Equatable, Hashable {
     var address: String
     var latitude: Double
     var longitude: Double
-    var category: String?
+    var category: String
     var notes: String?
     var imageUrls: [String]?
     var tags: [String]?
@@ -36,7 +36,7 @@ struct Location: Identifiable, Equatable, Hashable {
         address: String,
         latitude: Double,
         longitude: Double,
-        category: String? = nil,
+        category: String = .empty,
         notes: String? = nil,
         imageUrls: [String]? = nil,
         tags: [String]? = nil,

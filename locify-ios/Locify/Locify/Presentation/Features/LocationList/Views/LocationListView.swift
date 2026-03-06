@@ -9,7 +9,6 @@ import SwiftUI
 
 struct LocationListView: View {
     @Environment(\.appContainer) private var container
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.dismissSheet) private var dismissSheet
     @Environment(\.selectLocation) private var selectLocation
 
@@ -29,96 +28,84 @@ struct LocationListView: View {
     }
 
     var body: some View {
-        Group {
-            if let locations = viewModel.locations {
-                if locations.isEmpty {
-                    EmptyLocationView(collectionName: viewModel.collection.name) {
-                        showAddLocation = true
+        listView(viewModel.locations)
+            .navigationTitle(Text(viewModel.collection.name))
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismissSheet()
+                    } label: {
+                        Image.appSystemIcon(.close)
                     }
-                } else {
-                    listView(locations)
                 }
-            } else {
-                listView([])
-            }
-        }
-        .navigationTitle(Text(viewModel.collection.name))
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismissSheet()
-                } label: {
-                    Image.appSystemIcon(.close)
-                }
-            }
 
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showAddLocation = true
-                } label: {
-                    Text(CommonKeys.add)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAddLocation = true
+                    } label: {
+                        Text(CommonKeys.add)
+                    }
                 }
             }
-        }
-        .task {
-            if !isFetched {
-                await viewModel.fetchLocations()
-                isFetched.toggle()
-            }
-        }
-        .sheet(isPresented: $showAddLocation) {
-            EditLocationView(
-                container.makeEditLocationViewModel(),
-                editMode: .add,
-                collection: viewModel.collection
-            ) { [weak viewModel] location in
-                guard let viewModel else { return }
-
-                Task { @MainActor in
-                    await viewModel.addLocation(location)
+            .task {
+                if !isFetched {
+                    await viewModel.fetchLocations()
+                    isFetched.toggle()
                 }
             }
-        }
-        .sheet(item: $locationToSave) { location in
-            EditLocationView(
-                container.makeEditLocationViewModel(),
-                editMode: .update,
-                collection: viewModel.collection,
-                locationToSave: location
-            ) { [weak viewModel] updatedLocation in
-
-                guard let viewModel else { return }
-                Task { @MainActor in
-                    await viewModel.updateLocation(updatedLocation)
-                }
-            }
-        }
-        .alert(
-            Text(
-                String(
-                    format: MessageKeys.deleteAlertTitle.rawValue, locationToDelete?.name ?? .empty
-                )
-            ),
-            isPresented: $showDeleteAlert,
-            presenting: locationToDelete
-        ) { location in
-            Button(
-                String.localized(CommonKeys.delete),
-                role: .destructive
-            ) {
-                Task { @MainActor [weak viewModel] in
+            .sheet(isPresented: $showAddLocation) {
+                EditLocationView(
+                    container.makeEditLocationViewModel(),
+                    editMode: .add,
+                    collection: viewModel.collection
+                ) { [weak viewModel] location in
                     guard let viewModel else { return }
 
-                    await viewModel.deleteLocation(location)
+                    Task { @MainActor in
+                        await viewModel.addLocation(location)
+                    }
                 }
             }
-            Button(
-                String.localized(CommonKeys.cancel),
-                role: .cancel
-            ) {}
-        } message: { _ in
-            Text(MessageKeys.deleteAlertMessage.rawValue)
-        }
+            .sheet(item: $locationToSave) { location in
+                EditLocationView(
+                    container.makeEditLocationViewModel(),
+                    editMode: .update,
+                    collection: viewModel.collection,
+                    locationToSave: location
+                ) { [weak viewModel] updatedLocation in
+
+                    guard let viewModel else { return }
+                    Task { @MainActor in
+                        await viewModel.updateLocation(updatedLocation)
+                    }
+                }
+            }
+            .alert(
+                Text(
+                    String(
+                        format: MessageKeys.deleteAlertTitle.rawValue, locationToDelete?.name ?? .empty
+                    )
+                ),
+                isPresented: $showDeleteAlert,
+                presenting: locationToDelete
+            ) { location in
+                Button(
+                    String.localized(CommonKeys.delete),
+                    role: .destructive
+                ) {
+                    Task { @MainActor [weak viewModel] in
+                        guard let viewModel else { return }
+
+                        await viewModel.deleteLocation(location)
+                    }
+                }
+                Button(
+                    String.localized(CommonKeys.cancel),
+                    role: .cancel
+                ) {}
+            } message: { _ in
+                Text(MessageKeys.deleteAlertMessage.rawValue)
+            }
     }
 }
 
@@ -155,7 +142,7 @@ extension LocationListView {
                 selectLocation(
                     viewModel.collection,
                     location.id,
-                    viewModel.locations ?? []
+                    viewModel.locations
                 )
             }
     }

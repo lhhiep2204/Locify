@@ -18,5 +18,5 @@ enum HomeKeys: String, LocalizedKey {
     case notes = "Notes"
 
     // MARK: - R
-    case relatedLocations = "Related Locations"
+    case relatedLocations = "Also in this Collection"
 }

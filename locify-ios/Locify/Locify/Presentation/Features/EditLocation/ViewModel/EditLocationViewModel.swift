@@ -23,6 +23,7 @@ class EditLocationViewModel {
     var address: String = .empty
     var latitude: String = .empty
     var longitude: String = .empty
+    var category: String = .empty
     var notes: String = .empty
 
     private(set) var errorMessage: String = .empty
@@ -39,7 +40,6 @@ class EditLocationViewModel {
 extension EditLocationViewModel {
     func fetchCollections() async {
         do {
-            try await Task.sleep(for: .seconds(0.5))
             collections = try await fetchCollectionsUseCase.execute()
         } catch {
             Logger.error(error.localizedDescription)
@@ -61,6 +61,7 @@ extension EditLocationViewModel {
         address = location.address
         latitude = String(location.latitude)
         longitude = String(location.longitude)
+        category = location.category
     }
 
     func createLocation(completion: (Location?) -> Void) {
@@ -72,6 +73,7 @@ extension EditLocationViewModel {
             address: address,
             latitude: latitude.asDouble,
             longitude: longitude.asDouble,
+            category: category,
             notes: notes.trimmed.isEmpty ? nil : notes
         )
 

@@ -524,11 +524,11 @@ and collection shares. This operation is irreversible.
     - `collection_id`: Must be a valid UUID and exist in `collections`.
     - `place_id`: Optional string (e.g., Google Place ID) if the location came from a provider search.
     - `name`: Maximum 255 characters, must not be empty or null.
-    - `displayName`: Maximum 255 characters, must not be empty or null.
-    - `address`: Maximum 1000 characters (optional).
+    - `displayName`: Maximum 255 characters, must not be null.
+    - `address`: Maximum 1000 characters, must not be empty or null.
     - `latitude`: Must be between -90 and 90. Returns `E003` if violated.
     - `longitude`: Must be between -180 and 180. Returns `E003` if violated.
-    - `category`: Optional string.
+    - `category`: Maximum 255 characters, must not be null.
     - `is_favorite`: Boolean, defaults to `false`.
     - `image_urls`: Array of valid URLs, maximum 10 URLs.
     - `notes`: Maximum 1000 characters (optional).
@@ -627,7 +627,7 @@ and collection shares. This operation is irreversible.
     - Returns `E001` (Invalid input data) if `visibility` is `shared` but `share.permissions` is empty.
     - Returns `E002` (Invalid UUID format) for `id`, `collection_id`, or any `share.permissions[].user_id`.
     - Returns `E003` (Invalid coordinates) if `latitude`/`longitude` is out of range.
-    - Returns `E004` (Missing required field) if `id`, `name`, or `displayName` is missing.
+    - Returns `E004` (Missing required field) if `id`, `name`, `displayName` or `address` is missing.
     - Returns `E005` (Invalid or missing Firebase token) if the token is invalid or missing.
     - Returns `E007` (Resource not found) if `collection_id` does not exist.
     - Returns `E007` (Resource not found) if any `share.permissions[].user_id` does not exist in `users`.

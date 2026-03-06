@@ -83,7 +83,7 @@ Stores all location information saved by the user, including shared locations. T
 | `address`       | TEXT             |                                                  | Address of the location                                  |
 | `latitude`      | DOUBLE PRECISION | NOT NULL                                         | Latitude coordinate (between -90 and 90)                 |
 | `longitude`     | DOUBLE PRECISION | NOT NULL                                         | Longitude coordinate (between -180 and 180)              |
-| `category`      | VARCHAR(255)     |                                                  | Optional category string                                 |
+| `category`      | VARCHAR(255)     |                                                  | Category string                                 |
 | `notes`         | TEXT             |                                                  | Optional notes                                           |
 | `image_urls`    | TEXT[]           |                                                  | Array of URLs for location images                        |
 | `tags`          | TEXT[]           |                                                  | Array of custom tags                                     |

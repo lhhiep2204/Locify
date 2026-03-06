@@ -14,6 +14,7 @@ import Foundation
 class HomeViewModel {
     private let getUserLocationUseCase: GetUserLocationUseCaseProtocol
     private let locationUseCase: LocationUseCases
+    private let fetchCollectionsUseCase: FetchCollectionsUseCaseProtocol
     private let appleMapService: AppleMapServiceProtocol
     private let locationManager: LocationManagerProtocol
 
@@ -32,14 +33,22 @@ class HomeViewModel {
         locationList.filter { $0.id != selectedLocationId }
     }
 
+    var mapLocations: [Location] {
+        locationList.filter {
+            $0.id != Constants.myLocationId && $0.id != Constants.mapSelectionId
+        }
+    }
+
     init(
         getUserLocationUseCase: GetUserLocationUseCaseProtocol,
         locationUseCase: LocationUseCases,
+        fetchCollectionsUseCase: FetchCollectionsUseCaseProtocol,
         appleMapService: AppleMapServiceProtocol,
         locationManager: LocationManagerProtocol
     ) {
         self.getUserLocationUseCase = getUserLocationUseCase
         self.locationUseCase = locationUseCase
+        self.fetchCollectionsUseCase = fetchCollectionsUseCase
         self.appleMapService = appleMapService
         self.locationManager = locationManager
 
@@ -55,6 +64,7 @@ class HomeViewModel {
 
         locationManager.authorizationUpdates
             .dropFirst()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 guard let self else { return }
 
@@ -175,6 +185,35 @@ extension HomeViewModel {
             Logger.error(error.localizedDescription)
         }
     }
+
+    func refreshFromCollectionListDismissed() async {
+        guard let collection = selectedCollection else { return }
+
+        do {
+            let collections = try await fetchCollectionsUseCase.execute()
+
+            guard collections.contains(where: { $0.id == collection.id }) else {
+                await resetToDefault()
+                return
+            }
+
+            let locations = try await locationUseCase.fetch.execute(for: collection.id)
+
+            guard !locations.isEmpty else {
+                await resetToDefault()
+                return
+            }
+
+            locationList = locations
+
+            let selectionStillValid = locations.contains(where: { $0.id == selectedLocationId })
+            if !selectionStillValid {
+                selectedLocationId = locations.first?.id
+            }
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
+    }
 }
 
 extension HomeViewModel {
@@ -189,5 +228,19 @@ extension HomeViewModel {
         Logger.error("Permission denied")
         selectedLocationId = nil
         locationList.removeAll(where: \.isTemporary)
+    }
+
+    private func resetToDefault() async {
+        selectedCollection = nil
+        selectedLocationId = nil
+        locationList.removeAll()
+
+        do {
+            try await requestAndUpdateUserLocation()
+        } catch LocationError.permissionDenied {
+            handlePermissionDenied()
+        } catch {
+            Logger.error(error.localizedDescription)
+        }
     }
 }

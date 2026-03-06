@@ -131,7 +131,8 @@ extension AppleMapService {
                     metadata = .init(
                         name: firstItem.name ?? name,
                         address: firstItem.address?.fullAddress ?? .empty,
-                        placeId: firstItem.identifier?.rawValue
+                        placeId: firstItem.identifier?.rawValue,
+                        category: POIStyleHelper.categoryString(from: firstItem.pointOfInterestCategory)
                     )
                 } else {
                     Logger.debug("MKLocalSearch result too far (\(distance)m), using reverse geocoding")
@@ -154,7 +155,8 @@ extension AppleMapService {
             displayName: .empty,
             address: metadata.address,
             latitude: coordinate.latitude,
-            longitude: coordinate.longitude
+            longitude: coordinate.longitude,
+            category: metadata.category
         )
     }
 
@@ -186,7 +188,8 @@ extension AppleMapService {
         return .init(
             name: fallbackName ?? item.name ?? .empty,
             address: item.address?.fullAddress ?? .empty,
-            placeId: item.identifier?.rawValue
+            placeId: item.identifier?.rawValue,
+            category: POIStyleHelper.categoryString(from: item.pointOfInterestCategory)
         )
     }
 }
@@ -236,7 +239,8 @@ extension AppleMapService {
                     displayName: .empty,
                     address: $0.address?.fullAddress ?? .empty,
                     latitude: $0.location.coordinate.latitude,
-                    longitude: $0.location.coordinate.longitude
+                    longitude: $0.location.coordinate.longitude,
+                    category: POIStyleHelper.categoryString(from: $0.pointOfInterestCategory)
                 )
             }
         } catch {
@@ -248,8 +252,10 @@ extension AppleMapService {
 
 extension AppleMapService: MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        guard let continuation = suggestions else { return }
+
         var locations = [Location]()
-        completionByLocationID = [:]
+        completionByLocationID.removeAll()
 
         for completion in completer.results {
             let id = UUID()
@@ -268,10 +274,8 @@ extension AppleMapService: MKLocalSearchCompleterDelegate {
             completionByLocationID[id] = completion
         }
 
-        if let continuation = suggestions {
-            suggestions = nil
-            continuation.resume(returning: locations)
-        }
+        suggestions = nil
+        continuation.resume(returning: locations)
     }
 
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {

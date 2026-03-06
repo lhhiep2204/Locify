@@ -40,7 +40,7 @@ final class AppContainer {
 // MARK: - ViewModel Builders
 extension AppContainer {
     func makeHomeViewModel() -> HomeViewModel {
-        locationContainer.makeHomeViewModel()
+        locationContainer.makeHomeViewModel(fetchCollectionsUseCase: collectionContainer.fetchUseCase)
     }
 
     func makeCollectionListViewModel() -> CollectionListViewModel {

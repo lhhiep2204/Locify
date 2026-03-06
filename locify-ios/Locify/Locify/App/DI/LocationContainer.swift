@@ -63,10 +63,11 @@ final class LocationContainer {
     }
 
     // MARK: - ViewModel Factories
-    func makeHomeViewModel() -> HomeViewModel {
+    func makeHomeViewModel(fetchCollectionsUseCase: FetchCollectionsUseCaseProtocol) -> HomeViewModel {
         HomeViewModel(
             getUserLocationUseCase: getUserLocationUseCase,
             locationUseCase: useCases,
+            fetchCollectionsUseCase: fetchCollectionsUseCase,
             appleMapService: appleMapService,
             locationManager: locationManager
         )

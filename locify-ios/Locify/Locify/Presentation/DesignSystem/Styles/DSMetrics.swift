@@ -9,8 +9,6 @@ import Foundation
 
 /// Common spacing constants for layout and padding.
 enum DSSpacing {
-    /// zero: 0 - No spacing
-    static let zero: CGFloat = 0
     /// xSmall: 4 - For fine details or tight layouts
     static let xSmall: CGFloat = 4
     /// small: 8 - Standard spacing between small UI elements
@@ -29,8 +27,6 @@ enum DSSpacing {
 
 /// Corner radius constants for rounded UI components.
 enum DSRadius {
-    /// zero: 0 - No corner radius
-    static let zero: CGFloat = 0
     /// small: 4 - Subtle rounding for controls
     static let small: CGFloat = 4
     /// medium: 8 - Standard for buttons and fields
@@ -47,8 +43,6 @@ enum DSRadius {
 
 /// Size constants for consistent component dimensions.
 enum DSSize {
-    /// zero: 0 - No size
-    static let zero: CGFloat = 0
     /// xSmall: 4 - Tiny icons or details
     static let xSmall: CGFloat = 4
     /// small: 8 - Small icons or tap targets
@@ -65,8 +59,6 @@ enum DSSize {
 
 /// Border stroke thickness constants.
 enum DSStroke {
-    /// zero: 0 - No border
-    static let zero: CGFloat = 0
     /// thin: 1 - Standard hairline border
     static let thin: CGFloat = 1
     /// thick: 2 - Emphasized border
