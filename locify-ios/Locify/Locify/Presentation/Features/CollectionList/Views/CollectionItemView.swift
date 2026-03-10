@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CollectionItemView: View {
     let collection: Collection
+    let count: Int
 
     var body: some View {
         HStack(spacing: DSSpacing.medium) {
@@ -29,10 +30,16 @@ struct CollectionItemView: View {
                     systemFont: .caption2
                 )
             }
+
+            Spacer()
+
+            DSText("\(count)", font: .medium(.medium))
+                .lineLimit(1)
         }
     }
 }
 
 #Preview {
-    CollectionItemView(collection: .mock)
+    CollectionItemView(collection: .mock, count: 3)
+        .padding()
 }

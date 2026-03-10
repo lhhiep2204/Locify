@@ -13,6 +13,7 @@ protocol LocationLocalDataSourceProtocol {
     func fetchAll() async throws -> [LocationLocal]
     func fetchById(_ id: UUID) async throws -> LocationLocal?
     func fetchByCollectionId(_ collectionId: UUID) async throws -> [LocationLocal]
+    func fetchCountByCollectionId(_ collectionId: UUID) async throws -> Int
     func insert(_ item: LocationLocal) async throws
     func update(_ item: LocationLocal) async throws
     func delete(_ item: LocationLocal) async throws
@@ -47,6 +48,13 @@ final class LocationLocalDataSource: LocationLocalDataSourceProtocol {
             sortBy: [SortDescriptor(\.createdAt, order: .forward)]
         )
         return try swiftDataManager.fetch(descriptor)
+    }
+
+    func fetchCountByCollectionId(_ collectionId: UUID) async throws -> Int {
+        let descriptor = FetchDescriptor<LocationLocal>(
+            predicate: #Predicate { $0.collectionId == collectionId }
+        )
+        return try swiftDataManager.fetchCount(descriptor)
     }
 
     func insert(_ item: LocationLocal) async throws {

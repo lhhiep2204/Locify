@@ -12,6 +12,7 @@ protocol LocationRepositoryProtocol {
     func fetchLocations(for collectionId: UUID) async throws -> [Location]
     func fetchAllLocations() async throws -> [Location]
     func fetchLocationById(_ id: UUID) async throws -> Location?
+    func fetchLocationCount(for collectionId: UUID) async throws -> Int
     func fetchFavoriteLocations() async throws -> [Location]
     func addLocation(_ location: Location) async throws
     func updateLocation(_ location: Location) async throws
@@ -47,6 +48,10 @@ final class LocationRepository: LocationRepositoryProtocol {
     func fetchLocationById(_ id: UUID) async throws -> Location? {
         let localItem = try await localDataSource.fetchById(id)
         return localItem.map { locationMapper.toDomain($0) }
+    }
+
+    func fetchLocationCount(for collectionId: UUID) async throws -> Int {
+        try await localDataSource.fetchCountByCollectionId(collectionId)
     }
 
     func fetchFavoriteLocations() async throws -> [Location] {

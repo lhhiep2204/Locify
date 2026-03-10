@@ -12,6 +12,7 @@ import SwiftData
 protocol SwiftDataManagerProtocol {
     func fetch<T: PersistentModel>(_ descriptor: FetchDescriptor<T>) throws -> [T]
     func fetchOne<T: PersistentModel>(_ descriptor: FetchDescriptor<T>) throws -> T?
+    func fetchCount<T: PersistentModel>(_ descriptor: FetchDescriptor<T>) throws -> Int
     func insert<T: PersistentModel>(_ item: T) throws
     func delete<T: PersistentModel>(_ item: T) throws
     func save() throws
@@ -34,6 +35,11 @@ final class SwiftDataManager: SwiftDataManagerProtocol {
     /// Fetch a single item using a FetchDescriptor.
     func fetchOne<T: PersistentModel>(_ descriptor: FetchDescriptor<T>) throws -> T? {
         try modelContext.fetch(descriptor).first
+    }
+
+    /// Fetch only the count of items using a FetchDescriptor.
+    func fetchCount<T: PersistentModel>(_ descriptor: FetchDescriptor<T>) throws -> Int {
+        try modelContext.fetchCount(descriptor)
     }
 
     /// Insert a new item into the context.

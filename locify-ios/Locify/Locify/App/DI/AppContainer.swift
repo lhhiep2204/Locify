@@ -44,7 +44,7 @@ extension AppContainer {
     }
 
     func makeCollectionListViewModel() -> CollectionListViewModel {
-        collectionContainer.makeCollectionListViewModel()
+        collectionContainer.makeCollectionListViewModel(locationContainer: locationContainer)
     }
 
     func makeLocationListViewModel(collection: Collection) -> LocationListViewModel {

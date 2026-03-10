@@ -176,13 +176,13 @@ extension EditLocationView {
     @ViewBuilder
     private var mapView: some View {
         if let location = locationToSave ?? searchedLocation {
-            MapView(
-                selectedLocation: .constant(location),
-                locations: [location]
-            ) { _, _ in }
-                .allowsHitTesting(false)
-                .aspectRatio(2/1, contentMode: .fit)
-                .cornerRadius(DSRadius.xxLarge)
+            MapSnapshotView(
+                latitude: location.latitude,
+                longitude: location.longitude,
+                category: location.category
+            )
+            .aspectRatio(2/1, contentMode: .fit)
+            .cornerRadius(DSRadius.xxLarge)
         }
     }
 

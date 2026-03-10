@@ -49,8 +49,8 @@ final class CollectionContainer {
     }
 
     // MARK: - ViewModel Factories
-    func makeCollectionListViewModel() -> CollectionListViewModel {
-        CollectionListViewModel(collectionUseCases: useCases)
+    func makeCollectionListViewModel(locationContainer: LocationContainer) -> CollectionListViewModel {
+        locationContainer.makeCollectionListViewModel(collectionUseCases: useCases)
     }
 
     func makeEditCollectionViewModel() -> EditCollectionViewModel {

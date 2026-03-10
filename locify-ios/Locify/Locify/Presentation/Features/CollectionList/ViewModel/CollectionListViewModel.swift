@@ -11,11 +11,17 @@ import Foundation
 @Observable
 class CollectionListViewModel {
     private let collectionUseCases: CollectionUseCases
+    private let fetchLocationCountUseCase: FetchLocationCountUseCaseProtocol
 
     private(set) var collections: [Collection] = []
+    private(set) var locationCounts: [UUID: Int] = [:]
 
-    init(collectionUseCases: CollectionUseCases) {
+    init(
+        collectionUseCases: CollectionUseCases,
+        fetchLocationCountUseCase: FetchLocationCountUseCaseProtocol
+    ) {
         self.collectionUseCases = collectionUseCases
+        self.fetchLocationCountUseCase = fetchLocationCountUseCase
     }
 }
 
@@ -23,6 +29,7 @@ extension CollectionListViewModel {
     func fetchCollections() async {
         do {
             collections = try await collectionUseCases.fetch.execute()
+            await fetchLocationCounts()
         } catch {
             Logger.error(error.localizedDescription)
         }
@@ -32,6 +39,7 @@ extension CollectionListViewModel {
         do {
             try await collectionUseCases.add.execute(collection)
             collections.append(collection)
+            locationCounts[collection.id] = 0
         } catch {
             Logger.error(error.localizedDescription)
         }
@@ -53,8 +61,26 @@ extension CollectionListViewModel {
         do {
             try await collectionUseCases.delete.execute(collection)
             collections.removeAll { $0.id == collection.id }
+            locationCounts.removeValue(forKey: collection.id)
         } catch {
             Logger.error(error.localizedDescription)
+        }
+    }
+}
+
+extension CollectionListViewModel {
+    private func fetchLocationCounts() async {
+        await withTaskGroup(of: (UUID, Int).self) { group in
+            for collection in collections {
+                group.addTask {
+                    let count = (try? await self.fetchLocationCountUseCase.execute(for: collection.id)) ?? 0
+                    return (collection.id, count)
+                }
+            }
+
+            for await (id, count) in group {
+                locationCounts[id] = count
+            }
         }
     }
 }

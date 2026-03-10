@@ -9,6 +9,7 @@ import Foundation
 
 struct LocationUseCases {
     let fetch: FetchLocationsUseCaseProtocol
+    let fetchCount: FetchLocationCountUseCaseProtocol
     let add: AddLocationUseCaseProtocol
     let update: UpdateLocationUseCaseProtocol
     let delete: DeleteLocationUseCaseProtocol

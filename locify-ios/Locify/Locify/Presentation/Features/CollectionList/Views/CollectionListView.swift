@@ -114,16 +114,19 @@ extension CollectionListView {
                 NavigationLink(
                     .locationList(collection: item)
                 ) {
-                    CollectionItemView(collection: item)
-                        .swipeActions(edge: .trailing) {
-                            deleteButtonView(item)
-                            editButtonView(item)
-                        }
-                        .contextMenu {
-                            editButtonView(item)
-                            Divider()
-                            deleteButtonView(item)
-                        }
+                    CollectionItemView(
+                        collection: item,
+                        count: viewModel.locationCounts[item.id] ?? 0
+                    )
+                    .swipeActions(edge: .trailing) {
+                        deleteButtonView(item)
+                        editButtonView(item)
+                    }
+                    .contextMenu {
+                        editButtonView(item)
+                        Divider()
+                        deleteButtonView(item)
+                    }
                 }
             }
         }

@@ -89,8 +89,8 @@ extension AppleMapService {
             name: item.name ?? "My Location",
             displayName: "My Location",
             address: item.address?.fullAddress ?? .empty,
-            latitude: item.location.coordinate.latitude,
-            longitude: item.location.coordinate.longitude
+            latitude: location.coordinate.latitude,
+            longitude: location.coordinate.longitude
         )
     }
 
