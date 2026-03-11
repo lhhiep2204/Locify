@@ -27,6 +27,7 @@ final class LocationContainer {
     private lazy var addUseCase = AddLocationUseCase(repository: repository)
     private lazy var updateUseCase = UpdateLocationUseCase(repository: repository)
     private lazy var deleteUseCase = DeleteLocationUseCase(repository: repository)
+    private lazy var fetchRouteDistanceUseCase = FetchRouteDistanceUseCase(mapService: appleMapService)
 
     private(set) lazy var getUserLocationUseCase = GetUserLocationUseCase(
         appleMapService: appleMapService,
@@ -38,7 +39,8 @@ final class LocationContainer {
         fetchCount: fetchCountUseCase,
         add: addUseCase,
         update: updateUseCase,
-        delete: deleteUseCase
+        delete: deleteUseCase,
+        fetchRouteDistance: fetchRouteDistanceUseCase
     )
 
     init(

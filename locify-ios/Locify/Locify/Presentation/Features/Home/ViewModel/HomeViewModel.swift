@@ -21,6 +21,8 @@ class HomeViewModel {
     private(set) var selectedCollection: Collection?
     private(set) var selectedLocationId: UUID?
     private(set) var locationList: [Location] = []
+    private(set) var userLocation: Location?
+
     var permissionDenied: Bool = false
 
     private var cancellables = Set<AnyCancellable>()
@@ -146,6 +148,23 @@ extension HomeViewModel {
         }
     }
 
+    func fetchRouteDistance(
+        from origin: Location,
+        to destination: Location,
+        transportType: TransportType = .automobile
+    ) async -> Double? {
+        do {
+            return try await locationUseCase.fetchRouteDistance.execute(
+                from: origin,
+                to: destination,
+                transportType: transportType
+            )
+        } catch {
+            Logger.error(error.localizedDescription)
+            return nil
+        }
+    }
+
     func addLocation(_ location: Location) async {
         do {
             _ = try await locationUseCase.add.execute(location)
@@ -218,10 +237,13 @@ extension HomeViewModel {
 
 extension HomeViewModel {
     private func requestAndUpdateUserLocation() async throws {
-        let location = try await getUserLocationUseCase.execute()
-        selectedLocationId = location.id
+        userLocation = try await getUserLocationUseCase.execute()
+
+        guard let userLocation else { return }
+
+        selectedLocationId = userLocation.id
         locationList.removeAll(where: \.isTemporary)
-        locationList.insert(location, at: 0)
+        locationList.insert(userLocation, at: 0)
     }
 
     private func handlePermissionDenied() {

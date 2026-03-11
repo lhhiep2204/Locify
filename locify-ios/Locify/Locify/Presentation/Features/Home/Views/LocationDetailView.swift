@@ -10,6 +10,7 @@ import SwiftUI
 struct LocationDetailView: View {
     @Binding var location: Location?
 
+    let routeDistance: Double?
     let relatedLocations: [Location]
     let onSelectLocation: (UUID) -> Void
     let onSearchLocation: () -> Void
@@ -77,26 +78,7 @@ extension LocationDetailView {
 
                 Spacer()
 
-                Menu {
-                    if location.isTemporary {
-                        addButtonView
-                        openInMapsButtonView(location)
-                        copyButtonView(location)
-                        shareButtonView(location)
-                    } else {
-                        editButtonView
-                        openInMapsButtonView(location)
-                        copyButtonView(location)
-                        shareButtonView(location)
-                        Divider()
-                        deleteButtonView
-                    }
-                } label: {
-                    Image.appSystemIcon(.more)
-                        .circularGlassEffect()
-                }
-                .menuOrder(.fixed)
-                .padding(.top, -DSSpacing.small)
+                actionMenu(location: location)
 
                 if location.id != Constants.myLocationId || !relatedLocations.isEmpty {
                     closeButtonView
@@ -111,6 +93,29 @@ extension LocationDetailView {
                 )
             }
         }
+    }
+
+    private func actionMenu(location: Location) -> some View {
+        Menu {
+            if location.isTemporary {
+                addButtonView
+                openInMapsButtonView(location)
+                copyButtonView(location)
+                shareButtonView(location)
+            } else {
+                editButtonView
+                openInMapsButtonView(location)
+                copyButtonView(location)
+                shareButtonView(location)
+                Divider()
+                deleteButtonView
+            }
+        } label: {
+            Image.appSystemIcon(.more)
+                .circularGlassEffect()
+        }
+        .menuOrder(.fixed)
+        .padding(.top, -DSSpacing.small)
     }
 
     private var addButtonView: some View {
@@ -221,11 +226,22 @@ extension LocationDetailView {
     }
 
     private func addressView(address: String) -> some View {
-        infoItemView(
-            icon: .address,
-            title: .localized(LocationKeys.address),
-            value: address
-        )
+        HStack(alignment: .top) {
+            infoItemView(
+                icon: .address,
+                title: .localized(LocationKeys.address),
+                value: address
+            )
+
+            if let routeDistance {
+                Spacer()
+
+                DSText(
+                    "\(routeDistance.formattedDistance)",
+                    systemFont: .caption
+                )
+            }
+        }
     }
 
     private func coordinatesView(
@@ -358,6 +374,7 @@ extension LocationDetailView {
 #Preview {
     LocationDetailView(
         location: .constant(.mock),
+        routeDistance: 12.0,
         relatedLocations: Location.mockList
     ) { _ in }
     onSearchLocation: { }

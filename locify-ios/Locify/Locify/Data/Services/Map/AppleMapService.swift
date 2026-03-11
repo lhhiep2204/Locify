@@ -8,6 +8,20 @@
 import Combine
 @preconcurrency import MapKit
 
+enum TransportType {
+    case automobile
+    case walking
+    case transit
+
+    var mkTransportType: MKDirectionsTransportType {
+        switch self {
+        case .automobile: .automobile
+        case .walking:    .walking
+        case .transit:    .transit
+        }
+    }
+}
+
 /// Protocol defining the interface for map and location-related services,
 /// such as reverse geocoding, place search, and autocomplete suggestions.
 protocol AppleMapServiceProtocol: AnyObject {
@@ -25,11 +39,36 @@ protocol AppleMapServiceProtocol: AnyObject {
     /// - Throws: `LocationError.geocodingFailed` if no address is found.
     func getSelectedMapLocationInfo(name: String?, for coordinate: CLLocationCoordinate2D) async throws -> Location
 
-    /// Returns debounced autocomplete suggestions for a user-entered query.
+    /// Returns debounced autocomplete suggestions for a natural-language query.
+    ///
+    /// This function routes the query through a Combine-based debounce pipeline to
+    /// avoid spamming MapKit as the user types. It then awaits the next results from
+    /// `MKLocalSearchCompleter` and maps them to your `Location` model.
+    /// - Parameter query: The user-entered search text.
+    /// - Returns: A list of `Location` suggestions (coordinates are zero for suggestions).
     func suggestions(for query: String) async -> [Location]
 
-    /// Performs a detailed place search to resolve a suggested location to a precise coordinate.
+    /// Resolves a previously suggested `Location` into a precise place using `MKLocalSearch`.
+    ///
+    /// If the `Location` originated from this service's suggestions, the underlying
+    /// `MKLocalSearchCompletion` is used for improved accuracy. The first matching
+    /// map item is returned as a `Location` with coordinates.
+    /// - Parameter location: A suggestion `Location` previously returned by this service.
+    /// - Returns: The first resolved `Location` with coordinates, or `nil` if none found.
     func search(for location: Location) async -> Location?
+
+    /// Calculates the travel distance (in meters) between two locations.
+    /// - Parameters:
+    ///   - origin: The starting `Location`.
+    ///   - destination: The destination `Location`.
+    ///   - transportType: Travel mode (`.automobile`, `.walking`, `.transit`). Defaults to `.automobile`.
+    /// - Returns: The route distance in meters.
+    /// - Throws: `LocationError.routeNotFound` if no route is available.
+    func fetchRouteDistance(
+        from origin: Location,
+        to destination: Location,
+        transportType: TransportType
+    ) async throws -> CLLocationDistance
 }
 
 @MainActor
@@ -199,6 +238,53 @@ extension AppleMapService {
             address: item.address?.fullAddress ?? .empty,
             placeId: item.identifier?.rawValue,
             category: POIStyleHelper.categoryString(from: item.pointOfInterestCategory)
+        )
+    }
+
+    /// Calculates the travel distance in meters between two locations using on-device routing.
+    ///
+    /// This method constructs an `MKDirections` request from the given `Location` values,
+    /// using their coordinates and addresses to build enriched `MKMapItem` sources. Only
+    /// the first (best) route is used; alternate routes are not requested.
+    ///
+    /// - Parameters:
+    ///   - origin: The starting `Location`, used for both its coordinate and address.
+    ///   - destination: The destination `Location`, used for both its coordinate and address.
+    ///   - transportType: The travel mode to calculate distance for. Defaults to `.automobile`.
+    /// - Returns: The distance of the first route in meters as a `CLLocationDistance`.
+    /// - Throws: `LocationError.routeNotFound` if MapKit returns no routes for the given pair.
+    func fetchRouteDistance(
+        from origin: Location,
+        to destination: Location,
+        transportType: TransportType = .automobile
+    ) async throws -> CLLocationDistance {
+        let request = MKDirections.Request()
+        request.source = makeMapItem(for: origin)
+        request.destination = makeMapItem(for: destination)
+        request.transportType = transportType.mkTransportType
+        request.requestsAlternateRoutes = false
+
+        let response = try await MKDirections(request: request).calculate()
+
+        guard let route = response.routes.first else {
+            throw LocationError.routeNotFound
+        }
+
+        return route.distance
+    }
+
+    /// Constructs an `MKMapItem` from a domain `Location` using its coordinate and address.
+    ///
+    /// This helper bridges the domain `Location` entity to MapKit by combining the
+    /// location's coordinate into a `CLLocation` and its address fields into an
+    /// `MKAddress`, producing a fully enriched `MKMapItem` for use in routing requests.
+    ///
+    /// - Parameter location: The domain `Location` to convert.
+    /// - Returns: An `MKMapItem` populated with the location's coordinate and address.
+    private func makeMapItem(for location: Location) -> MKMapItem {
+        MKMapItem(
+            location: CLLocation(latitude: location.latitude, longitude: location.longitude),
+            address: MKAddress(fullAddress: location.address, shortAddress: location.displayName)
         )
     }
 }

@@ -23,6 +23,8 @@ struct HomeView: View {
 
     @State private var showDeleteAlert: Bool = false
 
+    @State private var routeDistance: Double?
+
     @State private var collectionRouter: Router<Route> = .init(root: .collectionList)
 
     private var selectedLocation: Binding<Location?> {
@@ -46,6 +48,17 @@ struct HomeView: View {
                     .toolbar(.hidden)
             default:
                 EmptyView()
+            }
+        }
+        .onChange(of: viewModel.selectedLocation?.placeId) {
+            Task {
+                routeDistance = nil
+
+                guard let destination = viewModel.selectedLocation,
+                      destination.id != Constants.myLocationId,
+                      let origin = viewModel.userLocation else { return }
+
+                routeDistance = await viewModel.fetchRouteDistance(from: origin, to: destination)
             }
         }
         .environment(\.dismissSheet) {
@@ -188,6 +201,7 @@ extension HomeView {
     private var locationDetailView: some View {
         LocationDetailView(
             location: selectedLocation,
+            routeDistance: routeDistance,
             relatedLocations: viewModel.relatedLocations
         ) { locationId in
             viewModel.selectRelatedLocation(locationId)

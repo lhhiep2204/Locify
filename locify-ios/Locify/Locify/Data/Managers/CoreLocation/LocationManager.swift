@@ -57,6 +57,7 @@ enum LocationError: Error, LocalizedError {
     case permissionRestricted
     case locationUnavailable
     case geocodingFailed(String)
+    case routeNotFound
     case unknown
 
     var errorDescription: String? {
@@ -66,6 +67,7 @@ enum LocationError: Error, LocalizedError {
         case .permissionRestricted: "Location permission is restricted."
         case .locationUnavailable: "Location is currently unavailable."
         case .geocodingFailed(let message): "Geocoding failed: \(message)"
+        case .routeNotFound: "No route could be found."
         case .unknown: "An unknown error occurred."
         }
     }
