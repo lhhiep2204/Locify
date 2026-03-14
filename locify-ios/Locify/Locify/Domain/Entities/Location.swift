@@ -51,7 +51,7 @@ struct Location: Identifiable, Equatable, Hashable {
         self.placeId = placeId
         self.name = name
         self.displayName = displayName
-        self.address = address
+        self.address = address.replace("\n", with: ", ")
         self.latitude = latitude.rounded(toDecimalPlaces: 8)
         self.longitude = longitude.rounded(toDecimalPlaces: 8)
         self.category = category

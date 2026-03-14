@@ -10,36 +10,42 @@ import Foundation
 @MainActor
 @Observable
 class EditCollectionViewModel {
-    var name: String = .empty
+    enum Mode {
+        case create
+        case update(Collection)
+    }
+
+    let mode: Mode
+
     private(set) var errorMessage: String = .empty
+
+    var name: String = .empty
+
+    init(mode: Mode) {
+        self.mode = mode
+
+        if case let .update(collection) = mode {
+            name = collection.name
+        }
+    }
 }
 
 extension EditCollectionViewModel {
-    func createCollection(
-        collectionToUpdate: Collection?,
-        completion: (Collection?) -> Void
-    ) {
-        var collection: Collection {
-            if let collectionToUpdate {
-                var collection = collectionToUpdate
-                collection.name = name
-                return collection
-            } else {
-                let collection = Collection(name: name)
-                return collection
-            }
-        }
-
+    func save(completion: (Collection?) -> Void) {
         guard isValid else {
             completion(nil)
             return
         }
 
-        completion(collection)
-    }
-
-    func updateCollectionName(_ collectionName: String) {
-        name = collectionName
+        switch mode {
+        case .create:
+            let new = Collection(name: name.trimmed)
+            completion(new)
+        case .update(let existing):
+            var updated = existing
+            updated.name = name.trimmed
+            completion(updated)
+        }
     }
 
     func clearErrorState() {

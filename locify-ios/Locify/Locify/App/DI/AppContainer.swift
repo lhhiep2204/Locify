@@ -51,12 +51,19 @@ extension AppContainer {
         locationContainer.makeLocationListViewModel(collection: collection)
     }
 
-    func makeEditCollectionViewModel() -> EditCollectionViewModel {
-        collectionContainer.makeEditCollectionViewModel()
+    func makeEditCollectionViewModel(_ mode: EditCollectionViewModel.Mode) -> EditCollectionViewModel {
+        collectionContainer.makeEditCollectionViewModel(mode: mode)
     }
 
-    func makeEditLocationViewModel() -> EditLocationViewModel {
-        locationContainer.makeEditLocationViewModel(collectionContainer: collectionContainer)
+    func makeEditLocationViewModel(
+        _ mode: EditLocationViewModel.Mode,
+        collection: Collection?
+    ) -> EditLocationViewModel {
+        locationContainer.makeEditLocationViewModel(
+            mode: mode,
+            collection: collection,
+            collectionContainer: collectionContainer
+        )
     }
 
     func makeSearchViewModel() -> SearchViewModel {

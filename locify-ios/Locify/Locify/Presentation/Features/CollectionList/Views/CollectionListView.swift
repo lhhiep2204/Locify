@@ -27,83 +27,88 @@ struct CollectionListView: View {
     }
 
     var body: some View {
-        listView(viewModel.collections)
-            .navigationTitle(Text(CollectionKeys.title))
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismissSheet()
-                    } label: {
-                        Image.appSystemIcon(.close)
-                    }
+        Group {
+            if viewModel.collections.isEmpty {
+                EmptyCollectionView {
+                    showAddCollection = true
                 }
+            } else {
+                listView(viewModel.collections)
+            }
+        }
+        .navigationTitle(Text(CollectionKeys.title))
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismissSheet()
+                } label: {
+                    Image.appSystemIcon(.close)
+                }
+            }
 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showAddCollection = true
-                    } label: {
-                        Text(CommonKeys.add)
-                    }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showAddCollection = true
+                } label: {
+                    Text(CommonKeys.add)
                 }
             }
-            .task {
-                if !isFetched {
-                    await viewModel.fetchCollections()
-                    isFetched.toggle()
+        }
+        .task {
+            if !isFetched {
+                await viewModel.fetchCollections()
+                isFetched.toggle()
+            }
+        }
+        .sheet(isPresented: $showAddCollection) {
+            EditCollectionView(
+                container.makeEditCollectionViewModel(.create)
+            ) { [weak viewModel] collection in
+                guard let viewModel else { return }
+
+                Task { @MainActor in
+                    await viewModel.addCollection(collection)
                 }
             }
-            .sheet(isPresented: $showAddCollection) {
-                EditCollectionView(
-                    container.makeEditCollectionViewModel(),
-                    editMode: .add
-                ) { [weak viewModel] collection in
+        }
+        .sheet(item: $collectionToUpdate) { collection in
+            EditCollectionView(
+                container.makeEditCollectionViewModel(.update(collection))
+            ) { [weak viewModel] updatedCollection in
+                guard let viewModel else { return }
+
+                Task { @MainActor in
+                    await viewModel.updateCollection(updatedCollection)
+                }
+            }
+        }
+        .alert(
+            Text(
+                String(
+                    format: .localized(MessageKeys.deleteAlertTitle),
+                    collectionToDelete?.name ?? .empty
+                )
+            ),
+            isPresented: $showDeleteAlert,
+            presenting: collectionToDelete
+        ) { collection in
+            Button(
+                String.localized(CommonKeys.delete),
+                role: .destructive
+            ) {
+                Task { @MainActor [weak viewModel] in
                     guard let viewModel else { return }
 
-                    Task { @MainActor in
-                        await viewModel.addCollection(collection)
-                    }
+                    await viewModel.deleteCollection(collection)
                 }
             }
-            .sheet(item: $collectionToUpdate) { collection in
-                EditCollectionView(
-                    container.makeEditCollectionViewModel(),
-                    editMode: .update,
-                    collectionToUpdate: collection
-                ) { [weak viewModel] updatedCollection in
-                    guard let viewModel else { return }
-
-                    Task { @MainActor in
-                        await viewModel.updateCollection(updatedCollection)
-                    }
-                }
-            }
-            .alert(
-                Text(
-                    String(
-                        format: .localized(MessageKeys.deleteAlertTitle),
-                        collectionToDelete?.name ?? .empty
-                    )
-                ),
-                isPresented: $showDeleteAlert,
-                presenting: collectionToDelete
-            ) { collection in
-                Button(
-                    String.localized(CommonKeys.delete),
-                    role: .destructive
-                ) {
-                    Task { @MainActor [weak viewModel] in
-                        guard let viewModel else { return }
-
-                        await viewModel.deleteCollection(collection)
-                    }
-                }
-                Button(
-                    String.localized(CommonKeys.cancel),
-                    role: .cancel
-                ) {}
-            } message: { _ in
-                Text(MessageKeys.deleteAlertMessage)
-            }
+            Button(
+                String.localized(CommonKeys.cancel),
+                role: .cancel
+            ) {}
+        } message: { _ in
+            Text(MessageKeys.deleteAlertMessage)
+        }
     }
 }
 

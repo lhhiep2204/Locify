@@ -27,39 +27,20 @@ struct EditLocationView: View {
     @State private var showAddCollection: Bool = false
     @State private var showErrorAlert: Bool = false
 
-    let editMode: EditMode
-    let locationToSave: Location?
     let onSave: (Location) -> Void
 
     init(
         _ viewModel: EditLocationViewModel,
-        editMode: EditMode,
         collection: Collection? = nil,
-        locationToSave: Location? = nil,
         onSave: @escaping (Location) -> Void
     ) {
         self.viewModel = viewModel
-        self.editMode = editMode
-        self.locationToSave = locationToSave
         self.onSave = onSave
 
-        viewModel.collection = collection
-
-        if let collection {
+        if let collection = viewModel.collection {
             _collectionName = State(initialValue: collection.name)
         } else {
             _collectionName = State(initialValue: .empty)
-        }
-
-        if let locationToSave {
-            viewModel.placeId = locationToSave.placeId
-            viewModel.displayName = locationToSave.displayName
-            viewModel.name = locationToSave.name
-            viewModel.address = locationToSave.address
-            viewModel.latitude = String(locationToSave.latitude)
-            viewModel.longitude = String(locationToSave.longitude)
-            viewModel.category = locationToSave.category
-            viewModel.notes = locationToSave.notes ?? .empty
         }
     }
 
@@ -106,10 +87,7 @@ struct EditLocationView: View {
                     selectCollectionView
                         .presentationDetents([.medium])
                         .sheet(isPresented: $showAddCollection) {
-                            EditCollectionView(
-                                EditCollectionViewModel(),
-                                editMode: .add
-                            ) { collection in
+                            EditCollectionView(EditCollectionViewModel(mode: .create)) { collection in
                                 Task {
                                     await viewModel.addCollection(collection)
                                 }
@@ -132,7 +110,7 @@ extension EditLocationView {
     private var contentView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DSSpacing.medium) {
-                if locationToSave == nil {
+                if case .create = viewModel.mode {
                     searchView
                 }
                 collectionView
@@ -147,8 +125,8 @@ extension EditLocationView {
     }
 
     private var navigationTitle: Text {
-        switch editMode {
-        case .add:
+        switch viewModel.mode {
+        case .create:
             Text(LocationKeys.addLocation)
         case .update:
             Text(LocationKeys.updateLocation)
@@ -175,7 +153,17 @@ extension EditLocationView {
 
     @ViewBuilder
     private var mapView: some View {
-        if let location = locationToSave ?? searchedLocation {
+        var location: Location? {
+            if case let .update(location) = viewModel.mode {
+                location
+            } else if let location = searchedLocation {
+                location
+            } else {
+                nil
+            }
+        }
+
+        if let location {
             MapSnapshotView(
                 latitude: location.latitude,
                 longitude: location.longitude,
@@ -282,32 +270,17 @@ extension EditLocationView {
 
 extension EditLocationView {
     private func saveLocation() {
-        func handleLocationResult(_ location: Location?) {
-            if let location {
-                onSave(location)
-                dismiss()
-            } else {
-                showErrorAlert = true
-            }
-        }
+        viewModel.save { location in
+            guard let location else { return }
 
-        switch editMode {
-        case .add:
-            viewModel.createLocation { location in
-                handleLocationResult(location)
-            }
-        case .update:
-            viewModel.updateLocation(locationToUpdate: locationToSave) { location in
-                handleLocationResult(location)
-            }
+            onSave(location)
+            dismiss()
         }
     }
 }
 
 #Preview {
     EditLocationView(
-        AppContainer().makeEditLocationViewModel(),
-        editMode: .add,
-        locationToSave: .mock
+        AppContainer().makeEditLocationViewModel(.create, collection: nil)
     ) { _ in }
 }

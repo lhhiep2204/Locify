@@ -22,24 +22,14 @@ struct EditCollectionView: View {
 
     @State private var viewModel: EditCollectionViewModel
 
-    let editMode: EditMode
-    let collectionToUpdate: Collection?
     let onSave: (Collection) -> Void
 
     init(
         _ viewModel: EditCollectionViewModel,
-        editMode: EditMode,
-        collectionToUpdate: Collection? = nil,
         onSave: @escaping (Collection) -> Void
     ) {
         self.viewModel = viewModel
-        self.editMode = editMode
-        self.collectionToUpdate = collectionToUpdate
         self.onSave = onSave
-
-        if let collectionToUpdate {
-            viewModel.updateCollectionName(collectionToUpdate.name)
-        }
     }
 
     var body: some View {
@@ -102,8 +92,8 @@ extension EditCollectionView {
     }
 
     private var navigationTitle: Text {
-        switch editMode {
-        case .add:
+        switch viewModel.mode {
+        case .create:
             Text(CollectionKeys.addCollection)
         case .update:
             Text(CollectionKeys.updateCollection)
@@ -113,7 +103,7 @@ extension EditCollectionView {
 
 extension EditCollectionView {
     private func saveCollection() {
-        viewModel.createCollection(collectionToUpdate: collectionToUpdate) { collection in
+        viewModel.save { collection in
             guard let collection else { return }
 
             onSave(collection)
@@ -124,7 +114,6 @@ extension EditCollectionView {
 
 #Preview {
     EditCollectionView(
-        AppContainer().makeEditCollectionViewModel(),
-        editMode: .add
+        AppContainer().makeEditCollectionViewModel(.create)
     ) { _ in }
 }

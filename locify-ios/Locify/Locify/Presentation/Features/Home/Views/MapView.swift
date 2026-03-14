@@ -59,17 +59,15 @@ struct MapView: View {
 
 extension MapView {
     private func updateCamera() {
-        withAnimation {
-            if let location = selectedLocation {
-                switch location.id {
-                case Constants.myLocationId:
-                    position = .userLocation(fallback: .automatic)
-                default:
-                    position = .item(makeMapItem(from: location))
-                }
-            } else {
-                position = .automatic
+        if let location = selectedLocation {
+            switch location.id {
+            case Constants.myLocationId:
+                position = .userLocation(fallback: .automatic)
+            default:
+                position = .item(makeMapItem(from: location))
             }
+        } else {
+            position = .automatic
         }
     }
 

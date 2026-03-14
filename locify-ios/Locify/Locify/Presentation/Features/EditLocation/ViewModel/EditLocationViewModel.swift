@@ -10,10 +10,18 @@ import Foundation
 @MainActor
 @Observable
 class EditLocationViewModel {
+    enum Mode {
+        case create
+        case update(Location)
+    }
+
     private let fetchCollectionsUseCase: FetchCollectionsUseCaseProtocol
     private let addCollectionUseCase: AddCollectionUseCaseProtocol
 
+    let mode: Mode
+
     private(set) var collections: [Collection] = []
+    private(set) var errorMessage: String = .empty
 
     var collection: Collection?
 
@@ -26,14 +34,27 @@ class EditLocationViewModel {
     var category: String = .empty
     var notes: String = .empty
 
-    private(set) var errorMessage: String = .empty
-
     init(
+        mode: Mode,
+        collection: Collection?,
         fetchCollectionsUseCase: FetchCollectionsUseCaseProtocol,
         addCollectionUseCase: AddCollectionUseCaseProtocol
     ) {
+        self.mode = mode
+        self.collection = collection
         self.fetchCollectionsUseCase = fetchCollectionsUseCase
         self.addCollectionUseCase = addCollectionUseCase
+
+        if case let .update(location) = mode {
+            placeId = location.placeId
+            displayName = location.displayName
+            name = location.name
+            address = location.address
+            latitude = String(location.latitude)
+            longitude = String(location.longitude)
+            category = location.category
+            notes = location.notes ?? .empty
+        }
     }
 }
 
@@ -64,45 +85,34 @@ extension EditLocationViewModel {
         category = location.category
     }
 
-    func createLocation(completion: (Location?) -> Void) {
-        let location: Location = .init(
-            collectionId: collection?.id ?? UUID(),
-            placeId: placeId,
-            name: name,
-            displayName: displayName,
-            address: address,
-            latitude: latitude.asDouble,
-            longitude: longitude.asDouble,
-            category: category,
-            notes: notes.trimmed.isEmpty ? nil : notes
-        )
-
-        guard isValid else {
+    func save(completion: (Location?) -> Void) {
+        guard isValid, let collection else {
             completion(nil)
             return
         }
 
-        completion(location)
-    }
-
-    func updateLocation(locationToUpdate: Location?, completion: (Location?) -> Void) {
-        guard let locationToUpdate, let collection else {
-            completion(nil)
-            return
+        switch mode {
+        case .create:
+            let new = Location(
+                collectionId: collection.id,
+                placeId: placeId,
+                name: name,
+                displayName: displayName.trimmed,
+                address: address,
+                latitude: latitude.asDouble,
+                longitude: longitude.asDouble,
+                category: category,
+                notes: notes.trimmed.isEmpty ? nil : notes.trimmed
+            )
+            completion(new)
+        case .update(let existing):
+            var updated = existing
+            updated.collectionId = collection.id
+            updated.displayName = displayName.trimmed
+            updated.notes = notes.trimmed.isEmpty ? nil : notes.trimmed
+            updated.updatedAt = Date()
+            completion(updated)
         }
-
-        var location = locationToUpdate
-        location.collectionId = collection.id
-        location.displayName = displayName
-        location.notes = notes.trimmed.isEmpty ? nil : notes
-        location.updatedAt = Date()
-
-        guard isValid else {
-            completion(nil)
-            return
-        }
-
-        completion(location)
     }
 
     func clearErrorState() {

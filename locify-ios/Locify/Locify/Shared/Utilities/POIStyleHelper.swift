@@ -116,7 +116,7 @@ enum POIStyleHelper {
         case "winery": .init(icon: "wineglass.fill", color: .purple)
         case "volleyball": .init(icon: "volleyball.fill", color: .orange)
         case "zoo": .init(icon: "pawprint.fill", color: .brown)
-        default: .init(icon: "mappin", color: .gray)
+        default: .init(icon: "mappin", color: .red)
         }
     }
     // swiftlint:enable cyclomatic_complexity function_body_length

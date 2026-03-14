@@ -27,7 +27,7 @@ final class LocationContainer {
     private lazy var addUseCase = AddLocationUseCase(repository: repository)
     private lazy var updateUseCase = UpdateLocationUseCase(repository: repository)
     private lazy var deleteUseCase = DeleteLocationUseCase(repository: repository)
-    private lazy var fetchRouteDistanceUseCase = FetchRouteDistanceUseCase(mapService: appleMapService)
+    private lazy var fetchRouteInfoUseCase = FetchRouteInfoUseCase(mapService: appleMapService)
 
     private(set) lazy var getUserLocationUseCase = GetUserLocationUseCase(
         appleMapService: appleMapService,
@@ -40,7 +40,7 @@ final class LocationContainer {
         add: addUseCase,
         update: updateUseCase,
         delete: deleteUseCase,
-        fetchRouteDistance: fetchRouteDistanceUseCase
+        fetchRouteInfo: fetchRouteInfoUseCase
     )
 
     init(
@@ -88,8 +88,14 @@ final class LocationContainer {
         LocationListViewModel(collection: collection, locationUseCase: useCases)
     }
 
-    func makeEditLocationViewModel(collectionContainer: CollectionContainer) -> EditLocationViewModel {
+    func makeEditLocationViewModel(
+        mode: EditLocationViewModel.Mode,
+        collection: Collection?,
+        collectionContainer: CollectionContainer
+    ) -> EditLocationViewModel {
         EditLocationViewModel(
+            mode: mode,
+            collection: collection,
             fetchCollectionsUseCase: collectionContainer.fetchUseCase,
             addCollectionUseCase: collectionContainer.addUseCase
         )

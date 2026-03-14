@@ -8,20 +8,6 @@
 import Combine
 @preconcurrency import MapKit
 
-enum TransportType {
-    case automobile
-    case walking
-    case transit
-
-    var mkTransportType: MKDirectionsTransportType {
-        switch self {
-        case .automobile: .automobile
-        case .walking:    .walking
-        case .transit:    .transit
-        }
-    }
-}
-
 /// Protocol defining the interface for map and location-related services,
 /// such as reverse geocoding, place search, and autocomplete suggestions.
 protocol AppleMapServiceProtocol: AnyObject {
@@ -57,18 +43,19 @@ protocol AppleMapServiceProtocol: AnyObject {
     /// - Returns: The first resolved `Location` with coordinates, or `nil` if none found.
     func search(for location: Location) async -> Location?
 
-    /// Calculates the travel distance (in meters) between two locations.
+    /// Calculates both distance and expected travel time between two locations.
+    ///
     /// - Parameters:
     ///   - origin: The starting `Location`.
     ///   - destination: The destination `Location`.
-    ///   - transportType: Travel mode (`.automobile`, `.walking`, `.transit`). Defaults to `.automobile`.
-    /// - Returns: The route distance in meters.
+    ///   - transportType: Travel mode (`.auto`, `.automobile`, `.walking`, `.transit`).
+    /// - Returns: A `RouteInfo` containing distance (meters) and ETA (seconds).
     /// - Throws: `LocationError.routeNotFound` if no route is available.
-    func fetchRouteDistance(
+    func fetchRouteInfo(
         from origin: Location,
         to destination: Location,
         transportType: TransportType
-    ) async throws -> CLLocationDistance
+    ) async throws -> RouteInfo
 }
 
 @MainActor
@@ -240,24 +227,22 @@ extension AppleMapService {
             category: POIStyleHelper.categoryString(from: item.pointOfInterestCategory)
         )
     }
+}
 
-    /// Calculates the travel distance in meters between two locations using on-device routing.
-    ///
-    /// This method constructs an `MKDirections` request from the given `Location` values,
-    /// using their coordinates and addresses to build enriched `MKMapItem` sources. Only
-    /// the first (best) route is used; alternate routes are not requested.
+extension AppleMapService {
+    /// Calculates both distance and expected travel time between two locations.
     ///
     /// - Parameters:
-    ///   - origin: The starting `Location`, used for both its coordinate and address.
-    ///   - destination: The destination `Location`, used for both its coordinate and address.
-    ///   - transportType: The travel mode to calculate distance for. Defaults to `.automobile`.
-    /// - Returns: The distance of the first route in meters as a `CLLocationDistance`.
-    /// - Throws: `LocationError.routeNotFound` if MapKit returns no routes for the given pair.
-    func fetchRouteDistance(
+    ///   - origin: The starting `Location`.
+    ///   - destination: The destination `Location`.
+    ///   - transportType: Travel mode (`.auto`, `.automobile`, `.walking`, `.transit`).
+    /// - Returns: A `RouteInfo` containing distance (meters) and ETA (seconds).
+    /// - Throws: `LocationError.routeNotFound` if no route is available.
+    func fetchRouteInfo(
         from origin: Location,
         to destination: Location,
-        transportType: TransportType = .automobile
-    ) async throws -> CLLocationDistance {
+        transportType: TransportType
+    ) async throws -> RouteInfo {
         let request = MKDirections.Request()
         request.source = makeMapItem(for: origin)
         request.destination = makeMapItem(for: destination)
@@ -270,7 +255,11 @@ extension AppleMapService {
             throw LocationError.routeNotFound
         }
 
-        return route.distance
+        return .init(
+            transportType: transportType,
+            distance: route.distance,
+            expectedTravelTime: route.expectedTravelTime
+        )
     }
 
     /// Constructs an `MKMapItem` from a domain `Location` using its coordinate and address.

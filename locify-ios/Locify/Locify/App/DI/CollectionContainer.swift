@@ -53,7 +53,7 @@ final class CollectionContainer {
         locationContainer.makeCollectionListViewModel(collectionUseCases: useCases)
     }
 
-    func makeEditCollectionViewModel() -> EditCollectionViewModel {
-        EditCollectionViewModel()
+    func makeEditCollectionViewModel(mode: EditCollectionViewModel.Mode) -> EditCollectionViewModel {
+        EditCollectionViewModel(mode: mode)
     }
 }

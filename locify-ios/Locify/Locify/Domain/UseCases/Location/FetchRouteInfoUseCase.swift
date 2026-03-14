@@ -1,5 +1,5 @@
 //
-//  FetchRouteDistanceUseCase.swift
+//  FetchRouteInfoUseCase.swift
 //  Locify
 //
 //  Created by Hoàng Hiệp Lê on 10/3/26.
@@ -7,15 +7,15 @@
 
 import Foundation
 
-protocol FetchRouteDistanceUseCaseProtocol {
+protocol FetchRouteInfoUseCaseProtocol {
     func execute(
         from origin: Location,
         to destination: Location,
         transportType: TransportType
-    ) async throws -> Double
+    ) async throws -> RouteInfo
 }
 
-struct FetchRouteDistanceUseCase: FetchRouteDistanceUseCaseProtocol {
+struct FetchRouteInfoUseCase: FetchRouteInfoUseCaseProtocol {
     private let mapService: AppleMapServiceProtocol
 
     init(mapService: AppleMapServiceProtocol) {
@@ -26,8 +26,8 @@ struct FetchRouteDistanceUseCase: FetchRouteDistanceUseCaseProtocol {
         from origin: Location,
         to destination: Location,
         transportType: TransportType = .automobile
-    ) async throws -> Double {
-        try await mapService.fetchRouteDistance(
+    ) async throws -> RouteInfo {
+        try await mapService.fetchRouteInfo(
             from: origin,
             to: destination,
             transportType: transportType

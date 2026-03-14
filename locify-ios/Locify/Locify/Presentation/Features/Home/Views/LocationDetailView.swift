@@ -10,7 +10,7 @@ import SwiftUI
 struct LocationDetailView: View {
     @Binding var location: Location?
 
-    let routeDistance: Double?
+    let routeInfo: RouteInfo?
     let relatedLocations: [Location]
     let onSelectLocation: (UUID) -> Void
     let onSearchLocation: () -> Void
@@ -212,6 +212,11 @@ extension LocationDetailView {
 
     private func infoView(location: Location) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.small) {
+            if let routeInfo {
+                routeInfoView(routeInfo: routeInfo)
+                    .padding(.bottom, DSSpacing.xSmall)
+            }
+
             addressView(address: location.address)
 
             coordinatesView(
@@ -225,23 +230,20 @@ extension LocationDetailView {
         }
     }
 
-    private func addressView(address: String) -> some View {
-        HStack(alignment: .top) {
-            infoItemView(
-                icon: .address,
-                title: .localized(LocationKeys.address),
-                value: address
-            )
-
-            if let routeDistance {
-                Spacer()
-
-                DSText(
-                    "\(routeDistance.formattedDistance)",
-                    systemFont: .caption
-                )
-            }
+    private func routeInfoView(routeInfo: RouteInfo) -> some View {
+        HStack(spacing: DSSpacing.xSmall) {
+            Text("\(routeInfo.distance.formattedDistance) -  \(routeInfo.expectedTravelTime.formattedETA)")
+            Image(systemName: routeInfo.transportType.systemImageName)
         }
+        .font(.caption)
+    }
+
+    private func addressView(address: String) -> some View {
+        infoItemView(
+            icon: .address,
+            title: .localized(LocationKeys.address),
+            value: address
+        )
     }
 
     private func coordinatesView(
@@ -374,7 +376,11 @@ extension LocationDetailView {
 #Preview {
     LocationDetailView(
         location: .constant(.mock),
-        routeDistance: 12.0,
+        routeInfo: .init(
+            transportType: .auto,
+            distance: 12.0,
+            expectedTravelTime: Date().timeIntervalSince1970
+        ),
         relatedLocations: Location.mockList
     ) { _ in }
     onSearchLocation: { }

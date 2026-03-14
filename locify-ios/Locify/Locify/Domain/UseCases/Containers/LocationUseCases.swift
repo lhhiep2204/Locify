@@ -13,5 +13,5 @@ struct LocationUseCases {
     let add: AddLocationUseCaseProtocol
     let update: UpdateLocationUseCaseProtocol
     let delete: DeleteLocationUseCaseProtocol
-    let fetchRouteDistance: FetchRouteDistanceUseCaseProtocol
+    let fetchRouteInfo: FetchRouteInfoUseCaseProtocol
 }

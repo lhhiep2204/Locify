@@ -148,16 +148,25 @@ extension HomeViewModel {
         }
     }
 
-    func fetchRouteDistance(
+    func fetchRouteInfo(
         from origin: Location,
         to destination: Location,
-        transportType: TransportType = .automobile
-    ) async -> Double? {
+        transportType: TransportType = .auto
+    ) async -> RouteInfo? {
+        let resolvedType: TransportType
+
+        if case .auto = transportType {
+            let straightLine = origin.straightLineDistance(to: destination)
+            resolvedType = .suggested(for: straightLine)
+        } else {
+            resolvedType = transportType
+        }
+
         do {
-            return try await locationUseCase.fetchRouteDistance.execute(
+            return try await locationUseCase.fetchRouteInfo.execute(
                 from: origin,
                 to: destination,
-                transportType: transportType
+                transportType: resolvedType
             )
         } catch {
             Logger.error(error.localizedDescription)

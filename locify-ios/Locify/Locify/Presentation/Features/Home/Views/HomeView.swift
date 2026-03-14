@@ -23,7 +23,7 @@ struct HomeView: View {
 
     @State private var showDeleteAlert: Bool = false
 
-    @State private var routeDistance: Double?
+    @State private var routeInfo: RouteInfo?
 
     @State private var collectionRouter: Router<Route> = .init(root: .collectionList)
 
@@ -52,13 +52,13 @@ struct HomeView: View {
         }
         .onChange(of: viewModel.selectedLocation?.placeId) {
             Task {
-                routeDistance = nil
+                routeInfo = nil
 
                 guard let destination = viewModel.selectedLocation,
                       destination.id != Constants.myLocationId,
                       let origin = viewModel.userLocation else { return }
 
-                routeDistance = await viewModel.fetchRouteDistance(from: origin, to: destination)
+                routeInfo = await viewModel.fetchRouteInfo(from: origin, to: destination)
             }
         }
         .environment(\.dismissSheet) {
@@ -201,7 +201,7 @@ extension HomeView {
     private var locationDetailView: some View {
         LocationDetailView(
             location: selectedLocation,
-            routeDistance: routeDistance,
+            routeInfo: routeInfo,
             relatedLocations: viewModel.relatedLocations
         ) { locationId in
             viewModel.selectRelatedLocation(locationId)
@@ -242,10 +242,10 @@ extension HomeView {
         }
         .sheet(isPresented: $showAddLocationView) {
             EditLocationView(
-                container.makeEditLocationViewModel(),
-                editMode: .add,
-                collection: viewModel.selectedCollection,
-                locationToSave: viewModel.selectedLocation
+                container.makeEditLocationViewModel(
+                    .create,
+                    collection: viewModel.selectedCollection
+                )
             ) { location in
                 Task {
                     await viewModel.addLocation(location)
@@ -253,11 +253,19 @@ extension HomeView {
             }
         }
         .sheet(isPresented: $showEditLocationView) {
+            var mode: EditLocationViewModel.Mode {
+                if let locationToUpdate = viewModel.selectedLocation {
+                    .update(locationToUpdate)
+                } else {
+                    .create
+                }
+            }
+
             EditLocationView(
-                container.makeEditLocationViewModel(),
-                editMode: .update,
-                collection: viewModel.selectedCollection,
-                locationToSave: viewModel.selectedLocation
+                container.makeEditLocationViewModel(
+                    mode,
+                    collection: viewModel.selectedCollection
+                )
             ) { location in
                 Task {
                     await viewModel.updateLocation(location)
