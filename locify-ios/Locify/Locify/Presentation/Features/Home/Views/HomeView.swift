@@ -34,8 +34,8 @@ struct HomeView: View {
         )
     }
 
-    private let locationDetailMinHeight: CGFloat = 350
-    private let locationDetailMaxHeight: CGFloat = 350
+    private let locationDetailMinHeight: CGFloat = 300
+    private let locationDetailMaxHeight: CGFloat = 500
 
     init(_ viewModel: HomeViewModel) {
         self.viewModel = viewModel
@@ -128,11 +128,25 @@ struct HomeView: View {
 
 extension HomeView {
     private var regularContentView: some View {
-        NavigationSplitView {
-            locationDetailView
-        } detail: {
-            mapView
-                .toolbar(.hidden)
+        GeometryReader { geo in
+            ZStack {
+                mapView
+                VStack {
+                    topView
+                    Spacer()
+                    HStack {
+                        locationDetailContainerView
+                            .frame(width: geo.size.width * 0.4)
+                            .onChange(of: viewModel.selectedLocationId) {
+                                withAnimation(.spring) {
+                                    locationDetailHeight = locationDetailMinHeight
+                                }
+                            }
+                        Spacer()
+                    }
+                }
+                .ignoresSafeArea(edges: .bottom)
+            }
         }
     }
 
@@ -140,6 +154,7 @@ extension HomeView {
         ZStack {
             mapView
             VStack {
+                topView
                 Spacer()
                 locationDetailContainerView
                     .onChange(of: viewModel.selectedLocationId) {
@@ -153,16 +168,13 @@ extension HomeView {
     }
 
     private var mapView: some View {
-        ZStack {
-            MapView(
-                selectedLocation: selectedLocation,
-                locations: viewModel.mapLocations
-            ) { name, coordinate in
-                viewModel.handleMapFeatureSelected(name: name, coordinate: coordinate)
-            }
-            .safeAreaPadding(.leading, DSSpacing.large)
-            topView
+        MapView(
+            selectedLocation: selectedLocation,
+            locations: viewModel.mapLocations
+        ) { name, coordinate in
+            viewModel.handleMapFeatureSelected(name: name, coordinate: coordinate)
         }
+        .safeAreaPadding(.leading, DSSpacing.large)
     }
 
     private var topView: some View {

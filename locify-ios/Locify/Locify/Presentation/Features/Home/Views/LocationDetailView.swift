@@ -23,22 +23,25 @@ struct LocationDetailView: View {
         ZStack(alignment: .bottomTrailing) {
             Group {
                 if let location {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: DSSpacing.large) {
-                            topView(location: location)
-                                .padding(.horizontal, DSSpacing.xLarge)
+                    VStack {
+                        topView(location: location)
+                            .padding(.horizontal, DSSpacing.xLarge)
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: DSSpacing.large) {
 
-                            infoView(location: location)
-                                .padding(.horizontal, DSSpacing.xLarge)
-
-                            if !relatedLocations.isEmpty {
-                                Divider()
+                                infoView(location: location)
                                     .padding(.horizontal, DSSpacing.xLarge)
-                                relatedLocationSection
+
+                                if !relatedLocations.isEmpty {
+                                    Divider()
+                                        .padding(.horizontal, DSSpacing.xLarge)
+                                    relatedLocationSection
+                                }
                             }
+                            .padding(.top, DSSpacing.small)
                         }
-                        .padding(.top, DSSpacing.xLarge)
                     }
+                    .padding(.top, DSSpacing.xLarge)
                 } else {
                     VStack(alignment: .center, spacing: DSSpacing.medium) {
                         DSText(.localized(HomeKeys.locationEmpty))
